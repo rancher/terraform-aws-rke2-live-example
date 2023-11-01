@@ -1,0 +1,5 @@
+write-kubeconfig-mode: 644
+cluster-cidr: 10.42.0.0/24
+service-cidr: 10.42.1.0/24
+cni: cilium
+#  node ip and external IP will be handled by default config

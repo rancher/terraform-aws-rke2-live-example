@@ -1,0 +1,67 @@
+name: Tests
+
+on:
+  pull_request:
+    branches:
+    - main
+
+env:
+  TERRAFORM_VERSION: 1.5.7
+
+jobs:
+  nix:
+    name: 'Nix Package Manager: Setup'
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - run: nix flake check
+
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    steps:
+    - run: nix --version
+    - uses: actions/checkout@v4
+    - uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: ${{env.TERRAFORM_VERSION}}
+        terraform_wrapper: false
+    - name: Init
+      run: terraform init -upgrade
+    - name: Validate
+      run: terraform validate
+    - name: Plan
+      run: terraform plan
+
+  tflint:
+    name: 'TFLint'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: terraform-linters/setup-tflint@v3
+      with:
+        tflint_version: latest
+    - name: Show version
+      run: tflint --version
+    - name: Init TFLint
+      run: tflint --init
+    - name: Run TFLint
+      run: tflint -f compact
+
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+
+  validate-commit-message:
+    name: Validate Commit Message
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
