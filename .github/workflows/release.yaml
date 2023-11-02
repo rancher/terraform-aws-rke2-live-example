@@ -8,6 +8,7 @@ on:
 env:
   AWS_REGION: us-west-1
   TERRAFORM_VERSION: 1.5.7
+  AWS_ROLE: arn:aws:iam::270074865685:role/terraform-module-ci-test
 
 permissions:
   id-token: write
@@ -32,18 +33,30 @@ jobs:
           body: |
             Please make sure to review the plan before merging this PR!
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      - uses: actions/checkout@v4
+        if: steps.release-please.outputs.pr
+      - uses: DeterminateSystems/nix-installer-action@main
+        if: steps.release-please.outputs.pr
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+        if: steps.release-please.outputs.pr
+      - uses: nicknovitski/nix-develop@v1
+        if: steps.release-please.outputs.pr
       - uses: aws-actions/configure-aws-credentials@v4
         if: steps.release-please.outputs.pr
         with:
-          role-to-assume: arn:aws:iam::270074865685:role/terraform-module-ci-test
+          role-to-assume: ${{env.AWS_ROLE}}
           role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
           aws-region: ${{env.AWS_REGION}}
-      - uses: actions/checkout@v4
+      - name: 'Show Plan'
+        run: |
+          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
+          terraform plan -out=plan.tfplan -input=false -no-color
+          rm -f terraform.tfstate
+        id: terraform-plan
         if: steps.release-please.outputs.pr
-      - uses: hashicorp/setup-terraform@v3
+      - name: 'Add plan to PR'
+        uses: peter-evans/create-or-update-comment@v3
         if: steps.release-please.outputs.pr
         with:
-          terraform_version: ${{env.TERRAFORM_VERSION}}
-          terraform_wrapper: false
-      - uses: dflook/terraform-plan@v1
-        if: steps.release-please.outputs.pr
+          issue-number: ${{ fromJson(steps.release-please.outputs.pr).number }}
+          body-path: ./plan.tfplan

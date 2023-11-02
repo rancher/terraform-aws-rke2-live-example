@@ -37,6 +37,7 @@
             bashInteractive
             terraform
             sops
+            age
           ];
         };
       }

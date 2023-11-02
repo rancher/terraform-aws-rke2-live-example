@@ -3,3 +3,6 @@ override.*
 rke2*
 *.gz
 *.DS_*
+.terraform
+tmp
+50-*
