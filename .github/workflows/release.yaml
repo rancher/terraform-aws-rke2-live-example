@@ -40,7 +40,7 @@ jobs:
           aws-region: ${{env.AWS_REGION}}
       - uses: actions/checkout@v4
         if: steps.release-please.outputs.pr
-      - uses: hashicorp/setup-terraform@v2
+      - uses: hashicorp/setup-terraform@v3
         if: steps.release-please.outputs.pr
         with:
           terraform_version: ${{env.TERRAFORM_VERSION}}
