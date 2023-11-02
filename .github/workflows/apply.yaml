@@ -17,6 +17,8 @@ jobs:
           role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
           aws-region: ${{env.AWS_REGION}}
       - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: ${{env.TERRAFORM_VERSION}}

@@ -32,17 +32,12 @@
         pkgs-terraform = nixpkgs-terraform.legacyPackages.${system};
       in
       {
-        devShell = pkgs.mkShell {
+        devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; with pkgs-terraform; [
             bashInteractive
-            git
             terraform
-            tflint
-            shellcheck
+            sops
           ];
-          shellHook = ''
-            source .envrc
-          '';
         };
       }
     );
