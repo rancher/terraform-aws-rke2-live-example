@@ -6,3 +6,5 @@ rke2*
 .terraform
 tmp
 50-*
+terraform.tfstate
+kubeconfig-*.yaml
