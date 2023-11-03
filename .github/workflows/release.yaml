@@ -51,7 +51,7 @@ jobs:
         run: |
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           terraform init
-          echo "plan=$(terraform plan -input=false -no-color)" >> $GITHUB_OUTPUT
+          terraform plan -input=false -no-color > plan.tfplan
           rm -f terraform.tfstate
         id: terraform-plan
         if: steps.release-please.outputs.pr
@@ -60,4 +60,4 @@ jobs:
         if: steps.release-please.outputs.pr
         with:
           issue-number: ${{ fromJson(steps.release-please.outputs.pr).number }}
-          body: ${{ steps.terraform-plan.outputs.plan }}
+          body-path: ./plan.tfplan
