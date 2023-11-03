@@ -50,6 +50,7 @@ jobs:
       - name: 'Show Plan'
         run: |
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
+          terraform init
           terraform plan -out=plan.tfplan -input=false -no-color
           rm -f terraform.tfstate
         id: terraform-plan
