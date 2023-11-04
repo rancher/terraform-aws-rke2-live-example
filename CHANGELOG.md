@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.2...v0.1.3) (2023-11-04)
+
+
+### Bug Fixes
+
+* add token permissions ([#20](https://github.com/matttrach/live-infra-aws-rke2/issues/20)) ([fa8b04b](https://github.com/matttrach/live-infra-aws-rke2/commit/fa8b04b83ccadc770705974fb7c3fcff2aad908c))
+
 ## [0.1.2](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.1...v0.1.2) (2023-11-04)
 
 
