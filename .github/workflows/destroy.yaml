@@ -2,6 +2,10 @@ name: Destroy Infra
 on:
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: write
+
 env:
   AWS_REGION: "us-west-1"
   AWS_ROLE: "arn:aws:iam::270074865685:role/terraform-module-ci-test"
