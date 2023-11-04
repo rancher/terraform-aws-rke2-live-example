@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.0...v0.1.1) (2023-11-04)
+
+
+### Bug Fixes
+
+* add manual apply and destroy workflows ([#16](https://github.com/matttrach/live-infra-aws-rke2/issues/16)) ([d6b097d](https://github.com/matttrach/live-infra-aws-rke2/commit/d6b097dffaba6df8d4a8d91332c4c5ba85d4b54a))
+
 ## 0.1.0 (2023-11-04)
 
 
