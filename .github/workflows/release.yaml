@@ -64,10 +64,10 @@ jobs:
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           terraform init
           rm -f plan.tfplan
-          plan.tfplan > '```'
-          plan.tfplan >> '# terraform plan -input=false -no-color'
+          echo '```' > plan.tfplan
+          echo '# terraform plan -input=false -no-color' >> plan.tfplan
           terraform plan -input=false -no-color >> plan.tfplan
-          plan.tfplan >> '```'
+          echo '```' >> plan.tfplan
           rm -f terraform.tfstate
         id: terraform-plan
         if: steps.release-please.outputs.pr
