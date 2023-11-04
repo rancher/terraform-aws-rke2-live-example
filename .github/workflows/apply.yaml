@@ -36,11 +36,10 @@ jobs:
             ${{ runner.os }}-terraform-
       - name: 'Apply changes'
         shell: bash
-        environment: production
         run: |
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           terraform init
-          # terraform apply --auto-approve
+          terraform apply --auto-approve
           echo '${{secrets.AGE_PUBLIC_KEY}}' | age -e -r - -o terraform.tfstate.age terraform.tfstate
           rm -f terraform.tfstate
           git config --global user.name 'automation'

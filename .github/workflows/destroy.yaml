@@ -34,7 +34,6 @@ jobs:
             ${{ runner.os }}-terraform-
       - name: 'Apply changes'
         shell: bash
-        environment: production
         run: |
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           terraform init
