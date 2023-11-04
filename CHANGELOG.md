@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.1...v0.1.2) (2023-11-04)
+
+
+### Bug Fixes
+
+* remove environment ([#18](https://github.com/matttrach/live-infra-aws-rke2/issues/18)) ([5ee545e](https://github.com/matttrach/live-infra-aws-rke2/commit/5ee545ecb15beb26d3b6a0f86d5bbd6fd7592a1c))
+
 ## [0.1.1](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.0...v0.1.1) (2023-11-04)
 
 
