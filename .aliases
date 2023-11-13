@@ -7,3 +7,5 @@ alias tfp='terraform init || terraform providers && terraform validate && terraf
 alias tfr='terraform destroy --auto-approve; terraform apply --auto-approve'
 alias k='kubectl'
 alias tt='cd tests; go test -v -parallel=10 -timeout=80m'
+# expects AGE and TF_CLI_ARGS variables to be set, see .variables and .rcs
+alias ss='rm -rf /tmp/terraform.tfstate;echo "${AGE_SECRET_KEY}" | age -d -i - -o /tmp/terraform.tfstate terraform.tfstate.age'

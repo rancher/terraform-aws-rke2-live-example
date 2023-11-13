@@ -1,3 +1,4 @@
 source ~/.config/aws/default/rc # add personal aws auth vars
 source ~/.config/github/default/rc # add personal github auth vars
 source ~/.config/alias/default/rc # add personal aliases
+source ~/.config/age/default/rc # add age secrets

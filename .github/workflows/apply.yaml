@@ -30,7 +30,7 @@ jobs:
         run: |
           echo 'plugin_cache_dir="$HOME/.terraform.d/plugin-cache"' > ~/.terraformrc
           mkdir --parents ~/.terraform.d/plugin-cache
-      - name: Cache Terraform
+      - name: 'Cache Terraform'
         uses: actions/cache@v3
         with:
           path: |
@@ -44,6 +44,7 @@ jobs:
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           terraform init
           terraform apply --auto-approve
+          rm -rf terraform.tfstate.age
           echo '${{secrets.AGE_PUBLIC_KEY}}' | age -e -r - -o terraform.tfstate.age terraform.tfstate
           rm -f terraform.tfstate
           git config --global user.name 'automation'
