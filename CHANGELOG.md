@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.4](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.3...v0.1.4) (2023-11-13)
+
+
+### Bug Fixes
+
+* encrypt and decrypt state in ci ([#24](https://github.com/matttrach/live-infra-aws-rke2/issues/24)) ([b99dace](https://github.com/matttrach/live-infra-aws-rke2/commit/b99dacec5f8fb3b2f3d20dea81713c88ea63de03))
+* get the IP from the env rather than the module ([#26](https://github.com/matttrach/live-infra-aws-rke2/issues/26)) ([3b4d01f](https://github.com/matttrach/live-infra-aws-rke2/commit/3b4d01fb589509706e9fa9be33eaffe1e3966a3f))
+
 ## [0.1.3](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.2...v0.1.3) (2023-11-04)
 
 
