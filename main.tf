@@ -4,14 +4,16 @@ provider "aws" {
 
 locals {
   ssh_key_name       = "matttrach"
-  rke2_version       = "v1.28.2+rke2r1"
+  rke2_version       = "v1.28.3+rke2r2"
   identifier         = "ex"
   email              = "matt.trachier@suse.com"
   username           = "matttrach"
   name               = "live-rke2-${local.identifier}"
   server_prep_script = file("${path.root}/prep.sh")
   local_file_path    = "${abspath(path.root)}/config" # add custom configs here
+  ip                 = var.ip
 }
+
 resource "random_uuid" "join_token" {}
 
 module "aws_rke2_rhel9_rpm" {
@@ -22,6 +24,7 @@ module "aws_rke2_rhel9_rpm" {
   owner               = local.email
   rke2_version        = local.rke2_version
   security_group_name = local.name
+  security_group_ip   = local.ip
   ssh_key_name        = local.ssh_key_name
   ssh_username        = local.username
   vpc_name            = local.name

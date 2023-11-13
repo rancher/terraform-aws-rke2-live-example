@@ -27,8 +27,14 @@ jobs:
         key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
         restore-keys: |
           ${{ runner.os }}-terraform-
+    - uses: haythem/public-ip@v1.3
+      id: ip
     - run: terraform init
+      env:
+        TF_VAR_ip: ${{ steps.ip.outputs.ipv4 }}
     - run: terraform validate
+      env:
+        TF_VAR_ip: ${{ steps.ip.outputs.ipv4 }}
 
   tflint:
     name: 'TFLint'

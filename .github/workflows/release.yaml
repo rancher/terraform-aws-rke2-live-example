@@ -61,11 +61,14 @@ jobs:
           key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
           restore-keys: |
             ${{ runner.os }}-terraform-
+      - uses: haythem/public-ip@v1.3
+        id: ip
       - name: 'Show Plan'
         id: terraform-plan
         if: steps.release-please.outputs.pr
         run: |
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
+          export TF_VAR_ip=${{ steps.ip.outputs.ipv4 }}
           terraform init
           rm -f plan.tfplan
           echo '```' > plan.tfplan
