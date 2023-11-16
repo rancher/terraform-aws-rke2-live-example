@@ -43,6 +43,7 @@ jobs:
       - name: 'Apply changes'
         shell: bash
         run: |
+          eval $(ssh-agent -s)
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           export TF_VAR_ip=${{ steps.ip.outputs.ipv4 }}
           terraform init
