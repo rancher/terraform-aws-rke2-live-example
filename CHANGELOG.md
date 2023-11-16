@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.4...v0.1.5) (2023-11-16)
+
+
+### Bug Fixes
+
+* update updatecli config ([#27](https://github.com/matttrach/live-infra-aws-rke2/issues/27)) ([c189070](https://github.com/matttrach/live-infra-aws-rke2/commit/c189070671a5ffc1e3fe1f071ad853680523fa68))
+
 ## [0.1.4](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.3...v0.1.4) (2023-11-13)
 
 
