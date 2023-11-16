@@ -3,7 +3,6 @@ provider "aws" {
 }
 
 locals {
-  ssh_key_name       = "matttrach"
   rke2_version       = "v1.28.3+rke2r2"
   identifier         = "ex"
   email              = "matt.trachier@suse.com"
@@ -12,11 +11,50 @@ locals {
   server_prep_script = file("${path.root}/prep.sh")
   local_file_path    = "${abspath(path.root)}/config" # add custom configs here
   ip                 = var.ip
+  ssh_key_name       = local.name
 }
-
+# it is important to know that the private key will be unencrypted in your state file
+# which is why it is important to keep your state file encrypted
+resource "tls_private_key" "ssh_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+resource "local_file" "ssh_private_key" {
+  content              = tls_private_key.ssh_key.private_key_pem
+  filename             = "~/.ssh/id_rsa_${local.identifier}"
+  file_permission      = 0600
+}
+resource "local_file" "ssh_public_key" {
+  content              = tls_private_key.ssh_key.public_key_pem
+  filename             = "~/.ssh/id_rsa_${local.identifier}.pub"
+  file_permission      = 0600
+}
 resource "random_uuid" "join_token" {}
 
+# add the key to the running ssh agent, assumes agent already exists
+resource "null_resource" "ssh_agent" {
+  depends_on = [
+    tls_private_key.ssh_key,
+    local_file.ssh_private_key,
+  ]
+  triggers = {
+    file = local_file.ssh_private_key.content_sha512
+  }
+  provisioner "local-exec" {
+    command = <<-EOT
+      set -x
+      set -e
+      ssh-add ~/.ssh/id_rsa_${local.identifier}
+    EOT
+  }
+}
+
 module "aws_rke2_rhel9_rpm" {
+  depends_on = [
+    tls_private_key.ssh_key,
+    local_file.ssh_private_key,
+    null_resource.ssh_agent,
+  ]
   source              = "rancher/rke2/aws"
   version             = "v0.1.4"
   join_token          = random_uuid.join_token.result
@@ -26,6 +64,7 @@ module "aws_rke2_rhel9_rpm" {
   security_group_name = local.name
   security_group_ip   = local.ip
   ssh_key_name        = local.ssh_key_name
+  ssh_key_content     = (can(file("~/.ssh/id_rsa_${local.identifier}.pub")) ? file("~/.ssh/id_rsa_${local.identifier}.pub") : "faketobypassinitialapply")
   ssh_username        = local.username
   vpc_name            = local.name
   vpc_cidr            = "10.42.0.0/16" # generates a VPC for you, comment this to select a VPC instead
