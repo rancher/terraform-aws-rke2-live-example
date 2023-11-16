@@ -1,5 +1,5 @@
 variable "ip" {
-  type = string
+  type        = string
   description = "the ip of the server running terraform"
-  sensitive = true
+  sensitive   = true
 }

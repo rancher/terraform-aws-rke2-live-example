@@ -13,7 +13,7 @@ env:
   AWS_ROLE: "arn:aws:iam::270074865685:role/terraform-module-ci-test"
 
 jobs:
-  release:
+  apply:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,6 +44,7 @@ jobs:
         shell: bash
         run: |
           eval $(ssh-agent -s)
+          install -d ~/.ssh
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           export TF_VAR_ip=${{ steps.ip.outputs.ipv4 }}
           terraform init

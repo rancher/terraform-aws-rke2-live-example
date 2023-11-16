@@ -10,8 +10,6 @@ updates:
       day: "sunday" # this way it is ready for review on Monday
     commit-message:
       prefix: "fix"
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # Check for updates to terraform providers every week
   - package-ecosystem: "terraform"
@@ -21,5 +19,3 @@ updates:
       day: "sunday" # this way it is ready for review on Monday
     commit-message:
       prefix: "fix"
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

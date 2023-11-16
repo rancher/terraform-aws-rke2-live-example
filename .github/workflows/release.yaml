@@ -25,6 +25,7 @@ jobs:
         with:
           release-type: terraform-module
           pull-request-title-pattern: "chore${scope}: release${component} ${version}"
+# only run when release PR exists
       - name: 'Remind to Review Plan'
         uses: peter-evans/create-or-update-comment@v3
         if: steps.release-please.outputs.pr
@@ -82,3 +83,24 @@ jobs:
         with:
           issue-number: ${{ fromJson(steps.release-please.outputs.pr).number }}
           body-path: ./plan.tfplan
+# only run after release is created
+      - name: 'Apply plan'
+        if: ${{ steps.release-please.outputs.release_created }}
+        shell: bash
+        run: |
+          eval $(ssh-agent -s)
+          install -d ~/.ssh
+          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
+          export TF_VAR_ip=${{ steps.ip.outputs.ipv4 }}
+          terraform init
+          terraform apply --auto-approve
+          rm -rf terraform.tfstate.age
+          echo '${{secrets.AGE_PUBLIC_KEY}}' | age -e -r - -o terraform.tfstate.age terraform.tfstate
+          rm -f terraform.tfstate
+          git config --global user.name 'automation'
+          git config --global user.email 'automation@users.noreply.github.com'
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git checkout "${GITHUB_REF:11}"
+          git add -A
+          git commit -s -m "New State"
+          git push origin main

@@ -3,15 +3,17 @@ provider "aws" {
 }
 
 locals {
-  rke2_version       = "v1.28.3+rke2r2"
-  identifier         = "ex"
-  email              = "matt.trachier@suse.com"
-  username           = "matttrach"
-  name               = "live-rke2-${local.identifier}"
-  server_prep_script = file("${path.root}/prep.sh")
-  local_file_path    = "${abspath(path.root)}/config" # add custom configs here
-  ip                 = var.ip
-  ssh_key_name       = local.name
+  rke2_version         = "v1.28.3+rke2r2"
+  identifier           = "ex"
+  email                = "matt.trachier@suse.com"
+  username             = "matttrach"
+  name                 = "live-rke2-${local.identifier}"
+  server_prep_script   = file("${path.root}/prep.sh")
+  local_file_path      = "${abspath(path.root)}/config" # add custom configs here
+  ip                   = var.ip
+  ssh_key_name         = local.name
+  ssh_private_key_path = pathexpand("~/.ssh/id_rsa_${local.identifier}")
+  ssh_public_key_path  = pathexpand("~/.ssh/id_rsa_${local.identifier}.pub")
 }
 # it is important to know that the private key will be unencrypted in your state file
 # which is why it is important to keep your state file encrypted
@@ -20,14 +22,14 @@ resource "tls_private_key" "ssh_key" {
   rsa_bits  = 4096
 }
 resource "local_file" "ssh_private_key" {
-  content              = tls_private_key.ssh_key.private_key_pem
-  filename             = "~/.ssh/id_rsa_${local.identifier}"
-  file_permission      = 0600
+  content         = tls_private_key.ssh_key.private_key_pem
+  filename        = local.ssh_private_key_path
+  file_permission = 0600
 }
 resource "local_file" "ssh_public_key" {
-  content              = tls_private_key.ssh_key.public_key_pem
-  filename             = "~/.ssh/id_rsa_${local.identifier}.pub"
-  file_permission      = 0600
+  content         = tls_private_key.ssh_key.public_key_pem
+  filename        = local.ssh_public_key_path
+  file_permission = 0600
 }
 resource "random_uuid" "join_token" {}
 
@@ -44,7 +46,7 @@ resource "null_resource" "ssh_agent" {
     command = <<-EOT
       set -x
       set -e
-      ssh-add ~/.ssh/id_rsa_${local.identifier}
+      ssh-add ${local.ssh_private_key_path}
     EOT
   }
 }
@@ -64,7 +66,7 @@ module "aws_rke2_rhel9_rpm" {
   security_group_name = local.name
   security_group_ip   = local.ip
   ssh_key_name        = local.ssh_key_name
-  ssh_key_content     = (can(file("~/.ssh/id_rsa_${local.identifier}.pub")) ? file("~/.ssh/id_rsa_${local.identifier}.pub") : "faketobypassinitialapply")
+  ssh_key_content     = (can(file(local.ssh_public_key_path)) ? file(local.ssh_public_key_path) : "faketobypassinitialapply")
   ssh_username        = local.username
   vpc_name            = local.name
   vpc_cidr            = "10.42.0.0/16" # generates a VPC for you, comment this to select a VPC instead
