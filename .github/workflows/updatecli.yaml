@@ -20,17 +20,10 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == "${{env.DEFAULT_BRANCH_REF}}"
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Go
-        uses: actions/setup-go@v4
-        with:
-          go-version: 'stable'
-
-      - name: Install Updatecli
-        uses: updatecli/updatecli-action@v2
-
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: nicknovitski/nix-develop@v1
       - name: Delete leftover UpdateCLI branches
         run: |
           gh pr list \
@@ -56,3 +49,4 @@ jobs:
         env:
           UPDATECLI_GITHUB_ACTOR: ${{ github.actor }}
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATECLI_GITHUB_OWNER: ${{ github.owner }}

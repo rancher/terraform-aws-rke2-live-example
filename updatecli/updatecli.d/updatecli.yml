@@ -2,40 +2,42 @@
 # To test this:
 #   have "UPDATECLI_GITHUB_ACTOR" env set to your github username
 #   have "UPDATECLI_GITHUB_TOKEN" env set to your github token
+#   have "UPDATECLI_GITHUB_OWNER" env set to your github repo's group
 #   have the latest version of updatecli installed
 #   'updatecli diff -v updatecli/values.yaml -c updatecli/updatecli.d/updatecli.yml'
 # In the future, more useful files should be added to this directory.
+# Common gotcha: check to make sure the default branches are correct
+# Token Permissions: the token needs "contents" read and write, "issues" read and write, and "pull requests" read and write.
 ---
 name: "Introduce updatecli to repo and validate basic functionality"
 # Make sure we can pull in github repos from multiple orgs
 scms:
-  rke2:
+  this-repo:
     kind: "github"
     spec:
-      user: "{{ .github.user }}"
-      email: "{{ .github.email }}"
-      username: "{{ requiredEnv .github.username }}"
-      token: '{{ requiredEnv .github.token }}'
-      owner: rancher
-      repository: terraform-aws-rke2
+      user: "{{ requiredEnv .github.user }}"
+      email: "{{ requiredEnv .github.email }}"
+      owner: "{{ requiredEnv .github.owner }}"
+      repository: live-infra-aws-rke2
+      token: "{{ requiredEnv .github.token }}"
+      username: "{{ requiredEnv .github.user }}"
       branch: main
-  go:
+  go-repo:
     kind: "github"
     spec:
-      user: "{{ .github.user }}"
-      email: "{{ .github.email }}"
-      username: "{{ requiredEnv .github.username }}"
-      token: '{{ requiredEnv .github.token }}'
+      user: "{{ requiredEnv .github.user }}"
+      email: "{{ requiredEnv .github.email }}"
       owner: golang
       repository: go
-      branch: main
-
+      token: '{{ requiredEnv .github.token }}'
+      username: "{{ requiredEnv .github.username }}"
+      branch: master
 sources:
   # validate gittag parsing external public repos
   goTag:
     name: "Get Go 1.20.2 tag"
     kind: "gittag"
-    scmid: "go"
+    scmid: "go-repo"
     spec:
       versionfilter:
         kind: "regex"
@@ -50,7 +52,7 @@ conditions:
     sourceid: goTag
     spec:
       file: "updatecli/validate.yml"
-      key: version
+      key: "$.version"
     failwhen: true #if set to true, continue to targets when condition is true rather than false
 
 # Validate the ability to generate branches, commits, what the commits look like, and what branches look like
@@ -61,11 +63,11 @@ targets:
   updateValidateFile:
     name: "Update the version in the validate file"
     kind: "yaml"
-    scmid: "terraform-aws-rke2"
+    scmid: "this-repo"
     sourceid: goTag
     spec:
       file: "updatecli/validate.yml"
-      key: version
+      key: "$.version"
 
 # Validate generating a pull request
 actions:
@@ -73,7 +75,7 @@ actions:
   # the title matches the commit message
   github:
     kind: "github/pullrequest"
-    scmid: "terraform-aws-rke2"
+    scmid: "this-repo"
     spec:
       automerge: false
       draft: false
