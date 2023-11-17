@@ -49,6 +49,10 @@ jobs:
           export TF_VAR_ip=${{ steps.ip.outputs.ipv4 }}
           terraform init
           terraform apply --auto-approve
+      - name: 'Save Changes'
+        shell: bash
+        if: always()
+        run: |
           rm -rf terraform.tfstate.age
           echo '${{secrets.AGE_PUBLIC_KEY}}' | age -e -r - -o terraform.tfstate.age terraform.tfstate
           rm -f terraform.tfstate
