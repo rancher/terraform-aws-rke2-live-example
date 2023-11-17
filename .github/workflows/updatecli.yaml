@@ -12,13 +12,10 @@ permissions:
   issues: write
   pull-requests: write
 
-env:
-  DEFAULT_BRANCH_REF: refs/heads/main
-
 jobs:
   updatecli:
     runs-on: ubuntu-latest
-    if: github.ref == "${{env.DEFAULT_BRANCH_REF}}"
+    if: github.ref == refs/heads/main
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main

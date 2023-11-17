@@ -25,45 +25,32 @@ jobs:
         with:
           release-type: terraform-module
           pull-request-title-pattern: "chore${scope}: release${component} ${version}"
-# only run when release PR exists
       - name: 'Remind to Review Plan'
         uses: peter-evans/create-or-update-comment@v3
-        if: steps.release-please.outputs.pr
         with:
           issue-number: ${{ fromJson(steps.release-please.outputs.pr).number }}
           body: |
             Please make sure to review the plan before merging this PR!
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       - uses: actions/checkout@v4
-        if: steps.release-please.outputs.pr
       - uses: DeterminateSystems/nix-installer-action@main
-        if: steps.release-please.outputs.pr
       - uses: DeterminateSystems/magic-nix-cache-action@main
-        if: steps.release-please.outputs.pr
       - uses: nicknovitski/nix-develop@v1
-        if: steps.release-please.outputs.pr
       - uses: aws-actions/configure-aws-credentials@v4
-        if: steps.release-please.outputs.pr
         with:
           role-to-assume: ${{env.AWS_ROLE}}
           role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
           aws-region: ${{env.AWS_REGION}}
-      - name: 'Config Terraform plugin cache'
-        if: steps.release-please.outputs.pr
-        run: |
-          echo 'plugin_cache_dir="$HOME/.terraform.d/plugin-cache"' >~/.terraformrc
-          mkdir --parents ~/.terraform.d/plugin-cache
-      - name: Cache Terraform
+      - run: terraform init
+      - name: 'Cache Terraform'
         uses: actions/cache@v3
-        if: steps.release-please.outputs.pr
         with:
-          path: |
-            ~/.terraform.d/plugin-cache
+          path: .terraform
           key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
-          restore-keys: |
-            ${{ runner.os }}-terraform-
+          restore-keys: ${{ runner.os }}-terraform-
       - uses: haythem/public-ip@v1.3
         id: ip
+# only run when release PR exists
       - name: 'Show Plan'
         id: terraform-plan
         if: steps.release-please.outputs.pr
@@ -93,11 +80,7 @@ jobs:
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           export TF_VAR_ip=${{ steps.ip.outputs.ipv4 }}
           terraform init
-          terraform apply --auto-approve
-      - name: 'Save Changes'
-        shell: bash
-        if: always()
-        run: |
+          terraform apply --auto-approve || true
           rm -rf terraform.tfstate.age
           echo '${{secrets.AGE_PUBLIC_KEY}}' | age -e -r - -o terraform.tfstate.age terraform.tfstate
           rm -f terraform.tfstate

@@ -12,6 +12,11 @@ env:
   AWS_REGION: "us-west-1"
   AWS_ROLE: "arn:aws:iam::270074865685:role/terraform-module-ci-test"
 
+# GitHub will remove any cache entries that have not been accessed in over 7 days.
+# There is no limit on the number of caches you can store, but the total size of all caches in a repository is limited to 10 GB.
+# If you exceed the limit, GitHub will save the new cache but will begin evicting caches until the total size is less than the repository limit docs.github.com.
+# https://www.phind.com/search?cache=uv1bowiqh8zysg6dtr1gm5nq
+
 jobs:
   apply:
     runs-on: ubuntu-latest
@@ -26,18 +31,13 @@ jobs:
           role-to-assume: ${{env.AWS_ROLE}}
           role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
           aws-region: ${{env.AWS_REGION}}
-      - name: 'Config Terraform plugin cache'
-        run: |
-          echo 'plugin_cache_dir="$HOME/.terraform.d/plugin-cache"' > ~/.terraformrc
-          mkdir --parents ~/.terraform.d/plugin-cache
+      - run: terraform init
       - name: 'Cache Terraform'
         uses: actions/cache@v3
         with:
-          path: |
-            ~/.terraform.d/plugin-cache
+          path: .terraform
           key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
-          restore-keys: |
-            ${{ runner.os }}-terraform-
+          restore-keys: ${{ runner.os }}-terraform-
       - uses: haythem/public-ip@v1.3
         id: ip
       - name: 'Apply changes'
@@ -48,11 +48,7 @@ jobs:
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           export TF_VAR_ip=${{ steps.ip.outputs.ipv4 }}
           terraform init
-          terraform apply --auto-approve
-      - name: 'Save Changes'
-        shell: bash
-        if: always()
-        run: |
+          terraform apply --auto-approve || true
           rm -rf terraform.tfstate.age
           echo '${{secrets.AGE_PUBLIC_KEY}}' | age -e -r - -o terraform.tfstate.age terraform.tfstate
           rm -f terraform.tfstate
