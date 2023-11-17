@@ -25,13 +25,6 @@ jobs:
         with:
           release-type: terraform-module
           pull-request-title-pattern: "chore${scope}: release${component} ${version}"
-      - name: 'Remind to Review Plan'
-        uses: peter-evans/create-or-update-comment@v3
-        with:
-          issue-number: ${{ fromJson(steps.release-please.outputs.pr).number }}
-          body: |
-            Please make sure to review the plan before merging this PR!
-            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
@@ -51,6 +44,14 @@ jobs:
       - uses: haythem/public-ip@v1.3
         id: ip
 # only run when release PR exists
+      - name: 'Remind to Review Plan'
+        if: steps.release-please.outputs.pr
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ fromJson(steps.release-please.outputs.pr).number }}
+          body: |
+            Please make sure to review the plan before merging this PR!
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       - name: 'Show Plan'
         id: terraform-plan
         if: steps.release-please.outputs.pr
