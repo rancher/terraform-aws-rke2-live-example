@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.7](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.6...v0.1.7) (2023-11-17)
+
+
+### Bug Fixes
+
+* make sure remind is only when pr exists ([#36](https://github.com/matttrach/live-infra-aws-rke2/issues/36)) ([e2695e0](https://github.com/matttrach/live-infra-aws-rke2/commit/e2695e040c4d82f748207580088ac988ae9f6017))
+
 ## [0.1.6](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.5...v0.1.6) (2023-11-17)
 
 
