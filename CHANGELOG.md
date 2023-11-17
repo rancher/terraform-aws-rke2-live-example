@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.6](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.5...v0.1.6) (2023-11-17)
+
+
+### Bug Fixes
+
+* Add key ([#29](https://github.com/matttrach/live-infra-aws-rke2/issues/29)) ([ccd6614](https://github.com/matttrach/live-infra-aws-rke2/commit/ccd66140fa4b0dea46a40af9483fbb67526100e1))
+* always save changes in state ([#33](https://github.com/matttrach/live-infra-aws-rke2/issues/33)) ([b4bfd85](https://github.com/matttrach/live-infra-aws-rke2/commit/b4bfd85c85c12f203ca691d1a82bc2a77a454de6))
+* expand file path and make sure directory exists ([#32](https://github.com/matttrach/live-infra-aws-rke2/issues/32)) ([28077a5](https://github.com/matttrach/live-infra-aws-rke2/commit/28077a5af0ce61eeda745b769ffeed640b92da44))
+* Fix workflow ([#34](https://github.com/matttrach/live-infra-aws-rke2/issues/34)) ([d2001aa](https://github.com/matttrach/live-infra-aws-rke2/commit/d2001aa1da539e9e6440e16024a480ef9789025c))
+* make sure agent is running and add token for dependabot ([#31](https://github.com/matttrach/live-infra-aws-rke2/issues/31)) ([40dfddb](https://github.com/matttrach/live-infra-aws-rke2/commit/40dfddbe0a29b80312e2ce28b8539552c4a874b0))
+* manage ssh key in repo ([#35](https://github.com/matttrach/live-infra-aws-rke2/issues/35)) ([a78d9be](https://github.com/matttrach/live-infra-aws-rke2/commit/a78d9be78664464940ef5dc6b12c6604d8786b57))
+
 ## [0.1.5](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.4...v0.1.5) (2023-11-16)
 
 
