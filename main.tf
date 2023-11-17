@@ -12,51 +12,11 @@ locals {
   local_file_path      = "${abspath(path.root)}/config" # add custom configs here
   ip                   = var.ip
   ssh_key_name         = local.name
-  ssh_private_key_path = pathexpand("~/.ssh/id_rsa_${local.identifier}")
-  ssh_public_key_path  = pathexpand("~/.ssh/id_rsa_${local.identifier}.pub")
 }
-# it is important to know that the private key will be unencrypted in your state file
-# which is why it is important to keep your state file encrypted
-resource "tls_private_key" "ssh_key" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-resource "local_file" "ssh_private_key" {
-  content         = tls_private_key.ssh_key.private_key_pem
-  filename        = local.ssh_private_key_path
-  file_permission = 0600
-}
-resource "local_file" "ssh_public_key" {
-  content         = tls_private_key.ssh_key.public_key_pem
-  filename        = local.ssh_public_key_path
-  file_permission = 0600
-}
+
 resource "random_uuid" "join_token" {}
 
-# add the key to the running ssh agent, assumes agent already exists
-resource "null_resource" "ssh_agent" {
-  depends_on = [
-    tls_private_key.ssh_key,
-    local_file.ssh_private_key,
-  ]
-  triggers = {
-    file = local_file.ssh_private_key.content_sha512
-  }
-  provisioner "local-exec" {
-    command = <<-EOT
-      set -x
-      set -e
-      ssh-add ${local.ssh_private_key_path}
-    EOT
-  }
-}
-
 module "aws_rke2_rhel9_rpm" {
-  depends_on = [
-    tls_private_key.ssh_key,
-    local_file.ssh_private_key,
-    null_resource.ssh_agent,
-  ]
   source              = "rancher/rke2/aws"
   version             = "v0.1.4"
   join_token          = random_uuid.join_token.result
@@ -66,7 +26,7 @@ module "aws_rke2_rhel9_rpm" {
   security_group_name = local.name
   security_group_ip   = local.ip
   ssh_key_name        = local.ssh_key_name
-  ssh_key_content     = (can(file(local.ssh_public_key_path)) ? file(local.ssh_public_key_path) : "faketobypassinitialapply")
+  ssh_key_content     = file("${path.root}/ssh.pub")
   ssh_username        = local.username
   vpc_name            = local.name
   vpc_cidr            = "10.42.0.0/16" # generates a VPC for you, comment this to select a VPC instead
@@ -81,5 +41,5 @@ module "aws_rke2_rhel9_rpm" {
   server_type         = "small"                  # smallest viable server: https://github.com/rancher/terraform-aws-server/blob/main/modules/server/types.tf
   server_prep_script  = local.server_prep_script # prep RHEL9 for running rke2
   skip_download       = true                     # let the installer download everything
-  retrieve_kubeconfig = true
+  retrieve_kubeconfig = false
 }

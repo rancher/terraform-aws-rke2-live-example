@@ -37,16 +37,20 @@ jobs:
         shell: bash
         run: |
           eval $(ssh-agent -s)
+          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh.age
+          chmod 0600 ssh_key
+          ssh-add ssh_key
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           export TF_VAR_ip=${{ steps.ip.outputs.ipv4 }}
           terraform init
-          terraform destroy --auto-approve
-          echo '${{secrets.AGE_PUBLIC_KEY}}' | age -e -r - -o terraform.tfstate.age terraform.tfstate
+          terraform apply --auto-approve || true
+          rm -rf ssh_key
+          rm -rf terraform.tfstate.age
+          age -e -r '${{ secrets.AGE_PUBLIC_KEY }}' -o terraform.tfstate.age terraform.tfstate
           rm -f terraform.tfstate
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
-          git checkout "${GITHUB_REF:11}"
           git add -A
-          git commit -s -m "New State"
+          git commit -s -m "New State ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}"
           git push origin main
