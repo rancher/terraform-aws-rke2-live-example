@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.8](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.7...v0.1.8) (2023-11-18)
+
+
+### Bug Fixes
+
+* use destroy command ([#38](https://github.com/matttrach/live-infra-aws-rke2/issues/38)) ([e2d587f](https://github.com/matttrach/live-infra-aws-rke2/commit/e2d587f4bcd36f02b08e03ffd4eed541656808ae))
+
 ## [0.1.7](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.6...v0.1.7) (2023-11-17)
 
 
