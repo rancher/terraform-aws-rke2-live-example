@@ -11,7 +11,7 @@ env:
   AWS_ROLE: "arn:aws:iam::270074865685:role/terraform-module-ci-test"
 
 jobs:
-  release:
+  destroy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +43,7 @@ jobs:
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           export TF_VAR_ip=${{ steps.ip.outputs.ipv4 }}
           terraform init
-          terraform apply --auto-approve || true
+          terraform destroy --auto-approve || true
           rm -rf ssh_key
           rm -rf terraform.tfstate.age
           age -e -r '${{ secrets.AGE_PUBLIC_KEY }}' -o terraform.tfstate.age terraform.tfstate
