@@ -4,7 +4,7 @@ provider "aws" {
 
 locals {
   rke2_version         = "v1.28.3+rke2r2"
-  identifier           = "ex"
+  identifier           = "lvex"
   email                = "matt.trachier@suse.com"
   username             = "matttrach"
   name                 = "live-rke2-${local.identifier}"
@@ -18,7 +18,7 @@ resource "random_uuid" "join_token" {}
 
 module "aws_rke2_rhel9_rpm" {
   source              = "rancher/rke2/aws"
-  version             = "v0.1.4"
+  version             = "v0.1.5"
   join_token          = random_uuid.join_token.result
   name                = local.name
   owner               = local.email
@@ -41,5 +41,5 @@ module "aws_rke2_rhel9_rpm" {
   server_type         = "small"                  # smallest viable server: https://github.com/rancher/terraform-aws-server/blob/main/modules/server/types.tf
   server_prep_script  = local.server_prep_script # prep RHEL9 for running rke2
   skip_download       = true                     # let the installer download everything
-  retrieve_kubeconfig = false
+  retrieve_kubeconfig = false                    # when set to true you can set the KUBECONFIG environment variable to the resulting file and control your cluster remotely
 }
