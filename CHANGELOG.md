@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.9](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.8...v0.1.9) (2023-11-28)
+
+
+### Bug Fixes
+
+* upgrade rke2 mod to get new install mod fix ([#41](https://github.com/matttrach/live-infra-aws-rke2/issues/41)) ([dd106f0](https://github.com/matttrach/live-infra-aws-rke2/commit/dd106f0d5450c42bb96125675ed24e0758adb95a))
+
 ## [0.1.8](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.7...v0.1.8) (2023-11-18)
 
 
