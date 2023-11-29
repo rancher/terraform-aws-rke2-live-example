@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.11](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.10...v0.1.11) (2023-11-29)
+
+
+### Bug Fixes
+
+* add cacheing to release action and only save state file ([#45](https://github.com/matttrach/live-infra-aws-rke2/issues/45)) ([5643f43](https://github.com/matttrach/live-infra-aws-rke2/commit/5643f438d7fa28f292e6f51089e2ec30521fac19))
+
 ## [0.1.10](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.9...v0.1.10) (2023-11-29)
 
 
