@@ -18,7 +18,7 @@ resource "random_uuid" "join_token" {}
 
 module "aws_rke2_rhel9_rpm" {
   source              = "rancher/rke2/aws"
-  version             = "v0.1.5"
+  version             = "v0.1.6"
   join_token          = random_uuid.join_token.result
   name                = local.name
   owner               = local.email

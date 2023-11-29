@@ -13,20 +13,37 @@ jobs:
     - uses: actions/checkout@v4
     - uses: DeterminateSystems/nix-installer-action@main
     - uses: DeterminateSystems/magic-nix-cache-action@main
+
+    - name: 'Restore Nix Store Cache'
+      id: cache-nix-store-restore
+      uses: actions/cache/restore@v3
+      with:
+        path: /nix/store
+        key: nix-store
     - uses: nicknovitski/nix-develop@v1
+    - name: 'Cache Nix Store'
+      id: cache-nix-store-save
+      uses: actions/cache/save@v3
+      with:
+        path: /nix/store
+        key: ${{ steps.cache-nix-store-restore.outputs.cache-primary-key }}
     - run: terraform version
     - uses: haythem/public-ip@v1.3
       id: ip
-    - run: terraform init
-      env:
-        TF_VAR_ip: ${{ steps.ip.outputs.ipv4 }}
-    - name: 'Cache Terraform'
-      uses: actions/cache@v3
+    - name: 'Restore Terraform Cache'
+      id: cache-terraform-restore
+      uses: actions/cache/restore@v3
       with:
-        path: .terraform
-        key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
-        restore-keys: ${{ runner.os }}-terraform-
-    - run: terraform validate
+        path: ./.terraform
+        key: terraform
+    - run: terraform init
+    - name: 'Cache Terraform'
+      id: cache-terraform-save
+      uses: actions/cache/save@v3
+      with:
+        path: ./.terraform
+        key: ${{ steps.cache-terraform-restore.outputs.cache-primary-key }}
+    - run: terraform init && terraform validate
       env:
         TF_VAR_ip: ${{ steps.ip.outputs.ipv4 }}
 
