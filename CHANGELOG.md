@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.12](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.11...v0.1.12) (2023-11-30)
+
+
+### Bug Fixes
+
+* upgrade to rke2 1.7 ([#47](https://github.com/matttrach/live-infra-aws-rke2/issues/47)) ([d90bb3c](https://github.com/matttrach/live-infra-aws-rke2/commit/d90bb3c4d4af2bbf79eade047acdb26915952344))
+
 ## [0.1.11](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.10...v0.1.11) (2023-11-29)
 
 
