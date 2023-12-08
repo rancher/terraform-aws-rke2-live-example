@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.15](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.14...v0.1.15) (2023-12-08)
+
+
+### Bug Fixes
+
+* update mod to 0.1.9 ([#56](https://github.com/matttrach/live-infra-aws-rke2/issues/56)) ([6b4e873](https://github.com/matttrach/live-infra-aws-rke2/commit/6b4e87381ba4dea120115f288148586ddb73a9ae))
+
 ## [0.1.14](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.13...v0.1.14) (2023-12-08)
 
 
