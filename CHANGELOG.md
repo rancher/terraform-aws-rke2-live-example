@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.13](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.12...v0.1.13) (2023-12-08)
+
+
+### Bug Fixes
+
+* bump hashicorp/aws from 5.23.1 to 5.26.0 ([#40](https://github.com/matttrach/live-infra-aws-rke2/issues/40)) ([886c029](https://github.com/matttrach/live-infra-aws-rke2/commit/886c029bfcad48d35b0a98905f6de9eef510d37d))
+* bump hashicorp/null from 3.2.1 to 3.2.2 ([#50](https://github.com/matttrach/live-infra-aws-rke2/issues/50)) ([5279ab1](https://github.com/matttrach/live-infra-aws-rke2/commit/5279ab1d9bff2b267985112c1ecbce9f5d7a1cd8))
+* bump hashicorp/tls from 4.0.4 to 4.0.5 ([#49](https://github.com/matttrach/live-infra-aws-rke2/issues/49)) ([14329fa](https://github.com/matttrach/live-infra-aws-rke2/commit/14329fa8bcba5782a79c0c68d1a827bc513bc374))
+* update mod and all workflows ([#52](https://github.com/matttrach/live-infra-aws-rke2/issues/52)) ([1dab454](https://github.com/matttrach/live-infra-aws-rke2/commit/1dab45493f407fe7c90db245a7713cd27fb040ce))
+
 ## [0.1.12](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.11...v0.1.12) (2023-11-30)
 
 
