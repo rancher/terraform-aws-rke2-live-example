@@ -1,4 +1,4 @@
-name: "Updatecli: Dependency Management"
+name: "Updatecli"
 
 on:
   schedule:
@@ -7,20 +7,48 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-permissions:
-  contents: write
-  issues: write
-  pull-requests: write
+permissions: write-all
 
 jobs:
   updatecli:
     runs-on: ubuntu-latest
-    if: github.ref == refs/heads/main
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+      - run: sudo rm -rf /nix/store
+      - run: sudo install -d /nix/store
+      - run: sudo chown -R "$(whoami)" /nix/store
+      - run: sudo chmod 0755 /nix/store
+      - uses: actions/cache/restore@v3
+        id: cache-nix-restore
+        with:
+          path: /nix/store
+          key: nix-${{ hashFiles('**/flake.nix') }}
       - uses: DeterminateSystems/nix-installer-action@main
-      - uses: DeterminateSystems/magic-nix-cache-action@main
-      - uses: nicknovitski/nix-develop@v1
+      - uses: nicknovitski/nix-develop@v1.1.0
+        with:
+          arguments: |
+            --ignore-environment \
+            --extra-experimental-features nix-command \
+            --extra-experimental-features flakes \
+            --keep HOME \
+            --keep SSH_AUTH_SOCK \
+            --keep GITHUB_TOKEN \
+            --keep AWS_ROLE \
+            --keep AWS_REGION \
+            --keep AWS_DEFAULT_REGION \
+            --keep AWS_ACCESS_KEY_ID \
+            --keep AWS_SECRET_ACCESS_KEY \
+            --keep AWS_SESSION_TOKEN \
+            --keep TERM \
+            ${{ github.workspace }}
+      - uses: actions/cache/save@v3
+        id: cache-nix-save
+        with:
+          path: /nix/store
+          key: ${{ steps.cache-nix-restore.outputs.cache-primary-key }}
       - name: Delete leftover UpdateCLI branches
         run: |
           gh pr list \
@@ -40,10 +68,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Apply Updatecli
+      - name: 'Apply Updatecli'
         # Never use '--debug' option, because it might leak the access tokens.
         run: "updatecli apply --clean --config ./updatecli/updatecli.d/ --values ./updatecli/values.yaml"
         env:
           UPDATECLI_GITHUB_ACTOR: ${{ github.actor }}
           UPDATECLI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          UPDATECLI_GITHUB_OWNER: ${{ github.owner }}
+          UPDATECLI_GITHUB_OWNER: ${{ github.repository_owner }}

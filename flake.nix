@@ -96,11 +96,15 @@
             actionlint
             age
             bashInteractive
+            curl
             git
+            gnupg
+            go
+            less
             openssh_hpn
+            shellcheck
             tflint
             tfswitch
-            shellcheck
           ];
           shellHook = ''
             rm -rf "/usr/local/bin/switched-terraform"

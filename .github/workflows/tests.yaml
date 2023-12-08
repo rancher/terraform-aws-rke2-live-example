@@ -3,7 +3,11 @@ name: Tests
 on:
   pull_request:
     branches:
-    - main
+      - main
+
+permissions:
+  pull-requests: read
+  contents: read
 
 jobs:
   terraform:
@@ -12,41 +16,63 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: DeterminateSystems/nix-installer-action@main
-    - name: 'Restore Nix Store Cache'
-      id: cache-nix-store-restore
-      uses: actions/cache/restore@v3
+    - uses: nicknovitski/nix-develop@v1.1.0
       with:
-        path: /nix/store
-        key: nix-store
-    - uses: nicknovitski/nix-develop@v1
-    - name: 'Cache Nix Store'
-      id: cache-nix-store-save
-      uses: actions/cache/save@v3
-      with:
-        path: /nix/store
-        key: ${{ steps.cache-nix-store-restore.outputs.cache-primary-key }}
-    - run: terraform version
-    - uses: haythem/public-ip@v1.3
-      id: ip
-    - name: 'Restore Terraform Cache'
+        arguments: |
+          --ignore-environment \
+          --extra-experimental-features nix-command \
+          --extra-experimental-features flakes \
+          --keep HOME \
+          --keep SSH_AUTH_SOCK \
+          --keep GITHUB_TOKEN \
+          --keep AWS_ROLE \
+          --keep AWS_REGION \
+          --keep AWS_DEFAULT_REGION \
+          --keep AWS_ACCESS_KEY_ID \
+          --keep AWS_SECRET_ACCESS_KEY \
+          --keep AWS_SESSION_TOKEN \
+          --keep TERM \
+          ${{ github.workspace }}
+    - uses: actions/cache/restore@v3
       id: cache-terraform-restore
-      uses: actions/cache/restore@v3
       with:
-        path: ./.terraform
+        path: ${{ github.workspace }}/.terraform
         key: terraform
-    - run: terraform init
-    - name: 'Cache Terraform'
+    - run: terraform init -upgrade
+    - uses: actions/cache/save@v3
       id: cache-terraform-save
-      uses: actions/cache/save@v3
       with:
-        path: ./.terraform
+        path: ${{ github.workspace }}/.terraform
         key: ${{ steps.cache-terraform-restore.outputs.cache-primary-key }}
-    - run: terraform init && terraform validate
-      env:
-        TF_VAR_ip: ${{ steps.ip.outputs.ipv4 }}
+    - run: terraform version && terraform init -upgrade && terraform validate
+    - run: terraform fmt -check -recursive
+
+  actionlint:
+    name: 'Lint Workflows'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: DeterminateSystems/nix-installer-action@main
+    - uses: nicknovitski/nix-develop@v1.1.0
+      with:
+        arguments: |
+          --ignore-environment \
+          --extra-experimental-features nix-command \
+          --extra-experimental-features flakes \
+          --keep HOME \
+          --keep SSH_AUTH_SOCK \
+          --keep GITHUB_TOKEN \
+          --keep AWS_ROLE \
+          --keep AWS_REGION \
+          --keep AWS_DEFAULT_REGION \
+          --keep AWS_ACCESS_KEY_ID \
+          --keep AWS_SECRET_ACCESS_KEY \
+          --keep AWS_SESSION_TOKEN \
+          --keep TERM \
+          ${{ github.workspace }}
+    - run: actionlint
 
   tflint:
-    name: 'TFLint'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -58,16 +84,13 @@ jobs:
     - run: tflint -f compact
 
   shellcheck:
-    name: Shellcheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - uses: ludeeus/action-shellcheck@master
 
   validate-commit-message:
-    name: Validate Commit Message
     runs-on: ubuntu-latest
     steps:
       - uses: amannn/action-semantic-pull-request@v5
         env:
-          GITHUB_TOKEN: ${{ secrets.LIMITED_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

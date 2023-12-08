@@ -1,25 +1,18 @@
-name: Release
-
+name: Update Infra
 on:
-  push:
-    branches:
-    - main
-
-env:
-  AWS_REGION: us-west-1
-  AWS_ROLE: arn:aws:iam::270074865685:role/terraform-module-ci-test
-  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  # dispatch only, infra updates also happen when a release pr is approved
+  workflow_dispatch:
 
 permissions: write-all
 
+env:
+  AWS_REGION: "us-west-1"
+  AWS_ROLE: "arn:aws:iam::270074865685:role/terraform-module-ci-test"
+
 jobs:
-  release:
+  update:
     runs-on: ubuntu-latest
     steps:
-      - uses: google-github-actions/release-please-action@v4
-        id: release-please
-        with:
-          release-type: terraform-module
       - uses: actions/checkout@v4
         with:
           token: ${{secrets.GITHUB_TOKEN}}
@@ -55,6 +48,11 @@ jobs:
         with:
           path: /nix/store
           key: ${{ steps.cache-nix-restore.outputs.cache-primary-key }}
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{env.AWS_ROLE}}
+          role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
+          aws-region: ${{env.AWS_REGION}}
       - uses: actions/cache/restore@v3
         id: cache-terraform-restore
         with:
@@ -66,18 +64,9 @@ jobs:
         with:
           path: ${{ github.workspace }}/.terraform
           key: ${{ steps.cache-terraform-restore.outputs.cache-primary-key }}
-# only run after release is created
-      - uses: aws-actions/configure-aws-credentials@v4
-        if: steps.release-please.outputs.release_created
-        with:
-          role-to-assume: ${{env.AWS_ROLE}}
-          role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
-          aws-region: ${{env.AWS_REGION}}
       - uses: haythem/public-ip@v1.3
         id: ip
-        if: steps.release-please.outputs.release_created
-      - name: 'Apply plan'
-        if: steps.release-please.outputs.release_created
+      - name: 'Apply changes'
         shell: bash
         run: |
           eval "$(ssh-agent -s)"
@@ -95,6 +84,6 @@ jobs:
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
-          git add terraform.tfstate.age
+          git add -A
           git commit -s -m "New State ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}"
           git push origin main
