@@ -1,3 +1,4 @@
+provider "github" {}
 provider "aws" {
   region = "us-west-1"
 }

@@ -8,6 +8,8 @@ permissions: write-all
 env:
   AWS_REGION: "us-west-1"
   AWS_ROLE: "arn:aws:iam::270074865685:role/terraform-module-ci-test"
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  GITHUB_OWNER: ${{github.repository_owner}}
 
 jobs:
   update:
@@ -74,7 +76,7 @@ jobs:
           chmod 0600 ssh_key
           ssh-add ssh_key
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
-          export TF_VAR_ip=${{ steps.ip.outputs.ipv4 }}
+          export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           terraform init
           terraform apply --auto-approve || true
           rm -rf ssh_key
