@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.14](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.13...v0.1.14) (2023-12-08)
+
+
+### Bug Fixes
+
+* troubleshoot github provider ([#54](https://github.com/matttrach/live-infra-aws-rke2/issues/54)) ([5f483df](https://github.com/matttrach/live-infra-aws-rke2/commit/5f483df41973c73a2ca282d4016a03d464911e8e))
+
 ## [0.1.13](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.12...v0.1.13) (2023-12-08)
 
 
