@@ -6,8 +6,8 @@ provider "aws" {
 locals {
   rke2_version       = "v1.28.4+rke2r1"
   identifier         = "lvex"
-  email              = "matt.trachier@suse.com"
-  username           = "matttrach"
+  email              = "example@example.com"
+  username           = "example"
   name               = "live-rke2-${local.identifier}"
   server_prep_script = file("${path.root}/prep.sh")
   local_file_path    = "${abspath(path.root)}/config" # add custom configs here
