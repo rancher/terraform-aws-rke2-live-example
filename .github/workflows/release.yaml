@@ -88,6 +88,9 @@ jobs:
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           terraform init
+          # manage the security group rule for the terraform runner as a separate entity to prevent dependency chain issues with server object
+          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
+          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
           terraform apply --auto-approve || true
           rm -rf ssh_key
           rm -rf terraform.tfstate.age
