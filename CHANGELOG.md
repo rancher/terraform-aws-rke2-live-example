@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.16](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.15...v0.1.16) (2023-12-11)
+
+
+### Bug Fixes
+
+* add age encrypt alias to env ([#58](https://github.com/matttrach/live-infra-aws-rke2/issues/58)) ([fb1ec3e](https://github.com/matttrach/live-infra-aws-rke2/commit/fb1ec3ea0e847c4cf975619cd8033cb81620c186))
+* target security group for tf runner in release and update ([#60](https://github.com/matttrach/live-infra-aws-rke2/issues/60)) ([5556ed7](https://github.com/matttrach/live-infra-aws-rke2/commit/5556ed7fd465763149c28d31ced864911b3fbdc1))
+
 ## [0.1.15](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.14...v0.1.15) (2023-12-08)
 
 
