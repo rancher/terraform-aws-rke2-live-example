@@ -34,17 +34,7 @@ jobs:
             --keep AWS_SESSION_TOKEN \
             --keep TERM \
             ${{ github.workspace }}
-      - uses: actions/cache/restore@v3
-        id: cache-terraform-restore
-        with:
-          path: ${{ github.workspace }}/.terraform
-          key: terraform
       - run: terraform init -upgrade
-      - uses: actions/cache/save@v3
-        id: cache-terraform-save
-        with:
-          path: ${{ github.workspace }}/.terraform
-          key: ${{ steps.cache-terraform-restore.outputs.cache-primary-key }}
       - run: terraform version && terraform init -upgrade && terraform validate
       - run: terraform fmt -check -recursive
 

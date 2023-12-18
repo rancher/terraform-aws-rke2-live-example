@@ -41,7 +41,7 @@ Steps:
       4. this has several sections
          1. "Actions permissions", "Artifact and log retention", "Fork pull request workflows", "Workflow permissions", and "Access"
          2. in the Actions permissions section select the "Allow all actions and reusable workflows" radial
-         3. in the "Workflow permissions" section select the "Read and write permissions" radial and check the "Allow GitHub Actions to create and approve pull requests" checkbox
-
+         3. in the "Workflow permissions" section select the "Read and write permissions" radial
+         4. check the "Allow GitHub Actions to create and approve pull requests" checkbox
 
 That's it! There are other options that you might want to set, like dissabling the wiki, but none of those are important to the automation.

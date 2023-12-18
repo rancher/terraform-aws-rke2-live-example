@@ -11,6 +11,7 @@ This is a step by step to get this example working for you.
    1. `git clone git@github.com:rancher/terraform-aws-rke2.git`
    2. `git clone git@github.com:yourname/live-infra-your-repo.git`
    3. `cp -r terraform-aws-rke2/examples/live-infra-all-in-one/* live-infra-your-repo/`
+   4. `cp -r terraform-aws-rke2/examples/live-infra-all-in-one/.* live-infra-your-repo/`
 6. Generate an AGE key and save it as a secret in your repo following [this guide](./setup_age.md)
 7. Modify the main.tf with your email, desired username, rke2 version, a unique id, etc (see locals block in main.tf)
 8. Update the `./config/extra-config.yaml` with whatever configuration information you would like to set

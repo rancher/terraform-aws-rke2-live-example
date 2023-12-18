@@ -17,6 +17,11 @@ locals {
 
 resource "random_uuid" "join_token" {}
 
+resource "local_file" "public_ssh_key" {
+  source   = "${path.root}/ssh_key.pub"
+  filename = "${path.root}/ssh_key.pub"
+}
+
 module "aws_rke2_rhel9_rpm" {
   source              = "rancher/rke2/aws"
   version             = "v0.1.12"
@@ -27,7 +32,7 @@ module "aws_rke2_rhel9_rpm" {
   security_group_name = local.name
   security_group_ip   = local.ip
   ssh_key_name        = local.ssh_key_name
-  ssh_key_content     = file("${path.root}/ssh.pub")
+  ssh_key_content     = local_file.public_ssh_key.content
   ssh_username        = local.username
   vpc_name            = local.name
   vpc_cidr            = "10.42.0.0/16" # generates a VPC for you, comment this to select a VPC instead
