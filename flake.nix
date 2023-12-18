@@ -97,6 +97,7 @@
             age
             bashInteractive
             curl
+            gh
             git
             gnupg
             go

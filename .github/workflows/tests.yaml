@@ -1,4 +1,4 @@
-name: Tests
+name: validate
 
 on:
   pull_request:
@@ -14,74 +14,75 @@ jobs:
     name: 'Terraform'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: DeterminateSystems/nix-installer-action@main
-    - uses: nicknovitski/nix-develop@v1.1.0
-      with:
-        arguments: |
-          --ignore-environment \
-          --extra-experimental-features nix-command \
-          --extra-experimental-features flakes \
-          --keep HOME \
-          --keep SSH_AUTH_SOCK \
-          --keep GITHUB_TOKEN \
-          --keep AWS_ROLE \
-          --keep AWS_REGION \
-          --keep AWS_DEFAULT_REGION \
-          --keep AWS_ACCESS_KEY_ID \
-          --keep AWS_SECRET_ACCESS_KEY \
-          --keep AWS_SESSION_TOKEN \
-          --keep TERM \
-          ${{ github.workspace }}
-    - uses: actions/cache/restore@v3
-      id: cache-terraform-restore
-      with:
-        path: ${{ github.workspace }}/.terraform
-        key: terraform
-    - run: terraform init -upgrade
-    - uses: actions/cache/save@v3
-      id: cache-terraform-save
-      with:
-        path: ${{ github.workspace }}/.terraform
-        key: ${{ steps.cache-terraform-restore.outputs.cache-primary-key }}
-    - run: terraform version && terraform init -upgrade && terraform validate
-    - run: terraform fmt -check -recursive
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: nicknovitski/nix-develop@v1.1.0
+        with:
+          arguments: |
+            --ignore-environment \
+            --extra-experimental-features nix-command \
+            --extra-experimental-features flakes \
+            --keep HOME \
+            --keep SSH_AUTH_SOCK \
+            --keep GITHUB_TOKEN \
+            --keep AWS_ROLE \
+            --keep AWS_REGION \
+            --keep AWS_DEFAULT_REGION \
+            --keep AWS_ACCESS_KEY_ID \
+            --keep AWS_SECRET_ACCESS_KEY \
+            --keep AWS_SESSION_TOKEN \
+            --keep TERM \
+            ${{ github.workspace }}
+      - uses: actions/cache/restore@v3
+        id: cache-terraform-restore
+        with:
+          path: ${{ github.workspace }}/.terraform
+          key: terraform
+      - run: terraform init -upgrade
+      - uses: actions/cache/save@v3
+        id: cache-terraform-save
+        with:
+          path: ${{ github.workspace }}/.terraform
+          key: ${{ steps.cache-terraform-restore.outputs.cache-primary-key }}
+      - run: terraform version && terraform init -upgrade && terraform validate
+      - run: terraform fmt -check -recursive
 
   actionlint:
     name: 'Lint Workflows'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: DeterminateSystems/nix-installer-action@main
-    - uses: nicknovitski/nix-develop@v1.1.0
-      with:
-        arguments: |
-          --ignore-environment \
-          --extra-experimental-features nix-command \
-          --extra-experimental-features flakes \
-          --keep HOME \
-          --keep SSH_AUTH_SOCK \
-          --keep GITHUB_TOKEN \
-          --keep AWS_ROLE \
-          --keep AWS_REGION \
-          --keep AWS_DEFAULT_REGION \
-          --keep AWS_ACCESS_KEY_ID \
-          --keep AWS_SECRET_ACCESS_KEY \
-          --keep AWS_SESSION_TOKEN \
-          --keep TERM \
-          ${{ github.workspace }}
-    - run: actionlint
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: nicknovitski/nix-develop@v1.1.0
+        with:
+          arguments: |
+            --ignore-environment \
+            --extra-experimental-features nix-command \
+            --extra-experimental-features flakes \
+            --keep HOME \
+            --keep SSH_AUTH_SOCK \
+            --keep GITHUB_TOKEN \
+            --keep AWS_ROLE \
+            --keep AWS_REGION \
+            --keep AWS_DEFAULT_REGION \
+            --keep AWS_ACCESS_KEY_ID \
+            --keep AWS_SECRET_ACCESS_KEY \
+            --keep AWS_SESSION_TOKEN \
+            --keep TERM \
+            ${{ github.workspace }}
+      - run: actionlint
 
   tflint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: terraform-linters/setup-tflint@v4
-      with:
-        tflint_version: latest
-    - run: tflint --version
-    - run: tflint --init
-    - run: tflint -f compact
+      - uses: actions/checkout@v4
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+      - run: tflint --version
+      - run: tflint --init
+      - run: tflint -f compact
 
   shellcheck:
     runs-on: ubuntu-latest

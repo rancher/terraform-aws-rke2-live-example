@@ -1,4 +1,4 @@
-name: "Updatecli"
+name: dependencies
 
 on:
   schedule:
@@ -15,18 +15,8 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{secrets.GITHUB_TOKEN}}
-      - run: sudo rm -rf /nix/store
-      - run: sudo install -d /nix/store
-      - run: sudo chown -R "$(whoami)" /nix/store
-      - run: sudo chmod 0755 /nix/store
-      - uses: actions/cache/restore@v3
-        id: cache-nix-restore
-        with:
-          path: /nix/store
-          key: nix-${{ hashFiles('**/flake.nix') }}
       - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: nicknovitski/nix-develop@v1.1.0
         with:
           arguments: |
@@ -44,30 +34,6 @@ jobs:
             --keep AWS_SESSION_TOKEN \
             --keep TERM \
             ${{ github.workspace }}
-      - uses: actions/cache/save@v3
-        id: cache-nix-save
-        with:
-          path: /nix/store
-          key: ${{ steps.cache-nix-restore.outputs.cache-primary-key }}
-      - name: Delete leftover UpdateCLI branches
-        run: |
-          gh pr list \
-            --search "is:closed is:pr head:updatecli_" \
-            --json headRefName \
-            --jq ".[].headRefName" | sort -u > closed_prs_branches.txt
-          gh pr list \
-            --search "is:open is:pr head:updatecli_" \
-            --json headRefName \
-            --jq ".[].headRefName" | sort -u > open_prs_branches.txt
-          for branch in $(comm -23 closed_prs_branches.txt open_prs_branches.txt); do
-            if (git ls-remote --exit-code --heads origin "$branch"); then
-              echo "Deleting leftover UpdateCLI branch - $branch";
-              git push origin --delete "$branch";
-            fi
-          done
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: 'Apply Updatecli'
         # Never use '--debug' option, because it might leak the access tokens.
         run: "updatecli apply --clean --config ./updatecli/updatecli.d/ --values ./updatecli/values.yaml"

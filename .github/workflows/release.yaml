@@ -1,4 +1,4 @@
-name: Release
+name: release
 
 on:
   push:
@@ -22,18 +22,8 @@ jobs:
         with:
           release-type: terraform-module
       - uses: actions/checkout@v4
-        with:
-          token: ${{secrets.GITHUB_TOKEN}}
-      - run: sudo rm -rf /nix/store
-      - run: sudo install -d /nix/store
-      - run: sudo chown -R "$(whoami)" /nix/store
-      - run: sudo chmod 0755 /nix/store
-      - uses: actions/cache/restore@v3
-        id: cache-nix-restore
-        with:
-          path: /nix/store
-          key: nix-${{ hashFiles('**/flake.nix') }}
       - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: nicknovitski/nix-develop@v1.1.0
         with:
           arguments: |
@@ -51,11 +41,6 @@ jobs:
             --keep AWS_SESSION_TOKEN \
             --keep TERM \
             ${{ github.workspace }}
-      - uses: actions/cache/save@v3
-        id: cache-nix-save
-        with:
-          path: /nix/store
-          key: ${{ steps.cache-nix-restore.outputs.cache-primary-key }}
       - uses: actions/cache/restore@v3
         id: cache-terraform-restore
         with:
@@ -77,10 +62,17 @@ jobs:
       - uses: haythem/public-ip@v1.3
         id: ip
         if: steps.release-please.outputs.release_created
-      - name: 'Apply plan'
+      - name: Apply
         if: steps.release-please.outputs.release_created
         shell: bash
         run: |
+          if [ ! -f ssh_key ]; then
+            echo "encrypted ssh key not found, generating one"
+            # uses rsa due to STIG images not accepting anything else
+            ssh-keygen -N "" -t rsa -b 4096 -C "${{github.repository}}" -f ssh_key
+            chmod 0600 ssh_key
+            age -e -r '${{ secrets.AGE_PUBLIC_KEY }}' -o ssh.age ssh_key && rm -f ssh_key
+          fi
           eval "$(ssh-agent -s)"
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh.age
           chmod 0600 ssh_key
@@ -91,6 +83,7 @@ jobs:
           # manage the security group rule for the terraform runner as a separate entity to prevent dependency chain issues with server object
           terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
           terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
+          terraform apply --auto-approve || true
           terraform apply --auto-approve || true
           rm -rf ssh_key
           rm -rf terraform.tfstate.age

@@ -1,4 +1,4 @@
-name: Update Infra
+name: update
 on:
   # dispatch only, infra updates also happen when a release pr is approved
   workflow_dispatch:
@@ -16,18 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{secrets.GITHUB_TOKEN}}
-      - run: sudo rm -rf /nix/store
-      - run: sudo install -d /nix/store
-      - run: sudo chown -R "$(whoami)" /nix/store
-      - run: sudo chmod 0755 /nix/store
-      - uses: actions/cache/restore@v3
-        id: cache-nix-restore
-        with:
-          path: /nix/store
-          key: nix-${{ hashFiles('**/flake.nix') }}
       - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: nicknovitski/nix-develop@v1.1.0
         with:
           arguments: |
@@ -45,11 +35,6 @@ jobs:
             --keep AWS_SESSION_TOKEN \
             --keep TERM \
             ${{ github.workspace }}
-      - uses: actions/cache/save@v3
-        id: cache-nix-save
-        with:
-          path: /nix/store
-          key: ${{ steps.cache-nix-restore.outputs.cache-primary-key }}
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{env.AWS_ROLE}}
@@ -71,6 +56,13 @@ jobs:
       - name: 'Apply changes'
         shell: bash
         run: |
+          if [ ! -f ssh_key ]; then
+            echo "encrypted ssh key not found, generating one"
+            # uses rsa due to STIG images not accepting anything else
+            ssh-keygen -N "" -t rsa -b 4096 -C "${{github.repository}}" -f ssh_key
+            chmod 0600 ssh_key
+            age -e -r '${{ secrets.AGE_PUBLIC_KEY }}' -o ssh.age ssh_key && rm -f ssh_key
+          fi
           eval "$(ssh-agent -s)"
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh.age
           chmod 0600 ssh_key
@@ -82,13 +74,15 @@ jobs:
           terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
           terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
           terraform apply --auto-approve || true
+          terraform apply --auto-approve || true
           rm -rf ssh_key
           rm -rf terraform.tfstate.age
-          age -e -r '${{ secrets.AGE_PUBLIC_KEY }}' -o terraform.tfstate.age terraform.tfstate
-          rm -f terraform.tfstate
+          age -e -r '${{ secrets.AGE_PUBLIC_KEY }}' -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
-          git add -A
+          git add ssh.age
+          git add ssh_key.pub
+          git add terraform.tfstate.age
           git commit -s -m "New State ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}"
           git push origin main

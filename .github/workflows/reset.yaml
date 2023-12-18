@@ -1,4 +1,4 @@
-name: Destroy Infra
+name: reset
 on:
   # only on dispatch
   workflow_dispatch:
@@ -10,22 +10,13 @@ env:
   AWS_ROLE: "arn:aws:iam::270074865685:role/terraform-module-ci-test"
 
 jobs:
+  # this workflow destroys the infrastructure and resets the repo to a clean state
   destroy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          token: ${{secrets.GITHUB_TOKEN}}
-      - run: sudo rm -rf /nix/store
-      - run: sudo install -d /nix/store
-      - run: sudo chown -R "$(whoami)" /nix/store
-      - run: sudo chmod 0755 /nix/store
-      - uses: actions/cache/restore@v3
-        id: cache-nix-restore
-        with:
-          path: /nix/store
-          key: nix-${{ hashFiles('**/flake.nix') }}
       - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: nicknovitski/nix-develop@v1.1.0
         with:
           arguments: |
@@ -43,11 +34,6 @@ jobs:
             --keep AWS_SESSION_TOKEN \
             --keep TERM \
             ${{ github.workspace }}
-      - uses: actions/cache/save@v3
-        id: cache-nix-save
-        with:
-          path: /nix/store
-          key: ${{ steps.cache-nix-restore.outputs.cache-primary-key }}
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{env.AWS_ROLE}}
@@ -66,7 +52,7 @@ jobs:
           key: ${{ steps.cache-terraform-restore.outputs.cache-primary-key }}
       - uses: haythem/public-ip@v1.3
         id: ip
-      - name: 'Apply changes'
+      - name: ResetRepo
         shell: bash
         run: |
           eval "$(ssh-agent -s)"
@@ -77,13 +63,15 @@ jobs:
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           terraform init
           terraform destroy --auto-approve || true
+          terraform destroy --auto-approve
           rm -rf ssh_key
+          rm -rf ssh_key.age
           rm -rf terraform.tfstate.age
-          age -e -r '${{ secrets.AGE_PUBLIC_KEY }}' -o terraform.tfstate.age terraform.tfstate
           rm -f terraform.tfstate
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
           git add -A
-          git commit -s -m "New State ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}"
+          git commit -s -m "Reset repo ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}"
           git push origin main
+          # At this point the repo should be clean to copy
