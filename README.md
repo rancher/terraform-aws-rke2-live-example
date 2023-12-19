@@ -27,3 +27,10 @@ The main purpose of this example is to show a specific full implementation of th
 - This example doesn't deploy a cluster.
   - In this example we only generate one node, using the default config.
   - It is possible to manage more than one node, but you will need to combine one of the other examples with this one to get that effect.
+
+## Common Questions
+
+### I am getting an error about a missing ssh key
+
+You are missing an ssh key. You need to generate an ssh key, encrypt it with AGE, and add it to the repo. The guide [here](./docs/onboarding.md) has all the steps I took to setup mine.
+The public key can be saved in the repo unencrypted, the automation expects it to be named "ssh_key.pub" the GH workflows will generate this for you on the first time you release.

@@ -18,13 +18,13 @@ locals {
 resource "random_uuid" "join_token" {}
 
 resource "local_file" "public_ssh_key" {
-  source   = "${path.root}/ssh_key.pub"
+  content   = file("${path.root}/ssh_key.pub")
   filename = "${path.root}/ssh_key.pub"
 }
 
 module "aws_rke2_rhel9_rpm" {
   source              = "rancher/rke2/aws"
-  version             = "v0.1.12"
+  version             = "v0.1.13"
   join_token          = random_uuid.join_token.result
   name                = local.name
   owner               = local.email
