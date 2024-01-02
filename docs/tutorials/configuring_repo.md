@@ -7,10 +7,8 @@ You should already have a GitHub account.
 Steps:
 
 1. Create a new ***private*** repo using the defaults, name it "live-infra-" and some unique identifier, I used "live-infra-aws-rke2".
-
    1. make sure to choose "private" or secrets could be potentially leaked later on
-2. Get oreinted with the controls
-
+2. Get oriented with the controls
    1. At the top of the page there are "tabs" for the repository
       1. "Code", "Issues", "Pull Requests", "Actions", "Projects", "Security", "Insights", and "Settings"
    2. Click the "Settings" tab
@@ -21,7 +19,6 @@ Steps:
          1. "General", "Features", "Pull Requests", "Archives", and "Pushes"
          2. You will need to scroll down to see them all
 3. Only allow squash merging and use the title for the commit message
-
    1. click the "Settings" tab
    2. click the "General" sub-tab
    3. in the "Pull Requests" section there are three check boxes
@@ -33,7 +30,6 @@ Steps:
 4. Click the "Always suggest updating pull request branches" checkbox to enable that
 5. Click the "Automatically delete head branches" checkbox to keep your repo from filling up with unnecessary branches
 6. Allow actions to automate pull requests and releases
-
    1. Click the "Actions" sub-tab
       1. this sub-tab has two of its own sub-tabs
       2. "General" and "Runners"
@@ -44,4 +40,4 @@ Steps:
          3. in the "Workflow permissions" section select the "Read and write permissions" radial
          4. check the "Allow GitHub Actions to create and approve pull requests" checkbox
 
-That's it! There are other options that you might want to set, like dissabling the wiki, but none of those are important to the automation.
+That's it! There are other options that you might want to set, like disabling the wiki, but none of those are important to the automation.
