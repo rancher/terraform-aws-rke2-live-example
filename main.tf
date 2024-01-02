@@ -4,13 +4,13 @@ provider "aws" {
 }
 
 locals {
-  rke2_version       = "v1.28.4+rke2r1"
+  rke2_version       = "v1.28.5+rke2r1"
   identifier         = "lvex"
   email              = "example@example.com"
   username           = "example"
   name               = "live-rke2-${local.identifier}"
   server_prep_script = file("${path.root}/prep.sh")
-  local_file_path    = "${abspath(path.root)}/config" # add custom configs here
+  local_file_path    = "${path.root}/config" # add custom configs here
   ip                 = var.ip
   ssh_key_name       = local.name
 }
@@ -18,7 +18,7 @@ locals {
 resource "random_uuid" "join_token" {}
 
 resource "local_file" "public_ssh_key" {
-  content   = file("${path.root}/ssh_key.pub")
+  content  = file("${path.root}/ssh_key.pub")
   filename = "${path.root}/ssh_key.pub"
 }
 
