@@ -110,9 +110,9 @@
           shellHook = ''
             homebin=$HOME/bin;
             install -d $homebin;
-            tfswitch -b $homebin/terraform 1.5.7;
+            tfswitch -b $homebin/terraform 1.5.7 &>/dev/null;
             export PATH="${updatecli-wrapper}/bin:${leftovers-wrapper}/bin:$homebin:$PATH";
-            export PS1="nix:# "
+            export PS1="nix:# ";
           '';
         };
       }
