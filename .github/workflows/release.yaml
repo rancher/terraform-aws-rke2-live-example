@@ -23,11 +23,9 @@ jobs:
           release-type: terraform-module
       - uses: actions/checkout@v4
       # try to blackhole upstream cache
-#      - run: echo '127.0.0.1 cache.nixos.org' >> /etc/hosts
+      - run: echo '127.0.0.1 cache.nixos.org' >> /etc/hosts
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
-        with:
-          upstream-cache: null
       - uses: nicknovitski/nix-develop@v1.1.0
         with:
           arguments: |
@@ -114,9 +112,14 @@ jobs:
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           terraform init
           # manage the security group rule for the terraform runner as a separate entity to prevent dependency chain issues with server object
-          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
-          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
+          if [ "" = "$(terraform state list | grep 'module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0]')" ]; then
+            terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
+          fi
+          if [ "" = "$(terraform state list | grep 'module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0]')" ]; then
+            terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
+          fi
           terraform apply --auto-approve || true
+          sleep 5
           terraform apply --auto-approve || true
           rm -rf ssh_key
           rm -rf age_key.txt
