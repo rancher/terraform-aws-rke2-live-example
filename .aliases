@@ -9,4 +9,4 @@ alias k='kubectl'
 alias tt='cd tests; go test -v -parallel=10 -timeout=80m'
 # expects AGE and TF_CLI_ARGS variables to be set, see .variables and .rcs
 alias ss='rm -rf /tmp/terraform.tfstate;echo "${AGE_SECRET_KEY}" | age -d -i - -o /tmp/terraform.tfstate terraform.tfstate.age'
-alias se='age -e -r "${AGE_PUBLIC_KEY}" -o terraform.tfstate.age /tmp/terraform.tfstate'
+alias se='age -e -R age_recipients.txt -o terraform.tfstate.age /tmp/terraform.tfstate'

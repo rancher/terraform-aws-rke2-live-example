@@ -18,6 +18,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
+        with:
+          upstream-cache: null
       - uses: nicknovitski/nix-develop@v1.1.0
         with:
           arguments: |
@@ -57,11 +59,20 @@ jobs:
         shell: bash
         run: |
           if [ ! -f ssh_key ]; then
-            echo "encrypted ssh key not found, generating one"
-            # uses rsa due to STIG images not accepting anything else
-            ssh-keygen -N "" -t rsa -b 4096 -C "${{github.repository}}" -f ssh_key
-            chmod 0600 ssh_key
-            age -e -r '${{ secrets.AGE_PUBLIC_KEY }}' -o ssh.age ssh_key && rm -f ssh_key
+            echo "encrypted ssh key not found, is the repo configured?"
+            exit 1;
+          fi
+          if [ ! -f age_recipients.txt ]; then
+            echo "age_recipients not found, is the repo configured?"
+            exit 1;
+          fi
+          if [ "" = "${{secrets.AGE_SECRET_KEY}}" ]; then
+            echo "age secret key not found, is the repo configured?"
+            exit 1;
+          fi
+          if [ ! -f terraform.tfstate.age ]; then
+            echo "terraform.tfstate.age not found, is the repo configured?"
+            exit 1;
           fi
           eval "$(ssh-agent -s)"
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh.age
@@ -77,12 +88,11 @@ jobs:
           terraform apply --auto-approve || true
           rm -rf ssh_key
           rm -rf terraform.tfstate.age
-          age -e -r '${{ secrets.AGE_PUBLIC_KEY }}' -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
+          age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
           git add ssh.age
-          git add ssh_key.pub
           git add terraform.tfstate.age
           git commit -s -m "New State ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}"
           git push origin main

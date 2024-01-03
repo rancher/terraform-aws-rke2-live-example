@@ -17,6 +17,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
+        with:
+          upstream-cache: null
       - uses: nicknovitski/nix-develop@v1.1.0
         with:
           arguments: |
@@ -65,9 +67,13 @@ jobs:
           terraform destroy --auto-approve || true
           terraform destroy --auto-approve
           rm -rf ssh_key
-          rm -rf ssh_key.age
+          rm -rf ssh.age
+          rm -rf ssh_key.pub
           rm -rf terraform.tfstate.age
-          rm -f terraform.tfstate
+          rm -rf terraform.tfstate
+          rm -rf age_recipients.txt
+          gh secret delete AGE_SECRET_KEY
+          gh secret delete AGE_PUBLIC_KEY
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"

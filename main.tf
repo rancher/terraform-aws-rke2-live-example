@@ -18,7 +18,7 @@ locals {
 resource "random_uuid" "join_token" {}
 
 resource "local_file" "public_ssh_key" {
-  content  = file("${path.root}/ssh_key.pub")
+  content  = can(file("${path.root}/ssh_key.pub") ? file("${path.root}/ssh_key.pub") : "")
   filename = "${path.root}/ssh_key.pub"
 }
 
