@@ -23,7 +23,7 @@ jobs:
           release-type: terraform-module
       - uses: actions/checkout@v4
       # try to blackhole upstream cache
-      - run: sudo echo '127.0.0.1 cache.nixos.org' >> /etc/hosts
+      - run: echo '127.0.0.1 cache.nixos.org' | sudo tee -a /etc/hosts
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: nicknovitski/nix-develop@v1.1.0

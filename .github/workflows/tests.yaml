@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # try to blackhole upstream cache
+      - run: echo '127.0.0.1 cache.nixos.org' | sudo tee -a /etc/hosts
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
-        with:
-          upstream-cache: null
       - uses: nicknovitski/nix-develop@v1.1.0
         with:
           arguments: |
@@ -45,10 +45,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # try to blackhole upstream cache
+      - run: echo '127.0.0.1 cache.nixos.org' | sudo tee -a /etc/hosts
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
-        with:
-          upstream-cache: null
       - uses: nicknovitski/nix-develop@v1.1.0
         with:
           arguments: |
