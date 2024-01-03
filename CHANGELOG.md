@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.18](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.17...v0.1.18) (2024-01-03)
+
+
+### Bug Fixes
+
+* add objects on first release ([#69](https://github.com/matttrach/live-infra-aws-rke2/issues/69)) ([1cb8f60](https://github.com/matttrach/live-infra-aws-rke2/commit/1cb8f6048bff4acf15c7ffbfd5fd41455c3e301d))
+
 ## [0.1.17](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.16...v0.1.17) (2024-01-02)
 
 
