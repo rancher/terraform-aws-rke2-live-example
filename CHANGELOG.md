@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.19](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.18...v0.1.19) (2024-01-05)
+
+
+### Bug Fixes
+
+* add automated setup ([#73](https://github.com/matttrach/live-infra-aws-rke2/issues/73)) ([c9eebe3](https://github.com/matttrach/live-infra-aws-rke2/commit/c9eebe3dc426f2ae577ee19078646f692a6a576d))
+* initial apply ([#71](https://github.com/matttrach/live-infra-aws-rke2/issues/71)) ([b3dd717](https://github.com/matttrach/live-infra-aws-rke2/commit/b3dd7171b7eb377fe79dc7c6f74cd16d7d1ba057))
+* remove initial recipients ([effbee4](https://github.com/matttrach/live-infra-aws-rke2/commit/effbee4a4ec8a3228498e54db737640c8e2877cb))
+* try to blackhole upstream cache ([00cf3e4](https://github.com/matttrach/live-infra-aws-rke2/commit/00cf3e46260a0a53d2219badbfc8c28115cd99fe))
+* use sudo ([bdf5fcb](https://github.com/matttrach/live-infra-aws-rke2/commit/bdf5fcb303ba4fc8992066be20e67fd1889daa9e))
+
 ## [0.1.18](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.17...v0.1.18) (2024-01-03)
 
 
