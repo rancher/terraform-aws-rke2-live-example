@@ -69,7 +69,7 @@ provider "registry.terraform.io/ijcd/sodium" {
 
 provider "registry.terraform.io/integrations/github" {
   version     = "5.43.0"
-  constraints = ">= 5.32.0"
+  constraints = ">= 5.43.0"
   hashes = [
     "h1:COzniaH4vmxix4Prxd43dbt0KF7JGd2/qrsuyHkf06M=",
     "zh:12cec13344f9ea4e8fdf23e0be2649ed40a3e5663dbc5e8f855fb631578012ce",
