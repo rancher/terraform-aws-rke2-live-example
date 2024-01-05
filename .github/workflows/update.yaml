@@ -48,9 +48,8 @@ jobs:
       - name: Apply
         shell: bash
         run: |
-          set -e
-          if [ "" = ${{secrets.AGE_SECRET_KEY}} ]; then echo "Missing encrypt key, please run repo setup before update."; exit 1; fi
-          if [ "" = ${{secrets.SSH_PRIVATE_KEY}} ]; then echo "Missing CI ssh access key, please run repo setup before update."; exit 1; fi
+          if [ "" = "${{secrets.AGE_SECRET_KEY}}" ]; then echo "Missing encrypt key, please run repo setup before update."; exit 1; fi
+          if [ "" = "${{secrets.SSH_PRIVATE_KEY}}" ]; then echo "Missing CI ssh access key, please run repo setup before update."; exit 1; fi
           if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before update."; exit 1; fi
           if [ ! -f terraform.tfstate.age ]; then echo "Missing initial encrypted terraform state, please run repo setup before update."; exit 1; fi
           eval "$(ssh-agent -s)"
