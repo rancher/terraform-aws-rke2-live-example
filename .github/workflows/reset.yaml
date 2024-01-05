@@ -17,8 +17,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
-        with:
-          upstream-cache: null
       - uses: nicknovitski/nix-develop@v1.1.0
         with:
           arguments: |
@@ -58,26 +56,25 @@ jobs:
         shell: bash
         run: |
           eval "$(ssh-agent -s)"
-          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh.age
-          chmod 0600 ssh_key
-          ssh-add ssh_key
-          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
+          ssh-add <<< "$(${{secrets.SSH_PRIVATE_KEY}})"
+          rm -f terraform.tfstate; echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           terraform init
           terraform destroy --auto-approve || true
           terraform destroy --auto-approve
-          rm -rf ssh_key
-          rm -rf ssh.age
           rm -rf ssh_key.pub
           rm -rf terraform.tfstate.age
           rm -rf terraform.tfstate
           rm -rf age_recipients.txt
+          rm -rf .terraform.lock.hcl
+          rm -rf flake.lock
+          rm -rf CHANGELOG.md
           gh secret delete AGE_SECRET_KEY
-          gh secret delete AGE_PUBLIC_KEY
+          gh secret delete SSH_PRIVATE_KEY
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
           git add -A
-          git commit -s -m "Reset repo ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}"
+          git commit -s -m "Reset repo https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
           git push origin main
           # At this point the repo should be clean to copy

@@ -9,3 +9,4 @@ tmp
 terraform.tfstate
 kubeconfig-*.yaml
 terraform.tfstate.backup
+terraform.tfstate*.backup

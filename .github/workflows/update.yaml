@@ -1,25 +1,26 @@
 name: update
+
 on:
-  # dispatch only, infra updates also happen when a release pr is approved
+  # only on dispatch
   workflow_dispatch:
+
+# WARNING! this applies the current terraform config and will overwrite state
+
+env:
+  AWS_REGION: us-west-1
+  AWS_ROLE: arn:aws:iam::270074865685:role/terraform-module-ci-test
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  GITHUB_OWNER: ${{ github.repository_owner }}
 
 permissions: write-all
 
-env:
-  AWS_REGION: "us-west-1"
-  AWS_ROLE: "arn:aws:iam::270074865685:role/terraform-module-ci-test"
-  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-  GITHUB_OWNER: ${{github.repository_owner}}
-
 jobs:
-  update:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
-        with:
-          upstream-cache: null
       - uses: nicknovitski/nix-develop@v1.1.0
         with:
           arguments: |
@@ -42,57 +43,35 @@ jobs:
           role-to-assume: ${{env.AWS_ROLE}}
           role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
           aws-region: ${{env.AWS_REGION}}
-      - uses: actions/cache/restore@v3
-        id: cache-terraform-restore
-        with:
-          path: ${{ github.workspace }}/.terraform
-          key: terraform-${{hashFiles('**/versions.tf','**/main.tf')}}
-      - run: terraform init -upgrade
-      - uses: actions/cache/save@v3
-        id: cache-terraform-save
-        with:
-          path: ${{ github.workspace }}/.terraform
-          key: ${{ steps.cache-terraform-restore.outputs.cache-primary-key }}
       - uses: haythem/public-ip@v1.3
         id: ip
-      - name: 'Apply changes'
+      - name: Apply
         shell: bash
         run: |
-          if [ ! -f ssh_key ]; then
-            echo "encrypted ssh key not found, is the repo configured?"
-            exit 1;
-          fi
-          if [ ! -f age_recipients.txt ]; then
-            echo "age_recipients not found, is the repo configured?"
-            exit 1;
-          fi
-          if [ "" = "${{secrets.AGE_SECRET_KEY}}" ]; then
-            echo "age secret key not found, is the repo configured?"
-            exit 1;
-          fi
-          if [ ! -f terraform.tfstate.age ]; then
-            echo "terraform.tfstate.age not found, is the repo configured?"
-            exit 1;
-          fi
+          set -e
+          if [ "" = ${{secrets.AGE_SECRET_KEY}} ]; then echo "Missing encrypt key, please run repo setup before update."; exit 1; fi
+          if [ "" = ${{secrets.SSH_PRIVATE_KEY}} ]; then echo "Missing CI ssh access key, please run repo setup before update."; exit 1; fi
+          if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before update."; exit 1; fi
+          if [ ! -f terraform.tfstate.age ]; then echo "Missing initial encrypted terraform state, please run repo setup before update."; exit 1; fi
           eval "$(ssh-agent -s)"
-          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh.age
-          chmod 0600 ssh_key
-          ssh-add ssh_key
+          ssh-add <<< "$(${{secrets.SSH_PRIVATE_KEY}})"
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           terraform init
           # manage the security group rule for the terraform runner as a separate entity to prevent dependency chain issues with server object
-          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
-          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
+          if [ "" = "$(terraform state list | grep 'module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0]')" ]; then
+            terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
+          fi
+          if [ "" = "$(terraform state list | grep 'module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0]')" ]; then
+            terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
+          fi
           terraform apply --auto-approve || true
+          sleep 5
           terraform apply --auto-approve || true
-          rm -rf ssh_key
-          rm -rf terraform.tfstate.age
-          age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
+          rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
-          git add ssh.age
           git add terraform.tfstate.age
-          git commit -s -m "New State ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}"
+          git commit -s -m "New State https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
           git push origin main

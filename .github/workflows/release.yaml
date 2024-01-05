@@ -22,8 +22,6 @@ jobs:
         with:
           release-type: terraform-module
       - uses: actions/checkout@v4
-      # try to blackhole upstream cache
-      - run: echo '127.0.0.1 cache.nixos.org' | sudo tee -a /etc/hosts
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
       - uses: nicknovitski/nix-develop@v1.1.0
@@ -43,6 +41,7 @@ jobs:
             --keep AWS_SESSION_TOKEN \
             --keep TERM \
             ${{ github.workspace }}
+# put release tests here
       - uses: actions/cache/restore@v3
         id: cache-terraform-restore
         with:
@@ -54,7 +53,7 @@ jobs:
         with:
           path: ${{ github.workspace }}/.terraform
           key: ${{ steps.cache-terraform-restore.outputs.cache-primary-key }}
-# only run after release is created
+# these are only run after release is created
       - uses: aws-actions/configure-aws-credentials@v4
         if: steps.release-please.outputs.release_created
         with:
@@ -69,45 +68,12 @@ jobs:
         shell: bash
         run: |
           set -e
-          # generate age key if not found
-          AGE_PUBLIC_KEY="${{secrets.AGE_PUBLIC_KEY}}"
-          if [ "" = "${{secrets.AGE_SECRET_KEY}}" ]; then
-            echo "Age key not found, adding one for CI"
-            age-keygen -o age_key.txt
-            gh secret set AGE_SECRET_KEY --body "$(cat age_key.txt)" --visibility repo
-            gh secret set AGE_PUBLIC_KEY --body "$(age-keygen -y age_key.txt)" --visibility repo
-            AGE_PUBLIC_KEY="$(age-keygen -y age_key.txt)"
-            rm -f age_key.txt
-          fi
-          # generate recipients if not found
-          if [ ! -f age_recipients.txt ]; then
-            echo "Generating age_recipients.txt, you will need to add your personal public age key to this file to access secrets"
-            touch age_recipients.txt
-          fi
-          # add ci recipient to list if not found
-          if [ "" = "$(grep "$AGE_PUBLIC_KEY" age_recipients.txt)" ]; then
-              echo "# CI" >> age_recipients.txt
-              echo "$AGE_PUBLIC_KEY" >> age_recipients.txt
-          fi
-          # generate encrypted ssh key if not found
-          if [ ! -f ssh_key ]; then
-            echo "encrypted ssh key not found, generating one"
-            # uses rsa due to STIG images not accepting anything else
-            rm -f ssh_key.pub
-            ssh-keygen -N "" -t rsa -b 4096 -C "${{github.repository}}" -f ssh_key
-            chmod 0600 ssh_key
-            age -e -R age_recipients.txt -o ssh.age ssh_key && rm -f ssh_key
-          fi
+          if [ "" = ${{secrets.AGE_SECRET_KEY}} ]; then echo "Missing encrypt key, please run repo setup before release."; exit 1; fi
+          if [ "" = ${{secrets.SSH_PRIVATE_KEY}} ]; then echo "Missing CI ssh access key, please run repo setup before release."; exit 1; fi
+          if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before release."; exit 1; fi
+          if [ ! -f terraform.tfstate.age ]; then echo "Missing initial encrypted terraform state, please run repo setup before release."; exit 1; fi
           eval "$(ssh-agent -s)"
-          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh.age
-          chmod 0600 ssh_key
-          ssh-add ssh_key
-          if [ ! -f terraform.tfstate.age ]; then
-            echo "no state found, is this the first run?"
-            echo "generating initial state"
-            if [ ! -f terraform.tfstate ]; then touch terraform.tfstate; fi;
-            age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -rf terraform.tfstate
-          fi
+          ssh-add <<< "$(${{secrets.SSH_PRIVATE_KEY}})"
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           terraform init
@@ -121,17 +87,10 @@ jobs:
           terraform apply --auto-approve || true
           sleep 5
           terraform apply --auto-approve || true
-          rm -rf ssh_key
-          rm -rf age_key.txt
-          rm -rf terraform.tfstate.age
-          age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate
-          rm -f terraform.tfstate
+          rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
           git add terraform.tfstate.age
-          git add age_recipients.txt
-          git add ssh_key.pub
-          git add ssh.age
-          git commit -s -m "New State ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}"
+          git commit -s -m "New State https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
           git push origin main
