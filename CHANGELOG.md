@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.20](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.19...v0.1.20) (2024-01-05)
+
+
+### Bug Fixes
+
+* quote tokens ([d4c406c](https://github.com/matttrach/live-infra-aws-rke2/commit/d4c406c4b325fadcfe4dce7fde78aab843c0e980))
+
 ## [0.1.19](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.18...v0.1.19) (2024-01-05)
 
 
