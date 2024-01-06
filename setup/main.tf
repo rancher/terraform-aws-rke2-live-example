@@ -36,7 +36,6 @@ resource "github_repository" "this" {
   squash_merge_commit_message = "COMMIT_MESSAGES"
   delete_branch_on_merge      = true
   allow_update_branch         = true
-  web_commit_signoff_required = true
 }
 
 resource "github_branch" "main" {
@@ -45,6 +44,27 @@ resource "github_branch" "main" {
   ]
   repository = github_repository.this.name
   branch     = "main"
+}
+
+resource "github_branch_protection" "main" {
+  repository_id = github_repository.this.name
+
+  pattern                 = "main"
+  enforce_admins          = true
+  require_signed_commits  = true
+  required_linear_history = true
+  allows_deletions        = false # protect branch from deletion
+
+  required_pull_request_reviews {
+    require_code_owner_reviews      = true
+    required_approving_review_count = 1
+    dismiss_stale_reviews           = true
+  }
+
+  required_status_checks {
+    strict = true # require the latest push on the branch to be reviewed
+  }
+
 }
 
 resource "github_branch_default" "main" {
