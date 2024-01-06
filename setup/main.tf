@@ -16,6 +16,10 @@ import {
   to = github_repository.this
   id = "live-infra-aws-rke2" # variables can't be used here
 }
+import {
+  to = github_branch.main
+  id = "live-infra-aws-rke2:main" # variables can't be used here
+}
 
 resource "github_repository" "this" {
   name                        = local.name
@@ -35,7 +39,19 @@ resource "github_repository" "this" {
   web_commit_signoff_required = true
 }
 
-resource "github_branch" "development" {
+resource "github_branch" "main" {
+  depends_on = [
+    github_repository.this,
+  ]
+  repository = github_repository.this.name
+  branch     = "main"
+}
+
+resource "github_branch_default" "main" {
+  depends_on = [
+    github_repository.this,
+    github_branch.main,
+  ]
   repository = github_repository.this.name
   branch     = "main"
 }
@@ -69,6 +85,7 @@ resource "sodium_encrypted_item" "age_secret_key" {
 resource "github_actions_secret" "age_secret_key" {
   depends_on = [
     github_repository.this,
+    sodium_encrypted_item.age_secret_key,
   ]
   repository      = github_repository.this.name
   secret_name     = "AGE_SECRET_KEY"
@@ -76,6 +93,11 @@ resource "github_actions_secret" "age_secret_key" {
 }
 
 resource "github_repository_file" "age_recipients" {
+  depends_on = [
+    github_repository.this,
+    github_branch.main,
+    age_secret_key.this,
+  ]
   repository          = github_repository.this.name
   branch              = "main"
   file                = "age_recipients.txt"
@@ -86,7 +108,7 @@ resource "github_repository_file" "age_recipients" {
   commit_message      = "Initial recipients"
   commit_author       = "automation"
   commit_email        = "automation@users.noreply.github.com"
-  overwrite_on_create = false
+  overwrite_on_create = true
 }
 
 # RSA key of size 4096 bits
@@ -98,6 +120,12 @@ resource "tls_private_key" "ssh_access_key" {
 }
 
 resource "github_repository_file" "ssh_public_access_key" {
+  depends_on = [
+    github_repository.this,
+    github_branch.main,
+    tls_private_key.ssh_access_key,
+  ]
+
   repository          = github_repository.this.name
   branch              = "main"
   file                = "ssh_key.pub"
@@ -109,6 +137,10 @@ resource "github_repository_file" "ssh_public_access_key" {
 }
 
 resource "github_repository_file" "starter_terraform_state" {
+  depends_on = [
+    github_repository.this,
+    github_branch.main,
+  ]
   repository          = github_repository.this.name
   branch              = "main"
   file                = "terraform.tfstate.age"
@@ -120,6 +152,9 @@ resource "github_repository_file" "starter_terraform_state" {
 }
 
 resource "sodium_encrypted_item" "ssh_private_access_key" {
+  depends_on = [
+    tls_private_key.ssh_access_key,
+  ]
   public_key_base64 = base64encode(data.github_actions_public_key.gh_actions_public_key.key)
   content_base64    = base64encode(trimspace(tls_private_key.ssh_access_key.private_key_openssh))
 }
@@ -129,8 +164,19 @@ resource "sodium_encrypted_item" "ssh_private_access_key" {
 resource "github_actions_secret" "ssh_private_access_key" {
   depends_on = [
     github_repository.this,
+    github_branch.main,
+    sodium_encrypted_item.ssh_private_access_key,
   ]
   repository      = github_repository.this.name
   secret_name     = "SSH_PRIVATE_KEY"
   encrypted_value = sodium_encrypted_item.ssh_private_access_key.encrypted_value_base64
+}
+
+output "SSH_PRIVATE_KEY" {
+  value     = base64encode(trimspace(tls_private_key.ssh_access_key.private_key_openssh))
+  sensitive = true
+}
+output "AGE_KEY" {
+  value     = sodium_encrypted_item.age_secret_key.encrypted_value_base64
+  sensitive = true
 }
