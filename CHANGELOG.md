@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.21](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.20...v0.1.21) (2024-01-06)
+
+
+### Bug Fixes
+
+* fix workflows ([559bf6e](https://github.com/matttrach/live-infra-aws-rke2/commit/559bf6ee757d4bf9fa7777e442f7bf135711483c))
+* update github provider version ([6d5ae4f](https://github.com/matttrach/live-infra-aws-rke2/commit/6d5ae4fe2769e77fe3fa127de03b5c31548699e7))
+
 ## [0.1.20](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.19...v0.1.20) (2024-01-05)
 
 
