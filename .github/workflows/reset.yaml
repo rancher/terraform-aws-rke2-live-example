@@ -11,7 +11,7 @@ env:
 
 jobs:
   # this workflow destroys the infrastructure and resets the repo to a clean state
-  destroy:
+  reset:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

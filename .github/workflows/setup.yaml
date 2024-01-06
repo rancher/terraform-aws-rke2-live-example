@@ -11,7 +11,7 @@ env:
   GITHUB_OWNER: ${{ github.repository_owner }}
 
 jobs:
-  release:
+  setup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,4 +34,4 @@ jobs:
             --keep AWS_SESSION_TOKEN \
             --keep TERM \
             ${{ github.workspace }}
-      - run: cd setup && terraform apply --auto-approve
+      - run: cd setup && terrform init && terraform apply --auto-approve

@@ -15,7 +15,7 @@ env:
 permissions: write-all
 
 jobs:
-  release:
+  update:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
