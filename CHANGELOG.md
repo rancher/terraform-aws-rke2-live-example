@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.22](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.21...v0.1.22) (2024-01-06)
+
+
+### Bug Fixes
+
+* adding dependency chain and troubleshooting ([#77](https://github.com/matttrach/live-infra-aws-rke2/issues/77)) ([3262777](https://github.com/matttrach/live-infra-aws-rke2/commit/3262777f408593834aa3a314d73e4bcf12779f59))
+
 ## [0.1.21](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.20...v0.1.21) (2024-01-06)
 
 
