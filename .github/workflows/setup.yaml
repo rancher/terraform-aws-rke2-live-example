@@ -35,3 +35,6 @@ jobs:
             --keep TERM \
             ${{ github.workspace }}
       - run: cd setup && terraform init && terraform apply --auto-approve
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
