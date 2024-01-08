@@ -34,4 +34,4 @@ jobs:
             --keep AWS_SESSION_TOKEN \
             --keep TERM \
             ${{ github.workspace }}
-      - run: cd setup && terrform init && terraform apply --auto-approve
+      - run: cd setup && terraform init && terraform apply --auto-approve
