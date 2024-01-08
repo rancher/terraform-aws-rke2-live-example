@@ -101,6 +101,7 @@
             git
             gnupg
             go
+            jq
             less
             openssh_hpn
             shellcheck

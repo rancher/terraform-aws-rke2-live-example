@@ -1,15 +1,18 @@
-
 # While this is a Terraform config, it shouldn't really be expected to maintain the repo
 #   this was the most robust interface I could find to manage the things necessary to initialize the repo
 #   without a lot of boilerplate code to manage api connections
-# After copying the code into your repo, import it with `` and run this to set it up,
-#   and you can pretty much ignore this from then on
+# After copying the code into your repo, run this to set it up and you can ignore it/remove it from then on
 
 provider "github" {} # This expects the GITHUB_TOKEN to be set in the environment
 
 locals {
-  name        = "live-infra-aws-rke2"
-  description = "an example of a live infrastructure repo"
+  name               = "live-infra-aws-rke2"
+  description        = "an example of a live infrastructure repo"
+  recipients_content = <<-EOT
+    # CI
+    ${data.external.age_key.result.public_key}
+  EOT
+  state              = file("terraform.tfstate")
 }
 
 import {
@@ -46,26 +49,30 @@ resource "github_branch" "main" {
   branch     = "main"
 }
 
-resource "github_branch_protection" "main" {
-  repository_id = github_repository.this.name
+# branch protections are only for enterprise
+# resource "github_branch_protection" "main" {
+#   depends_on = [
+#     github_repository.this,
+#     github_branch.main,
+#   ]
+#   repository_id = github_repository.this.name
 
-  pattern                 = "main"
-  enforce_admins          = true
-  require_signed_commits  = true
-  required_linear_history = true
-  allows_deletions        = false # protect branch from deletion
+#   pattern                 = github_branch.main.branch
+#   enforce_admins          = true
+#   require_signed_commits  = true
+#   required_linear_history = true
+#   allows_deletions        = false # protect branch from deletion
 
-  required_pull_request_reviews {
-    require_code_owner_reviews      = true
-    required_approving_review_count = 1
-    dismiss_stale_reviews           = true
-  }
+#   required_pull_request_reviews {
+#     require_code_owner_reviews      = true
+#     required_approving_review_count = 1
+#     dismiss_stale_reviews           = true
+#   }
 
-  required_status_checks {
-    strict = true # require the latest push on the branch to be reviewed
-  }
-
-}
+#   required_status_checks {
+#     strict = true # require the latest push on the branch to be reviewed
+#   }
+# }
 
 resource "github_branch_default" "main" {
   depends_on = [
@@ -73,7 +80,7 @@ resource "github_branch_default" "main" {
     github_branch.main,
   ]
   repository = github_repository.this.name
-  branch     = "main"
+  branch     = github_branch.main.branch
 }
 
 resource "github_actions_repository_permissions" "this" {
@@ -85,50 +92,68 @@ resource "github_actions_repository_permissions" "this" {
   repository      = github_repository.this.name
 }
 
-resource "age_secret_key" "this" {}
-
-data "github_actions_public_key" "gh_actions_public_key" {
-  repository = github_repository.this.name
+data "external" "age_key" {
+  program = ["bash", "${path.module}/get_age_key.sh"]
 }
 
-resource "sodium_encrypted_item" "age_secret_key" {
-  public_key_base64 = base64encode(data.github_actions_public_key.gh_actions_public_key.key)
-  content_base64    = base64encode(age_secret_key.this.secret_key)
-}
-
-# the AGE key is encrypted using the sodium key, then the state is encrypted using the AGE key (outside of this)
-# to decrypt the state you need to be one of the AGE recipients, you should not be able to access the CI's private AGE key (that is for the CI only)
-#
 # if you would like to access the state yourself, which may be important if you want console access to the infra
 #  you need to generate an AGE key for your workstation and add the public key to the age_recipients.txt
 # WARNING! Make sure that you re-encrypt the state using the age_recipients.txt so that the CI can see any changes you make.
 resource "github_actions_secret" "age_secret_key" {
   depends_on = [
     github_repository.this,
-    sodium_encrypted_item.age_secret_key,
   ]
   repository      = github_repository.this.name
   secret_name     = "AGE_SECRET_KEY"
-  encrypted_value = sodium_encrypted_item.age_secret_key.encrypted_value_base64
+  plaintext_value = sensitive(data.external.age_key.result.secret_key)
+}
+
+resource "terraform_data" "git_pull_before_recipients" {
+  depends_on = [
+    github_repository.this,
+    github_branch.main,
+    data.external.age_key,
+  ]
+  triggers_replace = [
+    data.external.age_key,
+  ]
+  provisioner "local-exec" {
+    command = "git pull"
+  }
 }
 
 resource "github_repository_file" "age_recipients" {
   depends_on = [
     github_repository.this,
     github_branch.main,
-    age_secret_key.this,
+    data.external.age_key,
+    terraform_data.git_pull_before_recipients,
   ]
   repository          = github_repository.this.name
-  branch              = "main"
-  file                = "age_recipients.txt"
-  content             = <<-EOT
-    # CI
-    ${age_secret_key.this.public_key}
-  EOT
+  branch              = github_branch.main.branch
   commit_message      = "Initial recipients"
   commit_author       = "automation"
   commit_email        = "automation@users.noreply.github.com"
   overwrite_on_create = true
+  file                = "age_recipients.txt"
+  content             = local.recipients_content
+}
+
+resource "terraform_data" "git_pull_after_recipients" {
+  depends_on = [
+    github_repository.this,
+    github_branch.main,
+    data.external.age_key,
+    terraform_data.git_pull_before_recipients,
+    github_repository_file.age_recipients,
+  ]
+  triggers_replace = [
+    github_repository_file.age_recipients,
+    data.external.age_key,
+  ]
+  provisioner "local-exec" {
+    command = "git pull"
+  }
 }
 
 # RSA key of size 4096 bits
@@ -139,64 +164,71 @@ resource "tls_private_key" "ssh_access_key" {
   rsa_bits  = 4096
 }
 
-resource "github_repository_file" "ssh_public_access_key" {
+data "external" "age_encrypted_private_ssh_key" {
+  program = ["bash", "${path.module}/get_age_encrypted_value.sh"]
+
+  query = {
+    state           = local.state
+    state_type      = "github_actions_secret"
+    state_name      = "ssh_access_key"
+    state_attribute = "plaintext_value"
+    content         = sensitive(tls_private_key.ssh_access_key.private_key_openssh)
+    recipients      = local.recipients_content
+  }
+}
+
+resource "github_actions_secret" "ssh_access_key" {
+  depends_on = [
+    github_repository.this,
+  ]
+  repository      = github_repository.this.name
+  secret_name     = "SSH_PRIVATE_KEY"
+  plaintext_value = sensitive(data.external.age_encrypted_private_ssh_key.result.data)
+}
+
+resource "github_repository_file" "ci_ssh_public_access_key" {
   depends_on = [
     github_repository.this,
     github_branch.main,
     tls_private_key.ssh_access_key,
+    github_repository_file.age_recipients,
+    terraform_data.git_pull_after_recipients,
   ]
-
   repository          = github_repository.this.name
-  branch              = "main"
-  file                = "ssh_key.pub"
-  content             = tls_private_key.ssh_access_key.public_key_openssh
+  branch              = github_branch.main.branch
   commit_message      = "Initial CI public ssh key"
   commit_author       = "automation"
   commit_email        = "automation@users.noreply.github.com"
   overwrite_on_create = true
+  file                = "ssh_key.pub"
+  content             = tls_private_key.ssh_access_key.public_key_openssh
 }
 
-resource "github_repository_file" "starter_terraform_state" {
+data "external" "age_encrypted_initial_state" {
+  program = ["bash", "${path.module}/get_age_encrypted_value.sh"]
+
+  query = {
+    state           = local.state
+    state_type      = "github_repository_file"
+    state_name      = "starter_encrypted_terraform_state"
+    state_attribute = "content"
+    content         = jsonencode("")
+    recipients      = local.recipients_content
+  }
+}
+
+resource "github_repository_file" "starter_encrypted_terraform_state" {
   depends_on = [
     github_repository.this,
     github_branch.main,
   ]
   repository          = github_repository.this.name
   branch              = "main"
-  file                = "terraform.tfstate.age"
-  content             = "{}"
-  commit_message      = "Initial CI state"
+  commit_message      = "Initial CI encrypted state"
   commit_author       = "automation"
   commit_email        = "automation@users.noreply.github.com"
   overwrite_on_create = true
+  file                = "terraform.tfstate.age"
+  content             = sensitive(data.external.age_encrypted_initial_state.result.data)
 }
 
-resource "sodium_encrypted_item" "ssh_private_access_key" {
-  depends_on = [
-    tls_private_key.ssh_access_key,
-  ]
-  public_key_base64 = base64encode(data.github_actions_public_key.gh_actions_public_key.key)
-  content_base64    = base64encode(trimspace(tls_private_key.ssh_access_key.private_key_openssh))
-}
-
-# Users should not be able to access the CI's private ssh key,
-# to add your own ssh key you will need to send your public key to the module
-resource "github_actions_secret" "ssh_private_access_key" {
-  depends_on = [
-    github_repository.this,
-    github_branch.main,
-    sodium_encrypted_item.ssh_private_access_key,
-  ]
-  repository      = github_repository.this.name
-  secret_name     = "SSH_PRIVATE_KEY"
-  encrypted_value = sodium_encrypted_item.ssh_private_access_key.encrypted_value_base64
-}
-
-output "SSH_PRIVATE_KEY" {
-  value     = base64encode(trimspace(tls_private_key.ssh_access_key.private_key_openssh))
-  sensitive = true
-}
-output "AGE_KEY" {
-  value     = sodium_encrypted_item.age_secret_key.encrypted_value_base64
-  sensitive = true
-}
