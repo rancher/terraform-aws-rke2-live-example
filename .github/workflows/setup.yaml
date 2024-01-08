@@ -4,7 +4,21 @@ on:
   # only on dispatch
   workflow_dispatch:
 
-permissions: write-all
+#permissions: write-all
+permissions:
+  actions: write
+  checks: write
+  contents: write
+  deployments: write
+  id-token: write
+  issues: write
+  discussions: write
+  packages: write
+  pages: write
+  pull-requests: write
+  repository-projects: write
+  security-events: write
+  statuses: write
 
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -26,6 +40,7 @@ jobs:
             --keep HOME \
             --keep SSH_AUTH_SOCK \
             --keep GITHUB_TOKEN \
+            --keep GITHUB_OWNER \
             --keep AWS_ROLE \
             --keep AWS_REGION \
             --keep AWS_DEFAULT_REGION \
