@@ -54,13 +54,12 @@ jobs:
         id: ip
       - name: ResetRepo
         shell: bash
-        env:
-          SSH_PRIVATE_KEY: secrets.SSH_PRIVATE_KEY
         run: |
           eval "$(ssh-agent -s)"
-          ssh-add <<< "$(echo "$SSH_PRIVATE_KEY" | base64 -d)"
-          TERRAFORM_STATE_AGE="$(base64 -d terraform.tfstate.age)"
-          rm -f terraform.tfstate; echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate <<< "$TERRAFORM_STATE_AGE"
+          ssh-add <<< "$(echo '${{secrets.SSH_PRIVATE_KEY}}' | base64 -d)"
+          base64 -d terraform.tfstate.age > terraform.tfstate.age.dc
+          rm -f terraform.tfstate; echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age.dc
+          rm -f terraform.tfstate.age.dc
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           terraform init
           terraform destroy --auto-approve || true
