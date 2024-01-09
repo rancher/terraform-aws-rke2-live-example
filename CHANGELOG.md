@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.1.23](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.22...v0.1.23) (2024-01-09)
+
+
+### Bug Fixes
+
+* add branch protections ([4a0f4bf](https://github.com/matttrach/live-infra-aws-rke2/commit/4a0f4bf4744c34f6cb0620698c4b433850053802))
+* add comments to give user creation example ([1548600](https://github.com/matttrach/live-infra-aws-rke2/commit/1548600f56bd81e13e522be1efb92ea62b3ef152))
+* add workstation age key ([#81](https://github.com/matttrach/live-infra-aws-rke2/issues/81)) ([b2c326c](https://github.com/matttrach/live-infra-aws-rke2/commit/b2c326cd8d47198d0f49d3a5d2df26c0a5b6e334))
+* attempting specific permissions ([0634605](https://github.com/matttrach/live-infra-aws-rke2/commit/0634605fdf782a00cb34588e5429ee6a0f633158))
+* bump hashicorp/local from 2.4.0 to 2.4.1 ([#76](https://github.com/matttrach/live-infra-aws-rke2/issues/76)) ([13261d2](https://github.com/matttrach/live-infra-aws-rke2/commit/13261d288e114999c716fb86d49f742947c3c02a))
+* make setup work ([#80](https://github.com/matttrach/live-infra-aws-rke2/issues/80)) ([cdbfb3e](https://github.com/matttrach/live-infra-aws-rke2/commit/cdbfb3e9cb4d41cf395a092a0a759761a52b5aa7))
+* make sure to base64 decode state and ssh keys ([240b069](https://github.com/matttrach/live-infra-aws-rke2/commit/240b069538ca9c1421888131c2f596f075faa5ff))
+* remove initial state ([540f371](https://github.com/matttrach/live-infra-aws-rke2/commit/540f371193c720e731affc67db013e2cfb1013ab))
+* remove initial state ([85cd6fd](https://github.com/matttrach/live-infra-aws-rke2/commit/85cd6fd7862e9aa1e52dc0e1be62d5085a889f28))
+* remove initial state ([3594979](https://github.com/matttrach/live-infra-aws-rke2/commit/3594979ece48259e9658601ebd2ba3080df54746))
+* remove initial state ([ec86219](https://github.com/matttrach/live-infra-aws-rke2/commit/ec86219d817aca15ec64979b598e17e9ee22e771))
+* try adding tokens to step ([9c6e407](https://github.com/matttrach/live-infra-aws-rke2/commit/9c6e4072ae9d26a01cd29b1376cea5b7c2f44e9d))
+* typo ([926385f](https://github.com/matttrach/live-infra-aws-rke2/commit/926385fc6eb9c59468f918eedaf82e2fee779280))
+* use PAT as admin token ([fe5bd29](https://github.com/matttrach/live-infra-aws-rke2/commit/fe5bd29c6968866a21167f38ed88fbaa52833202))
+
 ## [0.1.22](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.21...v0.1.22) (2024-01-06)
 
 
