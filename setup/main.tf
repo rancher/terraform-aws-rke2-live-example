@@ -193,7 +193,7 @@ resource "github_repository_file" "starter_encrypted_ci_ssh_private_access_key" 
   commit_email        = "automation@users.noreply.github.com"
   overwrite_on_create = true
   file                = "ssh_key.age"
-  content             = data.external.age_encrypted_initial_state.result.data
+  content             = data.external.age_encrypted_private_ssh_key.result.data
 }
 
 resource "github_repository_file" "ci_ssh_public_access_key" {
