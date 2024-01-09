@@ -73,8 +73,10 @@ jobs:
           if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before release."; exit 1; fi
           if [ ! -f terraform.tfstate.age ]; then echo "Missing initial encrypted terraform state, please run repo setup before release."; exit 1; fi
           eval "$(ssh-agent -s)"
-          SSH_PRIVATE_KEY="$(echo '${{secrets.SSH_PRIVATE_KEY}}' | base64 -d)"
-          ssh-add <<< "$SSH_PRIVATE_KEY"
+          echo '${{secrets.SSH_PRIVATE_KEY}}' > ssh_key_tmp
+          base64 -d ssh_key_tmp > ssh_key_tmp_dc
+          rm -f ssh_key_tmp
+          ssh-add ssh_key_tmp_dc
           base64 -d terraform.tfstate.age > terraform.tfstate.age.dc
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age.dc
           rm -f terraform.tfstate.age.dc
@@ -91,6 +93,7 @@ jobs:
           terraform apply --auto-approve || true
           sleep 5
           terraform apply --auto-approve || true
+          rm -f ssh_key_tmp_dc
           echo "Saving state..."
           rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
           base64 terraform.tfstate.age > tmp_terraform.tfstate.age
