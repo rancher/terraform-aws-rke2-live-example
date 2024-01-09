@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.25](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.24...v0.1.25) (2024-01-09)
+
+
+### Bug Fixes
+
+* try echo instead of redirect ([77c971e](https://github.com/matttrach/live-infra-aws-rke2/commit/77c971e12f295851359cfc9c1fc3c11d7c531d83))
+
 ## [0.1.24](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.23...v0.1.24) (2024-01-09)
 
 
