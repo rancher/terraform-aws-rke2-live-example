@@ -69,7 +69,7 @@ jobs:
         run: |
           echo "Setting up env..."
           if [ "" = '${{secrets.AGE_SECRET_KEY}}' ]; then echo "Missing encrypt key, please run repo setup before release."; exit 1; fi
-          if [ ! -f ssk_key.age ]; then echo "Missing CI ssh access key, please run repo setup before release."; exit 1; fi
+          if [ ! -f ssh_key.age ]; then echo "Missing CI ssh access key, please run repo setup before release."; exit 1; fi
           if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before release."; exit 1; fi
           eval "$(ssh-agent -s)"
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh_key.age
