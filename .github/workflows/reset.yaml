@@ -57,7 +57,8 @@ jobs:
         run: |
           eval "$(ssh-agent -s)"
           ssh-add <<< "$(base64 -d <<< ${{secrets.SSH_PRIVATE_KEY}})"
-          rm -f terraform.tfstate; echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate <<< "$(base64 -d terraform.tfstate.age)"
+          TERRAFORM_STATE_AGE="$(base64 -d terraform.tfstate.age)"
+          rm -f terraform.tfstate; echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate <<< "$TERRAFORM_STATE_AGE"
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           terraform init
           terraform destroy --auto-approve || true

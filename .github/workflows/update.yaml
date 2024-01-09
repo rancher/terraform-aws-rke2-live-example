@@ -45,16 +45,21 @@ jobs:
           aws-region: ${{env.AWS_REGION}}
       - uses: haythem/public-ip@v1.3
         id: ip
-      - name: Apply
+      - name: update
         shell: bash
+        env:
+          AGE_SECRET_KEY: secrets.AGE_SECRET_KEY
+          B64_SSH_PRIVATE_KEY: secrets.SSH_PRIVATE_KEY
         run: |
-          if [ "" = "${{secrets.AGE_SECRET_KEY}}" ]; then echo "Missing encrypt key, please run repo setup before update."; exit 1; fi
-          if [ "" = "${{secrets.SSH_PRIVATE_KEY}}" ]; then echo "Missing CI ssh access key, please run repo setup before update."; exit 1; fi
+          if [ "" = "$AGE_SECRET_KEY" ]; then echo "Missing encrypt key, please run repo setup before update."; exit 1; fi
+          if [ "" = "$B64_SSH_PRIVATE_KEY" ]; then echo "Missing CI ssh access key, please run repo setup before update."; exit 1; fi
           if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before update."; exit 1; fi
           if [ ! -f terraform.tfstate.age ]; then echo "Missing initial encrypted terraform state, please run repo setup before update."; exit 1; fi
           eval "$(ssh-agent -s)"
-          ssh-add <<< "$(base64 -d <<< ${{secrets.SSH_PRIVATE_KEY}})"
-          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate <<< "$(base64 -d terraform.tfstate.age)"
+          SSH_PRIVATE_KEY="$(base64 -d <<< $B64_SSH_PRIVATE_KEY)"
+          ssh-add <<< "$SSH_PRIVATE_KEY"
+          TERRAFORM_STATE_AGE="$(base64 -d terraform.tfstate.age)"
+          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate <<< "$TERRAFORM_STATE_AGE"
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           terraform init
           # manage the security group rule for the terraform runner as a separate entity to prevent dependency chain issues with server object
