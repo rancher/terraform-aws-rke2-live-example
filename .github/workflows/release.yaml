@@ -76,6 +76,7 @@ jobs:
           echo '${{secrets.SSH_PRIVATE_KEY}}' > ssh_key_tmp
           base64 -d ssh_key_tmp > ssh_key_tmp_dc
           rm -f ssh_key_tmp
+          chmod 0600 ssh_key_tmp_dc
           ssh-add ssh_key_tmp_dc
           base64 -d terraform.tfstate.age > terraform.tfstate.age.dc
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age.dc
