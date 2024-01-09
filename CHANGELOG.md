@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.27](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.26...v0.1.27) (2024-01-09)
+
+
+### Bug Fixes
+
+* isolating with single quotes ([03427bf](https://github.com/matttrach/live-infra-aws-rke2/commit/03427bfc0def17c2b6c36ef4a09666067cd47ec7))
+
 ## [0.1.26](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.25...v0.1.26) (2024-01-09)
 
 
