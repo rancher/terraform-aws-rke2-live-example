@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.28](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.27...v0.1.28) (2024-01-09)
+
+
+### Bug Fixes
+
+* try using a tmp file ([43128e9](https://github.com/matttrach/live-infra-aws-rke2/commit/43128e946aa44b462c95062819daa4a9a00feb0f))
+
 ## [0.1.27](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.26...v0.1.27) (2024-01-09)
 
 
