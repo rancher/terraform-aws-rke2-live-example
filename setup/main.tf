@@ -8,11 +8,11 @@ provider "github" {} # This expects the GITHUB_TOKEN to be set in the environmen
 locals {
   name               = "live-infra-aws-rke2"
   description        = "an example of a live infrastructure repo"
+  state              = file("terraform.tfstate") # this will fail if init was not run first
   recipients_content = <<-EOT
     # CI
     ${data.external.age_key.result.public_key}
   EOT
-  state              = file("terraform.tfstate")
 }
 
 import {
@@ -105,7 +105,7 @@ resource "github_actions_secret" "age_secret_key" {
   ]
   repository      = github_repository.this.name
   secret_name     = "AGE_SECRET_KEY"
-  plaintext_value = sensitive(data.external.age_key.result.secret_key)
+  plaintext_value = data.external.age_key.result.secret_key
 }
 
 resource "terraform_data" "git_pull_before_recipients" {
@@ -172,7 +172,7 @@ data "external" "age_encrypted_private_ssh_key" {
     state_type      = "github_repository_file"
     state_name      = "ssh_access_key"
     state_attribute = "content"
-    content         = sensitive(tls_private_key.ssh_access_key.private_key_openssh)
+    content         = tls_private_key.ssh_access_key.private_key_openssh
     recipients      = local.recipients_content
   }
 }
@@ -193,7 +193,7 @@ resource "github_repository_file" "starter_encrypted_ci_ssh_private_access_key" 
   commit_email        = "automation@users.noreply.github.com"
   overwrite_on_create = true
   file                = "ssh_key.age"
-  content             = sensitive(base64decode(data.external.age_encrypted_initial_state.result.data))
+  content             = data.external.age_encrypted_initial_state.result.data
 }
 
 resource "github_repository_file" "ci_ssh_public_access_key" {
@@ -212,32 +212,4 @@ resource "github_repository_file" "ci_ssh_public_access_key" {
   overwrite_on_create = true
   file                = "ssh_key.pub"
   content             = tls_private_key.ssh_access_key.public_key_openssh
-}
-
-data "external" "age_encrypted_initial_state" {
-  program = ["bash", "${path.module}/get_age_encrypted_value.sh"]
-
-  query = {
-    state           = local.state
-    state_type      = "github_repository_file"
-    state_name      = "starter_encrypted_terraform_state"
-    state_attribute = "content"
-    content         = jsonencode("")
-    recipients      = local.recipients_content
-  }
-}
-
-resource "github_repository_file" "starter_encrypted_terraform_state" {
-  depends_on = [
-    github_repository.this,
-    github_branch.main,
-  ]
-  repository          = github_repository.this.name
-  branch              = "main"
-  commit_message      = "Initial CI encrypted state"
-  commit_author       = "automation"
-  commit_email        = "automation@users.noreply.github.com"
-  overwrite_on_create = true
-  file                = "terraform.tfstate.age"
-  content             = sensitive(base64decode(data.external.age_encrypted_initial_state.result.data))
 }
