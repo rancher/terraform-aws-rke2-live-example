@@ -56,28 +56,32 @@ jobs:
         shell: bash
         run: |
           eval "$(ssh-agent -s)"
-          ssh-add <<< "$(echo '${{secrets.SSH_PRIVATE_KEY}}' | base64 -d)"
-          base64 -d terraform.tfstate.age > terraform.tfstate.age.dc
-          rm -f terraform.tfstate; echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age.dc
-          rm -f terraform.tfstate.age.dc
+          eval "$(ssh-agent -s)"
+          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh_key.age
+          chmod 0600 ssh_key
+          ssh-add ssh_key
+          rm -f terraform.tfstate; echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
+          rm -f terraform.tfstate.age
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           terraform init
           terraform destroy --auto-approve || true
           terraform destroy --auto-approve
+          rm -rf ssh_key
           rm -rf ssh_key.pub
-          rm -rf terraform.tfstate.age
+          rm -rf ssh_key.age
           rm -rf terraform.tfstate
+          rm -rf terraform.tfstate.age
           rm -rf age_recipients.txt
           rm -rf .terraform.lock.hcl
           rm -rf flake.lock
           rm -rf CHANGELOG.md
           gh secret delete AGE_SECRET_KEY
-          gh secret delete SSH_PRIVATE_KEY
           gh secret delete ADMIN_GITHUB_TOKEN
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
           git add -A
           git commit -s -m "Reset repo https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
-          git push origin main
+          git pull --rebase
+          git push -f origin main
           # At this point the repo should be clean to copy

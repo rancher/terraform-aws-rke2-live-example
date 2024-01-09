@@ -69,18 +69,14 @@ jobs:
         run: |
           echo "Setting up env..."
           if [ "" = '${{secrets.AGE_SECRET_KEY}}' ]; then echo "Missing encrypt key, please run repo setup before release."; exit 1; fi
-          if [ "" = '${{secrets.SSH_PRIVATE_KEY}}' ]; then echo "Missing CI ssh access key, please run repo setup before release."; exit 1; fi
+          if [ ! -f ssk_key.age ]; then echo "Missing CI ssh access key, please run repo setup before release."; exit 1; fi
           if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before release."; exit 1; fi
           if [ ! -f terraform.tfstate.age ]; then echo "Missing initial encrypted terraform state, please run repo setup before release."; exit 1; fi
           eval "$(ssh-agent -s)"
-          echo '${{secrets.SSH_PRIVATE_KEY}}' > ssh_key_tmp
-          base64 -d ssh_key_tmp > ssh_key_tmp_dc
-          rm -f ssh_key_tmp
-          chmod 0600 ssh_key_tmp_dc
-          ssh-add ssh_key_tmp_dc
-          base64 -d terraform.tfstate.age > terraform.tfstate.age.dc
-          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age.dc
-          rm -f terraform.tfstate.age.dc
+          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh_key.age
+          chmod 0600 ssh_key
+          ssh-add ssh_key
+          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           echo "Starting  deploy..."
           terraform init
@@ -94,11 +90,9 @@ jobs:
           terraform apply --auto-approve || true
           sleep 5
           terraform apply --auto-approve || true
-          rm -f ssh_key_tmp_dc
+          rm -f ssh_key
           echo "Saving state..."
           rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
-          base64 terraform.tfstate.age > tmp_terraform.tfstate.age
-          mv tmp_terraform.tfstate.age terraform.tfstate.age
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"

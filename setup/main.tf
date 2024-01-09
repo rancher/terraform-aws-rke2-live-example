@@ -169,21 +169,31 @@ data "external" "age_encrypted_private_ssh_key" {
 
   query = {
     state           = local.state
-    state_type      = "github_actions_secret"
+    state_type      = "github_repository_file"
     state_name      = "ssh_access_key"
-    state_attribute = "plaintext_value"
+    state_attribute = "content"
     content         = sensitive(tls_private_key.ssh_access_key.private_key_openssh)
     recipients      = local.recipients_content
   }
 }
 
-resource "github_actions_secret" "ssh_access_key" {
+resource "github_repository_file" "starter_encrypted_ci_ssh_private_access_key" {
   depends_on = [
     github_repository.this,
+    github_branch.main,
+    tls_private_key.ssh_access_key,
+    github_repository_file.age_recipients,
+    terraform_data.git_pull_after_recipients,
+    data.external.age_encrypted_private_ssh_key,
   ]
-  repository      = github_repository.this.name
-  secret_name     = "SSH_PRIVATE_KEY"
-  plaintext_value = sensitive(data.external.age_encrypted_private_ssh_key.result.data)
+  repository          = github_repository.this.name
+  branch              = github_branch.main.branch
+  commit_message      = "Initial CI encrypted private ssh key"
+  commit_author       = "automation"
+  commit_email        = "automation@users.noreply.github.com"
+  overwrite_on_create = true
+  file                = "ssh_key.age"
+  content             = sensitive(base64decode(data.external.age_encrypted_initial_state.result.data))
 }
 
 resource "github_repository_file" "ci_ssh_public_access_key" {
@@ -229,6 +239,5 @@ resource "github_repository_file" "starter_encrypted_terraform_state" {
   commit_email        = "automation@users.noreply.github.com"
   overwrite_on_create = true
   file                = "terraform.tfstate.age"
-  content             = sensitive(data.external.age_encrypted_initial_state.result.data)
+  content             = sensitive(base64decode(data.external.age_encrypted_initial_state.result.data))
 }
-
