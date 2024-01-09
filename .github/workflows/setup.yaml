@@ -8,7 +8,7 @@ permissions: write-all
 
 env:
   GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
-  GITHUB_OWNER: matttrach
+  GITHUB_OWNER: ${{ github.repository_owner }}
 
 jobs:
   setup:
