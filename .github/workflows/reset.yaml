@@ -55,11 +55,6 @@ jobs:
       - name: ResetRepo
         shell: bash
         run: |
-          eval "$(ssh-agent -s)"
-          eval "$(ssh-agent -s)"
-          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh_key.age
-          chmod 0600 ssh_key
-          ssh-add ssh_key
           rm -f terraform.tfstate; echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           rm -f terraform.tfstate.age
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
