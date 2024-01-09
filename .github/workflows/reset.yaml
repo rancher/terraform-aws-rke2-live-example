@@ -55,12 +55,16 @@ jobs:
       - name: ResetRepo
         shell: bash
         run: |
-          rm -f terraform.tfstate; echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
-          rm -f terraform.tfstate.age
-          export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
-          terraform init
-          terraform destroy --auto-approve || true
-          terraform destroy --auto-approve
+          if [ -f terraform.tfstate.age ]; then
+            rm -f terraform.tfstate; echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
+            rm -f terraform.tfstate.age
+            export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
+            terraform init
+            terraform destroy --auto-approve || true
+            terraform destroy --auto-approve
+          else
+            echo "no state found to clean..."
+          fi
           rm -rf ssh_key
           rm -rf ssh_key.pub
           rm -rf ssh_key.age
