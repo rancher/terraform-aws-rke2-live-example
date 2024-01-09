@@ -56,8 +56,8 @@ jobs:
         shell: bash
         run: |
           eval "$(ssh-agent -s)"
-          ssh-add <<< "$(${{secrets.SSH_PRIVATE_KEY}})"
-          rm -f terraform.tfstate; echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
+          ssh-add <<< "$(base64 -d <<< ${{secrets.SSH_PRIVATE_KEY}})"
+          rm -f terraform.tfstate; echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate <<< $(base64 -d terraform.tfstate.age)
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           terraform init
           terraform destroy --auto-approve || true
@@ -71,6 +71,7 @@ jobs:
           rm -rf CHANGELOG.md
           gh secret delete AGE_SECRET_KEY
           gh secret delete SSH_PRIVATE_KEY
+          gh secret delete ADMIN_GITHUB_TOKEN
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
