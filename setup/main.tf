@@ -14,6 +14,7 @@ locals {
     ${data.external.age_key.result.public_key}
   EOT
   recipients_file    = "age_recipients.txt"
+  recipients_path    = "${abspath(path.root)}/${local.recipients_file}"
 }
 
 import {
@@ -136,7 +137,7 @@ resource "github_repository_file" "age_recipients" {
   commit_author       = "automation"
   commit_email        = "automation@users.noreply.github.com"
   overwrite_on_create = true
-  file                = "age_recipients.txt"
+  file                = local.recipients_file
   content             = local.recipients_content
 }
 
@@ -175,10 +176,10 @@ data "external" "age_encrypted_private_ssh_key" {
   query = {
     state           = local.state
     state_type      = "github_repository_file"
-    state_name      = "ssh_access_key"
+    state_name      = "starter_encrypted_ci_ssh_private_access_key"
     state_attribute = "content"
-    content         = tls_private_key.ssh_access_key.private_key_openssh
-    recipients      = local.recipients_file
+    content         = chomp(tls_private_key.ssh_access_key.private_key_openssh)
+    recipients      = local.recipients_path
   }
 }
 
