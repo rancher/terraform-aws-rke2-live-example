@@ -13,6 +13,7 @@ locals {
     # CI
     ${data.external.age_key.result.public_key}
   EOT
+  recipients_file    = "age_recipients.txt"
 }
 
 import {
@@ -105,7 +106,7 @@ resource "github_actions_secret" "age_secret_key" {
   ]
   repository      = github_repository.this.name
   secret_name     = "AGE_SECRET_KEY"
-  plaintext_value = data.external.age_key.result.secret_key
+  plaintext_value = chomp(data.external.age_key.result.secret_key)
 }
 
 resource "terraform_data" "git_pull_before_recipients" {
@@ -165,6 +166,10 @@ resource "tls_private_key" "ssh_access_key" {
 }
 
 data "external" "age_encrypted_private_ssh_key" {
+  depends_on = [
+    github_repository_file.age_recipients,
+    terraform_data.git_pull_after_recipients,
+  ]
   program = ["bash", "${path.module}/get_age_encrypted_value.sh"]
 
   query = {
@@ -173,7 +178,7 @@ data "external" "age_encrypted_private_ssh_key" {
     state_name      = "ssh_access_key"
     state_attribute = "content"
     content         = tls_private_key.ssh_access_key.private_key_openssh
-    recipients      = local.recipients_content
+    recipients      = local.recipients_file
   }
 }
 

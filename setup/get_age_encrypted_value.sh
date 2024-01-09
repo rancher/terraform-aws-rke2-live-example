@@ -8,9 +8,7 @@ DATA="$(echo "$STATE" | jq -r --arg type "$TYPE" --arg name "$NAME" --arg attrib
 
 # get new encrypted data if state not found
 if [ "" = "$DATA" ]; then
-  echo "$RECIPIENTS" > "tmp_age_recipients.txt"
-  DATA="$(echo "$CONTENT" | age -e -R tmp_age_recipients.txt)"
-  rm -f tmp_age_recipients.txt
+  DATA="$(echo "$CONTENT" | age -e -R "$RECIPIENTS")"
 fi
 # Safely produce a JSON object containing the result value.
 # jq will ensure that the value is properly quoted and escaped to produce a valid JSON string.
