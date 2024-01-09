@@ -1,2 +1,4 @@
 # CI
 age1pgvu2x07dr2q57mdyzxtfhukagfsqq8jeccm2f0hnxdqf2rcqqpqnltdld
+# workstation
+age1yymz4r2kzl83f95k7f4lgk6sa7e6dt6eczwzp26djh4rhk4p6dfq2s6w9c
