@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.29](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.28...v0.1.29) (2024-01-09)
+
+
+### Bug Fixes
+
+* fix mode ([9de40a6](https://github.com/matttrach/live-infra-aws-rke2/commit/9de40a6d3cb6f5f63c9aab71702d851554c9ab5e))
+
 ## [0.1.28](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.27...v0.1.28) (2024-01-09)
 
 
