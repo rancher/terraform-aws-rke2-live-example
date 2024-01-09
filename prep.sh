@@ -22,6 +22,11 @@ systemctl disable nm-cloud-setup.service
 systemctl stop nm-cloud-setup.timer
 systemctl disable nm-cloud-setup.timer
 
+# add a user for yourself with your public key for remote ssh access
+# useradd -m '<username>'
+# install -d '/home/<username>/.ssh/authorized_keys'
+# echo '<your public key here>' > '/home/<username>/.ssh/authorized_keys'
+
 # reboot in 2 seconds and exit this script
 # this allows us to reboot without Terraform receiving errors
 # WARNING: there is a race condition here, the reboot must happen before Terraform reconnects for the next script
