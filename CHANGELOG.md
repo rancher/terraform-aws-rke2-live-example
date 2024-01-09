@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.24](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.23...v0.1.24) (2024-01-09)
+
+
+### Bug Fixes
+
+* break down lines to get values ([ebece79](https://github.com/matttrach/live-infra-aws-rke2/commit/ebece79fbcd5d33171f4c2d6c2e47c999e9828b0))
+
 ## [0.1.23](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.22...v0.1.23) (2024-01-09)
 
 
