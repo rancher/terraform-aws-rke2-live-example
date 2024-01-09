@@ -4,25 +4,11 @@ on:
   # only on dispatch
   workflow_dispatch:
 
-#permissions: write-all
-permissions:
-  actions: write
-  checks: write
-  contents: write
-  deployments: write
-  id-token: write
-  issues: write
-  discussions: write
-  packages: write
-  pages: write
-  pull-requests: write
-  repository-projects: write
-  security-events: write
-  statuses: write
+permissions: write-all
 
 env:
-  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-  GITHUB_OWNER: ${{ github.repository_owner }}
+  GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+  GITHUB_OWNER: matttrach
 
 jobs:
   setup:
@@ -50,6 +36,4 @@ jobs:
             --keep TERM \
             ${{ github.workspace }}
       - run: cd setup && terraform init && terraform apply --auto-approve
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_OWNER: ${{ github.repository_owner }}
+
