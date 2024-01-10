@@ -8,6 +8,8 @@ permissions: write-all
 env:
   AWS_REGION: "us-west-1"
   AWS_ROLE: "arn:aws:iam::270074865685:role/terraform-module-ci-test"
+  GH_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
 
 jobs:
   # this workflow destroys the infrastructure and resets the repo to a clean state
@@ -54,9 +56,8 @@ jobs:
         id: ip
       - name: ResetRepo
         shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
         run: |
+          if [ -z "$GITHUB_TOKEN" ]; then echo "token not found, please make sure to add ADMIN_GITHUB_TOKEN to secrets"; exit 1; fi
           if [ -f terraform.tfstate.age ]; then
             rm -f terraform.tfstate; echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
             rm -f terraform.tfstate.age
