@@ -42,7 +42,7 @@ jobs:
           KEY="$(age-keygen 2>/dev/null | grep '^AGE')"
           echo "$KEY" | age-keygen -y > age_recipients.txt
           gh secret set AGE_SECRET_KEY --body "$KEY"
-          ssh-keygen -t rsa -b 4096 -C "automation@users.noreply.github.com" -N "" -f ssh_key; rm -f ssh_key.age; age -e -R age_recipients.txt ssh_key -o ssh_key.age; rm -f ssh_key;
+          ssh-keygen -t rsa -b 4096 -C "automation@users.noreply.github.com" -N "" -f ssh_key && rm -f ssh_key.age; age -e -R age_recipients.txt -o ssh_key.age ssh_key && rm -f ssh_key;
           cd setup && terraform init && terraform apply --auto-approve && cd ..
           echo "Saving initial state..."
           rm -f terraform.tfstate; terraform init -upgrade; terraform plan;
