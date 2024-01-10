@@ -81,8 +81,11 @@ jobs:
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
-          git add -A
-          git commit -s -m "Reset repo https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
           git pull --rebase
-          git push -f origin main
+          if [ ! -z "$(git diff)" ]; then
+            git add -A
+            git commit -s -m "Reset repo https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
+            git pull --rebase
+            git push -f origin main
+          fi
           # At this point the repo should be clean to copy
