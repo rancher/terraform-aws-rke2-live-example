@@ -77,8 +77,8 @@ jobs:
           rm -rf .terraform.lock.hcl
           rm -rf flake.lock
           rm -rf CHANGELOG.md
-          gh secret delete AGE_SECRET_KEY
-          gh secret delete ADMIN_GITHUB_TOKEN
+          gh secret delete AGE_SECRET_KEY || true
+          gh secret delete ADMIN_GITHUB_TOKEN || true
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
