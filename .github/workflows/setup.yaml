@@ -8,6 +8,8 @@ on:
 permissions: write-all
 
 env:
+  AWS_REGION: us-west-1
+  AWS_ROLE: arn:aws:iam::270074865685:role/terraform-module-ci-test
   GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
   GH_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
   GITHUB_OWNER: ${{ github.repository_owner }}
@@ -37,6 +39,11 @@ jobs:
             --keep AWS_SESSION_TOKEN \
             --keep TERM \
             ${{ github.workspace }}
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{env.AWS_ROLE}}
+          role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
+          aws-region: ${{env.AWS_REGION}}
       - uses: haythem/public-ip@v1.3
         id: ip
       - run: |
