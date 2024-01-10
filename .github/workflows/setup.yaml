@@ -1,5 +1,6 @@
 name: setup
 # this workflow sets up your repo, run this before first release
+# WARNING! this step is not idempotent and is destructive
 on:
   # only on dispatch
   workflow_dispatch:
@@ -8,6 +9,7 @@ permissions: write-all
 
 env:
   GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+  GH_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
   GITHUB_OWNER: ${{ github.repository_owner }}
 
 jobs:
@@ -37,4 +39,23 @@ jobs:
             ${{ github.workspace }}
       - run: |
           if [ -z "$GITHUB_TOKEN" ]; then echo "token not found, please make sure to add ADMIN_GITHUB_TOKEN to secrets"; exit 1; fi
-          cd setup && terraform init && terraform apply --auto-approve
+          KEY="$(age-keygen 2>/dev/null | grep '^AGE')"
+          echo "$KEY" | age-keygen -y > age_recipients.txt
+          gh secret set AGE_SECRET_KEY --body "$KEY" --visibility repo
+          ssh-keygen -t rsa -b 4096 -C "automation@users.noreply.github.com" -N "" -f ssh_key; rm -f ssh_key.age; age -e -R age_recipients.txt ssh_key -o ssh_key.age; rm -f ssh_key;
+          cd setup && terraform init && terraform apply --auto-approve && cd ..
+          echo "Saving initial state..."
+          rm -f terraform.tfstate; terraform init -upgrade; terraform plan;
+          rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
+          git config --global user.name 'automation'
+          git config --global user.email 'automation@users.noreply.github.com'
+          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
+          git add terraform.tfstate.age
+          git add ssh_key.pub
+          git add ssh_key.age
+          git add .terraform.lock.hcl
+          git add age_recipients.txt
+          git commit -s -m "Setup https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
+          git push origin main
+          # admin token is only necessary for configuring repo settings
+          gh secret delete ADMIN_GITHUB_TOKEN

@@ -49,3 +49,31 @@ module "aws_rke2_rhel9_rpm" {
   skip_download       = true                     # let the installer download everything
   retrieve_kubeconfig = false                    # when set to true you can set the KUBECONFIG environment variable to the resulting file and control your cluster remotely
 }
+
+resource "terraform_data" "post_install" {
+  depends_on = [
+    module.aws_rke2_rhel9_rpm,
+  ]
+  connection {
+    type        = "ssh"
+    user        = local.username
+    script_path = "/var/tmp/post_install_terraform"
+    agent       = true
+    host        = module.aws_rke2_rhel9_rpm.server_public_ip
+  }
+  provisioner "remote-exec" {
+    inline = [<<-EOT
+      # This scipt will run on the node after install is complete
+      # Example to add a user for yourself with your public key for remote ssh access
+      # useradd -m '<username>'
+      # install -d '/home/<username>/.ssh/authorized_keys'
+      # echo '<your public key here>' > '/home/<username>/.ssh/authorized_keys'
+      #
+      # get node info
+      KUBECONFIG=/etc/rancher/rke2/config.yaml
+      PATH=$PATH:/var/lib/rancher/rke2/lib
+      kubectl get nodes
+    EOT
+    ]
+  }
+}
