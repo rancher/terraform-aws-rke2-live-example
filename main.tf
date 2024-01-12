@@ -17,22 +17,18 @@ locals {
 
 resource "random_uuid" "join_token" {}
 
-resource "local_file" "public_ssh_key" {
-  content  = can(file("${path.root}/ssh_key.pub") ? file("${path.root}/ssh_key.pub") : "")
-  filename = "${path.root}/ssh_key.pub"
-}
-
 module "aws_rke2_rhel9_rpm" {
   source              = "rancher/rke2/aws"
-  version             = "v0.1.13"
+  version             = "v0.1.14"
   join_token          = random_uuid.join_token.result
   name                = local.name
   owner               = local.email
   rke2_version        = local.rke2_version
+  rpm_channel         = "stable"
   security_group_name = local.name
   security_group_ip   = local.ip
   ssh_key_name        = local.ssh_key_name
-  ssh_key_content     = local_file.public_ssh_key.content
+  ssh_key_content     = file("${path.root}/ssh_key.pub") # this file should be generated during setup
   ssh_username        = local.username
   vpc_name            = local.name
   vpc_cidr            = "10.42.0.0/16" # generates a VPC for you, comment this to select a VPC instead
