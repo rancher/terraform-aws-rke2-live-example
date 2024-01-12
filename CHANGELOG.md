@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.2.0...v0.2.1) (2024-01-12)
+
+
+### Bug Fixes
+
+* always do the targeted applies ([344d655](https://github.com/matttrach/live-infra-aws-rke2/commit/344d655830fa7d33373dfdf6e89f026ff20366ee))
+* apply in plan ([840190a](https://github.com/matttrach/live-infra-aws-rke2/commit/840190a628070e1dbf14ca8dfd10f8c196c9ecdd))
+* save state properly ([0782d48](https://github.com/matttrach/live-infra-aws-rke2/commit/0782d48b83ac219b0b4cee9a7bb146d6655f2bdc))
+
 ## [0.2.0](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.40...v0.2.0) (2024-01-12)
 
 
