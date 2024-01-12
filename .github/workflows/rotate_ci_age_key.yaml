@@ -41,6 +41,7 @@ jobs:
       - name: 'Rotate CI AGE Key'
         run: |
           echo "Rotating AGE key for the CI..."
+          if [ -z "$GITHUB_TOKEN" ]; then echo "token not found, please make sure to add ADMIN_GITHUB_TOKEN to secrets"; exit 1; fi
           if [ "" = '${{secrets.AGE_SECRET_KEY}}' ]; then echo "Missing encrypt key."; exit 1; fi
 
           echo "Decrypt files..."
