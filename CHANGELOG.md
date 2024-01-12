@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.37](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.36...v0.1.37) (2024-01-12)
+
+
+### Bug Fixes
+
+* don't install authkeys and make idempotent ([8cd26b0](https://github.com/matttrach/live-infra-aws-rke2/commit/8cd26b0a37069af9eab01d80be4da764a01f1d5a))
+
 ## [0.1.36](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.35...v0.1.36) (2024-01-12)
 
 
