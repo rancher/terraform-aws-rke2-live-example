@@ -63,7 +63,7 @@ resource "terraform_data" "post_install" {
       # Example to add a user for yourself with your public key for remote ssh access
       sudo useradd -m 'matttrach' || true
       sudo install -d '/home/matttrach/.ssh'
-      sudo rm -f /home/matttrach/.ssh/authorized_keys
+      sudo rm -rf /home/matttrach/.ssh/authorized_keys
       sudo echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGbArPa8DHRkmnIx+2kT/EVmdN1cORPCDYF2XVwYGTsp matt.trachier@suse.com' | sudo tee '/home/matttrach/.ssh/authorized_keys'
       sudo chown -R matttrach:matttrach /home/matttrach
       # get node info
