@@ -56,6 +56,7 @@ jobs:
           echo "Saving initial state..."
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           rm -f terraform.tfstate; terraform init -upgrade; terraform plan;
+          if [ ! -f terraform.tfstate ]; then echo "{}" > terraform.tfstate; fi;
           rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
