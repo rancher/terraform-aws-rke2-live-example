@@ -42,12 +42,18 @@ jobs:
             --keep TERM \
             ${{ github.workspace }}
 # put release tests here
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{env.AWS_ROLE}}
+          role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
+          aws-region: ${{env.AWS_REGION}}
+      - uses: haythem/public-ip@v1.3
+        id: ip
       - uses: actions/cache/restore@v3
         id: cache-terraform-restore
         with:
           path: ${{ github.workspace }}/.terraform
           key: terraform-${{hashFiles('**/versions.tf','**/main.tf')}}
-      - run: terraform init -upgrade
       - run: |
           echo "Setting up env..."
           if [ "" = '${{secrets.AGE_SECRET_KEY}}' ]; then echo "Missing encrypt key, please run repo setup before release."; exit 1; fi
@@ -60,8 +66,8 @@ jobs:
           ssh-add ssh_key
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
-          terraform init -upgrade
-          terraform plan
+          terraform init -upgrade || rm -f terraform.tfstate
+          terraform plan || rm -f terraform.tfstate
           rm -f terraform.tfstate
       - uses: actions/cache/save@v3
         id: cache-terraform-save
