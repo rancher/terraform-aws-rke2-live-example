@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.35](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.34...v0.1.35) (2024-01-12)
+
+
+### Bug Fixes
+
+* use sudo and proper kubeconfig ([eb67cc9](https://github.com/matttrach/live-infra-aws-rke2/commit/eb67cc9872bbb434d5ec855d93741f0b50b67a05))
+
 ## [0.1.34](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.33...v0.1.34) (2024-01-12)
 
 
