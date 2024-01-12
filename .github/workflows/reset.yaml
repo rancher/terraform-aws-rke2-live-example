@@ -84,8 +84,7 @@ jobs:
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
           if [ ! -z "$(git diff)" ]; then
             git add -A
-            git commit -s -m "Reset repo https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
-            git pull --rebase
-            git push -f origin main
+            git commit -s -m "Reset repo https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}" || true
+            git push -f origin main || true
           fi
-          # At this point the repo should be clean to copy
+          echo "At this point the repo should be clean"
