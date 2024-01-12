@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.40](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.39...v0.1.40) (2024-01-12)
+
+
+### Bug Fixes
+
+* taint post install ([2b71572](https://github.com/matttrach/live-infra-aws-rke2/commit/2b715722639a29bf4ab4b902a08cd2cc179a3d9e))
+
 ## [0.1.39](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.38...v0.1.39) (2024-01-12)
 
 
