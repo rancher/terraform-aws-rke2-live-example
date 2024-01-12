@@ -69,23 +69,14 @@ jobs:
           terraform init -upgrade || rm -f terraform.tfstate
           # manage the security group rule for the terraform runner as a separate entity to prevent dependency chain issues with server object
           # this is a hack for the basic example, normally you would manage access as a separate terraform config
-          if [ "" = "$(terraform state list | grep 'module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0]')" ]; then
-            terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
-          fi
-          if [ "" = "$(terraform state list | grep 'module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0]')" ]; then
-            terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
-          fi
+          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
+          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
           echo "Terraform Plan..."
           terraform plan || rm -f terraform.tfstate
           echo "clear out the CI security group access by replacing with a nonsense IP..."
           export TF_VAR_ip="192.168.1.1"
-          if [ "" = "$(terraform state list | grep 'module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0]')" ]; then
-            terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
-          fi
-          if [ "" = "$(terraform state list | grep 'module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0]')" ]; then
-            terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
-          fi
-          rm -f terraform.tfstate
+          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
+          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
       - uses: actions/cache/save@v3
         id: cache-terraform-save
         with:
@@ -124,25 +115,14 @@ jobs:
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           echo "Starting  deploy..."
           terraform init
-          # manage the security group rule for the terraform runner as a separate entity to prevent dependency chain issues with server object
-          if [ "" = "$(terraform state list | grep 'module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0]')" ]; then
-            terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
-          fi
-          if [ "" = "$(terraform state list | grep 'module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0]')" ]; then
-            terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
-          fi
-          terraform apply --auto-approve || true
-          sleep 5
+          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
+          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
           terraform apply --auto-approve || true
           sleep 5
           echo "clear out the CI security group access by replacing with a nonsense IP..."
           export TF_VAR_ip="192.168.1.1"
-          if [ "" = "$(terraform state list | grep 'module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0]')" ]; then
-            terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
-          fi
-          if [ "" = "$(terraform state list | grep 'module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0]')" ]; then
-            terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
-          fi
+          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
+          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
           rm -f ssh_key
           echo "Saving state..."
           rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
