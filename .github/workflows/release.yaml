@@ -48,6 +48,21 @@ jobs:
           path: ${{ github.workspace }}/.terraform
           key: terraform-${{hashFiles('**/versions.tf','**/main.tf')}}
       - run: terraform init -upgrade
+      - run: |
+          echo "Setting up env..."
+          if [ "" = '${{secrets.AGE_SECRET_KEY}}' ]; then echo "Missing encrypt key, please run repo setup before release."; exit 1; fi
+          if [ ! -f ssh_key.age ]; then echo "Missing CI ssh access key, please run repo setup before release."; exit 1; fi
+          if [ ! -f terraform.tfstate.age ]; then echo "Missing terraform state, please run repo setup before release."; exit 1; fi
+          if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before release."; exit 1; fi
+          eval "$(ssh-agent -s)"
+          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh_key.age
+          chmod 0600 ssh_key
+          ssh-add ssh_key
+          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
+          export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
+          terraform init -upgrade
+          terraform plan
+          rm -f terraform.tfstate
       - uses: actions/cache/save@v3
         id: cache-terraform-save
         with:
@@ -70,16 +85,13 @@ jobs:
           echo "Setting up env..."
           if [ "" = '${{secrets.AGE_SECRET_KEY}}' ]; then echo "Missing encrypt key, please run repo setup before release."; exit 1; fi
           if [ ! -f ssh_key.age ]; then echo "Missing CI ssh access key, please run repo setup before release."; exit 1; fi
+          if [ ! -f terraform.tfstate.age ]; then echo "Missing terraform state, please run repo setup before release."; exit 1; fi
           if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before release."; exit 1; fi
           eval "$(ssh-agent -s)"
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh_key.age
           chmod 0600 ssh_key
           ssh-add ssh_key
-          if [ -f terraform.tfstate.age ]; then 
-            echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
-          else
-            echo "no state found, is this the first run?"
-          fi
+          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           echo "Starting  deploy..."
           terraform init
