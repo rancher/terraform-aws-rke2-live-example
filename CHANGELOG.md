@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.40...v0.2.0) (2024-01-12)
+
+
+### Features
+
+* add ci rotate job, manage state better, add aws role to secrets ([347d132](https://github.com/matttrach/live-infra-aws-rke2/commit/347d132460cd94c187a79f16ac42116153573bf4))
+
+
+### Bug Fixes
+
+* replace ci ip with bogus ip to remove access ([4a5a458](https://github.com/matttrach/live-infra-aws-rke2/commit/4a5a458b5ac99ca3ac5c06f403b3674f4165237d))
+
 ## [0.1.40](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.39...v0.1.40) (2024-01-12)
 
 
