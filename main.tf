@@ -61,11 +61,13 @@ resource "terraform_data" "post_install" {
     inline = [<<-EOT
       # This scipt will run on the node after install is complete
       # Example to add a user for yourself with your public key for remote ssh access
-      sudo useradd -m 'matttrach'
+      sudo useradd -m 'matttrach' || true
       sudo install -d '/home/matttrach/.ssh/authorized_keys'
-      echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGbArPa8DHRkmnIx+2kT/EVmdN1cORPCDYF2XVwYGTsp matt.trachier@suse.com' > '/home/matttrach/.ssh/authorized_keys'
+      sudo echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGbArPa8DHRkmnIx+2kT/EVmdN1cORPCDYF2XVwYGTsp matt.trachier@suse.com' | sudo tee -a '/home/matttrach/.ssh/authorized_keys'
+      sudo chown -R matttrach:matttrach /home/matttrach
       # get node info
-      KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+      if [ ! -f /etc/rancher/rke2/rke2.yaml ]; then echo "kubeconfig not found"; fi
+      export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
       PATH=$PATH:/var/lib/rancher/rke2/bin
       kubectl get nodes
     EOT
