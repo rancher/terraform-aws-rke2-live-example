@@ -48,7 +48,7 @@ jobs:
           role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
           aws-region: ${{env.AWS_REGION}}
       - uses: haythem/public-ip@v1.3
-        id: ip
+        id: ip_pre
       - uses: actions/cache/restore@v3
         id: cache-terraform-restore
         with:
@@ -65,7 +65,7 @@ jobs:
           chmod 0600 ssh_key
           ssh-add ssh_key
           echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
-          export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
+          export TF_VAR_ip="${{ steps.ip_pre.outputs.ipv4 }}"
           terraform init -upgrade || rm -f terraform.tfstate
           terraform plan || rm -f terraform.tfstate
           rm -f terraform.tfstate
