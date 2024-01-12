@@ -83,6 +83,9 @@ jobs:
 
           echo "Saving state..."
           rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
+          git config --global user.name 'automation'
+          git config --global user.email 'automation@users.noreply.github.com'
+          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
           git add terraform.tfstate.age
           git commit -s -m "New State https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
           git push origin main
