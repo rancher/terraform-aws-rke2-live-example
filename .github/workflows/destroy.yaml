@@ -1,4 +1,5 @@
-name: reset
+name: destroy
+# WARNING! This will destroy your infra!
 on:
   # only on dispatch
   workflow_dispatch:
@@ -12,8 +13,8 @@ env:
   GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
 
 jobs:
-  # this workflow destroys the infrastructure and resets the repo to a clean state
-  reset:
+  # this workflow destroys the infrastructure
+  destroy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,50 +42,37 @@ jobs:
           role-to-assume: ${{env.AWS_ROLE}}
           role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
           aws-region: ${{env.AWS_REGION}}
+      # example using simple auth keys
+      # - uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: ${{env.AWS_REGION}}
       - uses: actions/cache/restore@v3
         id: cache-terraform-restore
         with:
           path: ${{ github.workspace }}/.terraform
           key: terraform-${{hashFiles('**/versions.tf','**/main.tf')}}
-      - run: terraform init -upgrade
-      - uses: actions/cache/save@v3
-        id: cache-terraform-save
-        with:
-          path: ${{ github.workspace }}/.terraform
-          key: ${{ steps.cache-terraform-restore.outputs.cache-primary-key }}
       - uses: haythem/public-ip@v1.3
         id: ip
-      - name: ResetRepo
+      - name: Destroy Infra
         shell: bash
         run: |
-          if [ -z "$GITHUB_TOKEN" ]; then echo "token not found, please make sure to add ADMIN_GITHUB_TOKEN to secrets"; exit 1; fi
+          echo "Destroying Infra..."
           if [ -f terraform.tfstate.age ]; then
             rm -f terraform.tfstate; echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
             rm -f terraform.tfstate.age
             export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
             terraform init
             terraform destroy --auto-approve || true
-            terraform destroy --auto-approve
+            echo "Saving state..."
+            rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
+            git config --global user.name 'automation'
+            git config --global user.email 'automation@users.noreply.github.com'
+            git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
+            git add terraform.tfstate.age
+            git commit -s -m "New State https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
+            git push origin main
           else
-            echo "no state found to clean..."
+            echo "no state found to destroy..."
           fi
-          rm -rf ssh_key
-          rm -rf ssh_key.pub
-          rm -rf ssh_key.age
-          rm -rf terraform.tfstate
-          rm -rf terraform.tfstate.age
-          rm -rf age_recipients.txt
-          rm -rf .terraform.lock.hcl
-          rm -rf flake.lock
-          rm -rf CHANGELOG.md
-          gh secret delete AGE_SECRET_KEY || true
-          gh secret delete ADMIN_GITHUB_TOKEN || true
-          git config --global user.name 'automation'
-          git config --global user.email 'automation@users.noreply.github.com'
-          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
-          if [ -n "$(git diff)" ]; then
-            git add -A
-            git commit -s -m "Reset repo https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}" || true
-            git push -f origin main || true
-          fi
-          echo "At this point the repo should be clean"

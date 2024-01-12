@@ -9,7 +9,7 @@ permissions: write-all
 
 env:
   AWS_REGION: us-west-1
-  AWS_ROLE: arn:aws:iam::270074865685:role/terraform-module-ci-test
+  AWS_ROLE: ${{ secrets.AWS_ROLE }}
   GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
   GH_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
   GITHUB_OWNER: ${{ github.repository_owner }}
@@ -44,15 +44,23 @@ jobs:
           role-to-assume: ${{env.AWS_ROLE}}
           role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
           aws-region: ${{env.AWS_REGION}}
+      # example using simple auth keys
+      # - uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: ${{env.AWS_REGION}}
       - uses: haythem/public-ip@v1.3
         id: ip
       - run: |
+          echo "Setting up Repo..."
           if [ -z "$GITHUB_TOKEN" ]; then echo "token not found, please make sure to add ADMIN_GITHUB_TOKEN to secrets"; exit 1; fi
           KEY="$(age-keygen 2>/dev/null | grep '^AGE')"
           echo "$KEY" | age-keygen -y > age_recipients.txt
           gh secret set AGE_SECRET_KEY --body "$KEY"
           ssh-keygen -t rsa -b 4096 -C "automation@users.noreply.github.com" -N "" -f ssh_key && rm -f ssh_key.age; age -e -R age_recipients.txt -o ssh_key.age ssh_key && rm -f ssh_key;
           cd setup && terraform init && terraform apply --auto-approve && cd ..
+
           echo "Saving initial state..."
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           rm -f terraform.tfstate; terraform init -upgrade; terraform plan;
