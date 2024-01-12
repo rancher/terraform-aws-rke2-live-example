@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.39](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.38...v0.1.39) (2024-01-12)
+
+
+### Bug Fixes
+
+* recursive remove ([d67fcec](https://github.com/matttrach/live-infra-aws-rke2/commit/d67fcec37a1a529fea1b1871f2f112361c6287bf))
+
 ## [0.1.38](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.37...v0.1.38) (2024-01-12)
 
 
