@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.34](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.33...v0.1.34) (2024-01-12)
+
+
+### Bug Fixes
+
+* add aws to pre-release test ([66af7e4](https://github.com/matttrach/live-infra-aws-rke2/commit/66af7e4884f2c2547adbd41a5cd84e4d456a550a))
+* add my email and fix kubectl path ([#94](https://github.com/matttrach/live-infra-aws-rke2/issues/94)) ([60072bd](https://github.com/matttrach/live-infra-aws-rke2/commit/60072bda8ac1a7a63a91889e94a1cf2365810728))
+* add plan to pre-release test ([c5c5bfd](https://github.com/matttrach/live-infra-aws-rke2/commit/c5c5bfd7730fadbbdd59cfb8b76b508df3c7d7c5))
+* pre-release ([7ba13a4](https://github.com/matttrach/live-infra-aws-rke2/commit/7ba13a458b3ff75af34a2f3e715204294e357b53))
+
 ## [0.1.33](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.32...v0.1.33) (2024-01-12)
 
 
