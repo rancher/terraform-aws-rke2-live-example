@@ -86,5 +86,3 @@ jobs:
           git add age_recipients.txt
           git commit -s -m "Setup https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
           git push origin main
-          # admin token is only necessary for configuring repo settings
-          gh secret delete ADMIN_GITHUB_TOKEN
