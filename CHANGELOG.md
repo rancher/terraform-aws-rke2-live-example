@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.36](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.35...v0.1.36) (2024-01-12)
+
+
+### Bug Fixes
+
+* overwrite ([861a8d7](https://github.com/matttrach/live-infra-aws-rke2/commit/861a8d71fa1e93a0fbfa741a1ea676e1a8526b56))
+* try sudo tee ([cc8f9df](https://github.com/matttrach/live-infra-aws-rke2/commit/cc8f9dfa22f557c9564b28778b863a0c17c7b18e))
+
 ## [0.1.35](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.1.34...v0.1.35) (2024-01-12)
 
 
