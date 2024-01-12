@@ -6,8 +6,8 @@ provider "aws" {
 locals {
   rke2_version       = "v1.28.5+rke2r1"
   identifier         = "lvex"
-  email              = "example@example.com"
-  username           = "example"
+  email              = "matt.trachier@suse.com"
+  username           = local.identifier
   name               = "live-rke2-${local.identifier}"
   server_prep_script = file("${path.root}/prep.sh")
   local_file_path    = "${path.root}/config" # add custom configs here
@@ -61,13 +61,12 @@ resource "terraform_data" "post_install" {
     inline = [<<-EOT
       # This scipt will run on the node after install is complete
       # Example to add a user for yourself with your public key for remote ssh access
-      # useradd -m '<username>'
-      # install -d '/home/<username>/.ssh/authorized_keys'
-      # echo '<your public key here>' > '/home/<username>/.ssh/authorized_keys'
-      #
+      useradd -m 'matttrach'
+      install -d '/home/matttrach/.ssh/authorized_keys'
+      echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGbArPa8DHRkmnIx+2kT/EVmdN1cORPCDYF2XVwYGTsp matt.trachier@suse.com' > '/home/matttrach/.ssh/authorized_keys'
       # get node info
       KUBECONFIG=/etc/rancher/rke2/config.yaml
-      PATH=$PATH:/var/lib/rancher/rke2/lib
+      PATH=$PATH:/var/lib/rancher/rke2/bin
       kubectl get nodes
     EOT
     ]

@@ -82,7 +82,7 @@ jobs:
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
-          if [ ! -z "$(git diff)" ]; then
+          if [ -n "$(git diff)" ]; then
             git add -A
             git commit -s -m "Reset repo https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}" || true
             git push -f origin main || true
