@@ -68,11 +68,11 @@ jobs:
           else
             echo "no state found to clean..."
           fi
-          rm -rf ssh_key
+          while read -r file; do
+              rm -f "$file";
+              rm -f "$file.age";
+          done <secret_file_list.txt
           rm -rf ssh_key.pub
-          rm -rf ssh_key.age
-          rm -rf terraform.tfstate
-          rm -rf terraform.tfstate.age
           rm -rf age_recipients.txt
           rm -rf .terraform.lock.hcl
           rm -rf flake.lock

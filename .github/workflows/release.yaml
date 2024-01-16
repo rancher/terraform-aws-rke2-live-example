@@ -55,16 +55,19 @@ jobs:
           path: ${{ github.workspace }}/.terraform
           key: terraform-${{hashFiles('**/versions.tf','**/main.tf')}}
       - run: |
+          echo "Planning..."
+
           echo "Setting up env..."
           if [ "" = '${{secrets.AGE_SECRET_KEY}}' ]; then echo "Missing encrypt key, please run repo setup before release."; exit 1; fi
-          if [ ! -f ssh_key.age ]; then echo "Missing CI ssh access key, please run repo setup before release."; exit 1; fi
-          if [ ! -f terraform.tfstate.age ]; then echo "Missing terraform state, please run repo setup before release."; exit 1; fi
           if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before release."; exit 1; fi
+          if [ ! -f secret_file_list.txt ]; then echo "Missing encrypted file list, please run repo setup before release."; exit 1; fi
+          while read -r file; do
+            echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
+          done <secret_file_list.txt
           eval "$(ssh-agent -s)"
-          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh_key.age
           chmod 0600 ssh_key
           ssh-add ssh_key
-          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
+
           export TF_VAR_ip="${{ steps.ip_pre.outputs.ipv4 }}"
           terraform init -upgrade
 
@@ -83,6 +86,10 @@ jobs:
 
           echo "Saving state..."
           rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
+          echo "Removing secret files..."
+          while read -r file; do
+             rm -f "$file"
+          done <secret_file_list.txt
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
@@ -116,14 +123,14 @@ jobs:
         run: |
           echo "Setting up env..."
           if [ "" = '${{secrets.AGE_SECRET_KEY}}' ]; then echo "Missing encrypt key, please run repo setup before release."; exit 1; fi
-          if [ ! -f ssh_key.age ]; then echo "Missing CI ssh access key, please run repo setup before release."; exit 1; fi
-          if [ ! -f terraform.tfstate.age ]; then echo "Missing terraform state, please run repo setup before release."; exit 1; fi
           if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before release."; exit 1; fi
+          if [ ! -f secret_file_list.txt ]; then echo "Missing encrypted file list, please run repo setup before release."; exit 1; fi
+          while read -r file; do
+            echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
+          done <secret_file_list.txt
           eval "$(ssh-agent -s)"
-          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh_key.age
           chmod 0600 ssh_key
           ssh-add ssh_key
-          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
           echo "Starting  deploy..."
           terraform init
@@ -139,6 +146,10 @@ jobs:
           rm -f ssh_key
           echo "Saving state..."
           rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
+          echo "Removing secret files..."
+          while read -r file; do
+             rm -f "$file"
+          done <secret_file_list.txt
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"

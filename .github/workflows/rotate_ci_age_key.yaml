@@ -45,8 +45,9 @@ jobs:
           if [ "" = '${{secrets.AGE_SECRET_KEY}}' ]; then echo "Missing encrypt key."; exit 1; fi
 
           echo "Decrypt files..."
-          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o ssh_key ssh_key.age
-          echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
+          while read -r file; do
+            echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
+          done <secret_file_list.txt
 
           echo "Remove old key..."
           OLD_PUB_KEY="$(echo '${{secrets.AGE_SECRET_KEY}}' | age-keygen -y)"
@@ -59,15 +60,19 @@ jobs:
           gh secret set AGE_SECRET_KEY --body "$KEY"
 
           echo "Re-encrypt files..."
-          rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
-          rm -rf ssh_key.age && age -e -R age_recipients.txt -o ssh_key.age ssh_key && rm -f ssh_key
+          while read -r file; do
+            rm -f "$file.age"
+            age -e -R age_recipients.txt -o "$file.age" "$file"
+            rm -f "$file"
+          done <secret_file_list.txt
 
           echo "Save files under new encryption..."
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
-          git add terraform.tfstate.age
-          git add ssh_key.age
+          while read -r file; do
+            git add "$file.age";
+          done <secret_file_list.txt
           git add age_recipients.txt
           git commit -s -m "Rotate AGE key https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
           git push origin main

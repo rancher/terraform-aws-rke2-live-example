@@ -6,7 +6,9 @@ provider "aws" {
 locals {
   rke2_version       = "v1.28.5+rke2r1"
   identifier         = "lvex"
-  email              = "matt.trachier@suse.com"
+  email              = "ex@example.com"
+  my_user            = "example"
+  my_key             = "abc123"
   username           = local.identifier
   name               = "live-rke2-${local.identifier}"
   server_prep_script = file("${path.root}/prep.sh")
@@ -61,11 +63,11 @@ resource "terraform_data" "post_install" {
     inline = [<<-EOT
       # This scipt will run on the node after install is complete
       # Example to add a user for yourself with your public key for remote ssh access
-      sudo useradd -m 'matttrach' || true
-      sudo install -d '/home/matttrach/.ssh'
-      sudo rm -rf /home/matttrach/.ssh/authorized_keys
-      sudo echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGbArPa8DHRkmnIx+2kT/EVmdN1cORPCDYF2XVwYGTsp matt.trachier@suse.com' | sudo tee '/home/matttrach/.ssh/authorized_keys'
-      sudo chown -R matttrach:matttrach /home/matttrach
+      sudo useradd -m '${local.my_user}' || true
+      sudo install -d '/home/${local.my_user}/.ssh'
+      sudo rm -rf /home/${local.my_user}/.ssh/authorized_keys
+      sudo echo '${local.my_key}' | sudo tee '/home/${local.my_user}/.ssh/authorized_keys'
+      sudo chown -R ${local.my_user}:${local.my_user} /home/${local.my_user}
       # get node info
       if [ ! -f /etc/rancher/rke2/rke2.yaml ]; then echo "kubeconfig not found"; fi
       export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
