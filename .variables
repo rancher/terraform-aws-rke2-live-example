@@ -2,6 +2,7 @@ export TF_IN_AUTOMATION=1
 export TF_CLI_ARGS_plan="--state /tmp/terraform.tfstate"
 export TF_CLI_ARGS_apply="--state /tmp/terraform.tfstate"
 export TF_CLI_ARGS_destroy="--state /tmp/terraform.tfstate"
+export TF_CLI_ARGS_state_list="--state /tmp/terraform.tfstate"
 export TF_VAR_ip="$(curl -s 'https://api.ipify.org')"
 export ACME_SERVER_URL="https://acme-v02.api.letsencrypt.org/directory"
 
