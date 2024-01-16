@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.2](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.2.1...v0.2.2) (2024-01-16)
+
+
+### Bug Fixes
+
+* add the tmp state file location to state list action ([#106](https://github.com/matttrach/live-infra-aws-rke2/issues/106)) ([8b7c38f](https://github.com/matttrach/live-infra-aws-rke2/commit/8b7c38fd5cb87230dac80d119c9b315de2707e47))
+* don't remove admin key ([a1bb150](https://github.com/matttrach/live-infra-aws-rke2/commit/a1bb1503bcf76209147b542374dd1e26ac3d63cf))
+* fail early without admin key ([bd9c823](https://github.com/matttrach/live-infra-aws-rke2/commit/bd9c823efc9c1494ffbc1958f71ce81c53f1f4df))
+* values are not env variable keys ([#105](https://github.com/matttrach/live-infra-aws-rke2/issues/105)) ([44170a9](https://github.com/matttrach/live-infra-aws-rke2/commit/44170a98f5d1b36e39e6667a2fe7b80a15051008))
+
 ## [0.2.1](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.2.0...v0.2.1) (2024-01-12)
 
 
