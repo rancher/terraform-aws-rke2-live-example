@@ -15,18 +15,18 @@ scms:
   this-repo:
     kind: "github"
     spec:
-      user: "{{ requiredEnv .github.user }}"
-      email: "{{ requiredEnv .github.email }}"
+      user: "{{ .github.user }}"
+      email: "{{ .github.email }}"
       owner: "{{ requiredEnv .github.owner }}"
       repository: live-infra-aws-rke2
       token: "{{ requiredEnv .github.token }}"
-      username: "{{ requiredEnv .github.user }}"
+      username: "{{ .github.user }}"
       branch: main
   go-repo:
     kind: "github"
     spec:
-      user: "{{ requiredEnv .github.user }}"
-      email: "{{ requiredEnv .github.email }}"
+      user: "{{ .github.user }}"
+      email: "{{ .github.email }}"
       owner: golang
       repository: go
       token: '{{ requiredEnv .github.token }}'
