@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.3](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.2.2...v0.2.3) (2024-01-16)
+
+
+### Bug Fixes
+
+* extrap personal vars and add secret file list ([#108](https://github.com/matttrach/live-infra-aws-rke2/issues/108)) ([3c88b30](https://github.com/matttrach/live-infra-aws-rke2/commit/3c88b30edcf6caf6ab10fb52863da172dccb2a0b))
+* Introduce updatecli to repo and validate basic functionality ([#107](https://github.com/matttrach/live-infra-aws-rke2/issues/107)) ([f2f4d65](https://github.com/matttrach/live-infra-aws-rke2/commit/f2f4d657d43a454bd121576872ec4709962d5f14))
+
 ## [0.2.2](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.2.1...v0.2.2) (2024-01-16)
 
 
