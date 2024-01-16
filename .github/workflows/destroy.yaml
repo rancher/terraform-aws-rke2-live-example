@@ -7,8 +7,6 @@ on:
 permissions: write-all
 
 env:
-  AWS_REGION: "us-west-1"
-  AWS_ROLE: ${{ secrets.AWS_ROLE }}
   GH_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
 
@@ -37,17 +35,20 @@ jobs:
             --keep AWS_SESSION_TOKEN \
             --keep TERM \
             ${{ github.workspace }}
+      # if using OICD auth
       - uses: aws-actions/configure-aws-credentials@v4
+        if: ${{vars.AWS_AUTH == 'OIDC'}}
         with:
-          role-to-assume: ${{env.AWS_ROLE}}
+          role-to-assume: ${{secrets.AWS_ROLE}}
           role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
-          aws-region: ${{env.AWS_REGION}}
-      # example using simple auth keys
-      # - uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: ${{env.AWS_REGION}}
+          aws-region: ${{secrets.AWS_REGION}}
+      # if using access key auth
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: ${{vars.AWS_AUTH == 'IAM'}}
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{secrets.AWS_REGION}}
       - uses: actions/cache/restore@v3
         id: cache-terraform-restore
         with:

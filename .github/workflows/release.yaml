@@ -6,8 +6,6 @@ on:
     - main
 
 env:
-  AWS_REGION: us-west-1
-  AWS_ROLE: ${{ secrets.AWS_ROLE }}
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   GITHUB_OWNER: ${{ github.repository_owner }}
 
@@ -42,11 +40,20 @@ jobs:
             --keep TERM \
             ${{ github.workspace }}
 # put release tests here
+      # if using OICD auth
       - uses: aws-actions/configure-aws-credentials@v4
+        if: ${{vars.AWS_AUTH == 'OIDC'}}
         with:
-          role-to-assume: ${{env.AWS_ROLE}}
+          role-to-assume: ${{secrets.AWS_ROLE}}
           role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
-          aws-region: ${{env.AWS_REGION}}
+          aws-region: ${{secrets.AWS_REGION}}
+      # if using access key auth
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: ${{vars.AWS_AUTH == 'IAM'}}
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{secrets.AWS_REGION}}
       - uses: haythem/public-ip@v1.3
         id: ip_pre
       - uses: actions/cache/restore@v3
@@ -60,17 +67,19 @@ jobs:
           echo "Setting up env..."
           if [ "" = '${{secrets.AGE_SECRET_KEY}}' ]; then echo "Missing encrypt key, please run repo setup before release."; exit 1; fi
           if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before release."; exit 1; fi
-          if [ ! -f secret_file_list.txt ]; then echo "Missing encrypted file list, please run repo setup before release."; exit 1; fi
+
           while read -r file; do
             echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
           done <secret_file_list.txt
           eval "$(ssh-agent -s)"
           chmod 0600 ssh_key
           ssh-add ssh_key
-
           export TF_VAR_ip="${{ steps.ip_pre.outputs.ipv4 }}"
-          terraform init -upgrade
 
+          ls -lah
+
+          echo "Deploy ci security group access..."
+          terraform init -upgrade
           # manage the security group rule for the terraform runner as a separate entity to prevent dependency chain issues with server object
           # this is a hack for the basic example, normally you would manage access as a separate terraform config
           terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
@@ -84,12 +93,15 @@ jobs:
           terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
           terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
 
-          echo "Saving state..."
+          echo "Updating state..."
           rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
+
           echo "Removing secret files..."
           while read -r file; do
              rm -f "$file"
           done <secret_file_list.txt
+
+          echo "Saving state..."
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
@@ -102,18 +114,20 @@ jobs:
           path: ${{ github.workspace }}/.terraform
           key: ${{ steps.cache-terraform-restore.outputs.cache-primary-key }}
 # these are only run after release is created
+      # if using OICD auth
       - uses: aws-actions/configure-aws-credentials@v4
-        if: steps.release-please.outputs.release_created
+        if: ${{vars.AWS_AUTH == 'OIDC'}}
         with:
-          role-to-assume: ${{env.AWS_ROLE}}
+          role-to-assume: ${{secrets.AWS_ROLE}}
           role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
-          aws-region: ${{env.AWS_REGION}}
-      # example using simple auth keys
-      # - uses: aws-actions/configure-aws-credentials@v4
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: ${{env.AWS_REGION}}
+          aws-region: ${{secrets.AWS_REGION}}
+      # if using access key auth
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: ${{vars.AWS_AUTH == 'IAM'}}
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{secrets.AWS_REGION}}
       - uses: haythem/public-ip@v1.3
         id: ip
         if: steps.release-please.outputs.release_created
@@ -124,7 +138,6 @@ jobs:
           echo "Setting up env..."
           if [ "" = '${{secrets.AGE_SECRET_KEY}}' ]; then echo "Missing encrypt key, please run repo setup before release."; exit 1; fi
           if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before release."; exit 1; fi
-          if [ ! -f secret_file_list.txt ]; then echo "Missing encrypted file list, please run repo setup before release."; exit 1; fi
           while read -r file; do
             echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
           done <secret_file_list.txt
@@ -132,6 +145,7 @@ jobs:
           chmod 0600 ssh_key
           ssh-add ssh_key
           export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
+
           echo "Starting  deploy..."
           terraform init
           # this is a hack for the basic example, normally you would manage access as a separate terraform config
@@ -139,17 +153,22 @@ jobs:
           terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
           terraform apply --auto-approve || true
           sleep 5
+
           echo "clear out the CI security group access by replacing with a nonsense IP..."
           export TF_VAR_ip="192.168.1.1"
           terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
           terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
           rm -f ssh_key
-          echo "Saving state..."
+
+          echo "Updating state..."
           rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
+
           echo "Removing secret files..."
           while read -r file; do
              rm -f "$file"
           done <secret_file_list.txt
+
+          echo "Saving state..."
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"

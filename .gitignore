@@ -11,3 +11,4 @@ kubeconfig-*.yaml
 terraform.tfstate.backup
 terraform.tfstate*.backup
 !*.age
+ssh_key
