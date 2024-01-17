@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.4](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.2.3...v0.2.4) (2024-01-17)
+
+
+### Bug Fixes
+
+* add access to allow user to login remotely ([#112](https://github.com/matttrach/live-infra-aws-rke2/issues/112)) ([cb94161](https://github.com/matttrach/live-infra-aws-rke2/commit/cb941617a37d71feb1d03fbd5817350a46e44b09))
+* Add my access ([#113](https://github.com/matttrach/live-infra-aws-rke2/issues/113)) ([f61d894](https://github.com/matttrach/live-infra-aws-rke2/commit/f61d894939908436df6813e484b9c6ec0c190de7))
+* use different aws auth based on secrets config ([#110](https://github.com/matttrach/live-infra-aws-rke2/issues/110)) ([1ecc030](https://github.com/matttrach/live-infra-aws-rke2/commit/1ecc0309aa647a40fa20b6f6012eb1a40f064a08))
+
 ## [0.2.3](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.2.2...v0.2.3) (2024-01-16)
 
 
