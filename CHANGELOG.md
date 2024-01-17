@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.7](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.2.6...v0.2.7) (2024-01-17)
+
+
+### Bug Fixes
+
+* add info about tools in warnings ([c729986](https://github.com/matttrach/live-infra-aws-rke2/commit/c7299865025f4d9d2d2f4eeeae0523c39de18f04))
+
 ## [0.2.6](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.2.5...v0.2.6) (2024-01-17)
 
 
