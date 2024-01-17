@@ -95,6 +95,7 @@
           buildInputs = with pkgs; [
             actionlint
             age
+            awscli2
             bashInteractive
             curl
             gh
