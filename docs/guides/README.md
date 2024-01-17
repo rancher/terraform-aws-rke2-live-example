@@ -17,13 +17,16 @@ These guides are more terse than tutorials and are intended to be used as a refe
    - [AWS IAM User](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html)
    - [AWS OIDC](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html)
    - [AWS OIDC GITHUB](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)
-3. Clone this repo, copy all files from the example directory to your new repo
-4. Update workflows for AWS authentication and add your GitHub token as a secret ('ADMIN_GITHUB_TOKEN') in your repo
-5. Commit and push changes to your new repo, then run the setup workflow in GitHub Actions
+   - make sure to add the secrets to your repo
+     - OIDC requires the following secrets: AWS_REGION, AWS_ROLE
+     - IAM requires the following secrets: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION
+  - make sure  to add the AWS_AUTH variable to your repo
+    - OIDC requires the following AWS_AUTH value "OIDC"
+    - IAM requires the following AWS_AUTH value "IAM"
+3. Clone this repo, copy all files from the example directory to your new repo, commit and push changes, then run the setup workflow in GitHub Actions
    - make sure to pull down the new files the setup action created
-6. Generate an AGE key, add the public key to the age_recipients.txt file in your repo
-   - make sure to save the age secret key somewhere safe, you will need it to decrypt files in the future
-7. Optionally, add your public SSH access key to the prep.sh script
-8. Create a new branch, commit your changes, push to your repo, and open a PR
-9. Review and merge the PR, monitor the repo actions to ensure everything works
-10. Review and merge the release PR, then watch your cluster being built in the repo actions
+4. Update the main.tf file with your desired configuration
+   - you will probably want to change the my_ variables
+5. Create a new branch, commit your changes, push to your repo, and open a PR
+6. Review and merge the PR, monitor the repo actions to ensure everything works
+7. Review and merge the release PR, then watch your cluster being built in the repo actions

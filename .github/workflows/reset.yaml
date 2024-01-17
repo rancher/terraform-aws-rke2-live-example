@@ -79,10 +79,21 @@ jobs:
               rm -f "$file";
               rm -f "$file.age";
           done <secret_file_list.txt
-          rm -rf ssh_key.pub
-          rm -rf age_recipients.txt
-          rm -rf .terraform.lock.hcl
-          rm -rf flake.lock
+          cat << 'EOF' > 'terraform.tfstate'
+          {
+            "version": 4,
+            "serial": 3,
+            "outputs": {},
+            "resources": [],
+            "check_results": null
+          }
+          EOF
+          cat << 'EOF' > 'secret_file_list.txt'
+          terraform.tfstate
+          ssh_key
+          EOF
+          echo "" > age_recipients.txt
+          echo "" > ssh_key.pub
           rm -rf CHANGELOG.md
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'

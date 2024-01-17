@@ -12,7 +12,8 @@ This example includes GitHub action config which will enable create, update, and
 
 ## How Do I Use It?
 
-Copy the contents of this directory into a new private repo and follow the onboarding guide [here](./docs/onboarding.md).
+Follow the onboarding guide [here](./docs/guides/onboarding.md).
+For an in-depth tutorial on onboarding take a look at the tutorial [here](./docs/tutorials/onboarding.md).
 
 This is meant to be an example, it is not a managed solution.
 This example is focused on automating as much as possible with security as a secondary priority, please take a close look at what this does and make good decisions for the security of your use case.
@@ -21,16 +22,30 @@ The main purpose of this example is to show a specific full implementation of th
 ### What is it missing?
 
 - This example doesn't configure AWS authentication for you.
-  - I have some docs with two options for configuring AWS, [here](./docs/configuring_aws.md)
-- This example doesn't generate an AGE key for you to encrypt secrets.
-  - You will need to generate an AGE key and store it in the repo's secrets, see the guide [here](./docs/onboarding.md) for all the steps I took to setup mine.
+  - I have some docs with two options for configuring AWS, [here](./docs/guides/configuring_aws.md) or [here](./docs/tutorials/configuring_aws.md)
 - This example doesn't deploy a cluster.
-  - In this example we only generate one node, using the default config.
+  - In this example we only generate one node.
   - It is possible to manage more than one node, but you will need to combine one of the other examples with this one to get that effect.
+    - there is another example in progress which will show how to do this, but it is not ready yet
 
 ## Common Questions
 
-### I am getting an error about a missing ssh key
+### Why use local state?
 
-You are missing an ssh key. You need to generate an ssh key, encrypt it with AGE, and add it to the repo. The guide [here](./docs/onboarding.md) has all the steps I took to setup mine.
-The public key can be saved in the repo unencrypted, the automation expects it to be named "ssh_key.pub" the GH workflows will generate this for you on the first time you release.
+This example uses local state because it optimizes for the onboarding process.
+Using a local state file means that you don't need to configure remote state to get started.
+
+### Why use Nix?
+
+This example uses Nix because we are passionate about solving "works on my machine" problems.
+We want to make use of GitHub's free workflow runners, which limits our container options, Nix allow us to install the tools we need without needing to build a custom container.
+At the same time, Nix allows us to work locally without having to worry about synchronizing a custom container with the GitHub workflow runners or managing a local container runtime.
+
+### Why not make a provider?
+
+This is a lot of work, why not make a provider instead?
+Terraform providers have a different use case than terraform modules;
+  providers are a Terraform plugin which enables the use of Terraform on a remote API,
+  modules are a collection of Terraform resources which can be used to manage a specific use case.
+This example is a collection of Terraform resources which can be used to manage a specific use case, so it is a module.
+The API it talks to is the AWS API, so it uses the AWS provider, which is maintained by a large community of people and certified by HashiCorp.
