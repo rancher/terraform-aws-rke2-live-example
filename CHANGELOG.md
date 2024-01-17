@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.6](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.2.5...v0.2.6) (2024-01-17)
+
+
+### Bug Fixes
+
+* add awscli locally to make authentication easier ([d14a982](https://github.com/matttrach/live-infra-aws-rke2/commit/d14a982fdb2c47dbc5905da587e5c4134580b506))
+* remove scary tf cli args warnings ([71f24f8](https://github.com/matttrach/live-infra-aws-rke2/commit/71f24f80d13429604cb002dda3a46950cf0d1e71))
+
 ## [0.2.5](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.2.4...v0.2.5) (2024-01-17)
 
 
