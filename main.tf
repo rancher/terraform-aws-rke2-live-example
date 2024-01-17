@@ -9,6 +9,7 @@ locals {
   email              = "ex@example.com"
   my_user            = "example"
   my_key             = "abc123"
+  my_ip              = "192.168.1.2"
   username           = local.identifier
   name               = "live-rke2-${local.identifier}"
   server_prep_script = file("${path.root}/prep.sh")
@@ -20,6 +21,9 @@ locals {
 resource "random_uuid" "join_token" {}
 
 module "aws_rke2_rhel9_rpm" {
+  depends_on = [
+    random_uuid.join_token,
+  ]
   source              = "rancher/rke2/aws"
   version             = "v0.1.14"
   join_token          = random_uuid.join_token.result
@@ -50,6 +54,7 @@ module "aws_rke2_rhel9_rpm" {
 
 resource "terraform_data" "post_install" {
   depends_on = [
+    random_uuid.join_token,
     module.aws_rke2_rhel9_rpm,
   ]
   connection {
@@ -76,4 +81,33 @@ resource "terraform_data" "post_install" {
     EOT
     ]
   }
+}
+
+# create a security group that gives access to my home ip so that I can ssh into the node afterwords
+module "my_access" {
+  source  = "rancher/access/aws"
+  version = "0.1.4"
+  depends_on = [
+    random_uuid.join_token,
+    module.aws_rke2_rhel9_rpm,
+    terraform_data.post_install,
+  ]
+  vpc_name            = local.name         # selects vpc, doesn't create
+  subnet_name         = local.name         # selects subnet, doesn't create
+  security_group_type = "specific"         # allow only one ip: https://github.com/rancher/terraform-aws-access/blob/main/modules/security_group/types.tf
+  security_group_name = local.my_user      # generate a new security group
+  security_group_ip   = local.my_ip        # not the same as local.ip which is the IP of the runner, this is my home ip
+  ssh_key_name        = local.ssh_key_name # selects key, doesn't create
+  owner               = local.email        # tag objects with your contact info
+}
+
+resource "aws_network_interface_sg_attachment" "sg_attachment" {
+  depends_on = [
+    random_uuid.join_token,
+    module.aws_rke2_rhel9_rpm,
+    terraform_data.post_install,
+    module.my_access,
+  ]
+  security_group_id    = module.my_access.security_group.id
+  network_interface_id = module.aws_rke2_rhel9_rpm.server.primary_network_interface_id
 }
