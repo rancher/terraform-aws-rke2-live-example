@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.2.4...v0.2.5) (2024-01-17)
+
+
+### Bug Fixes
+
+* state file can be locally in the repo since the encryption is in place and working well ([3fd2d87](https://github.com/matttrach/live-infra-aws-rke2/commit/3fd2d871eb4f676da191d9ee74f49cd23a822f42))
+
 ## [0.2.4](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.2.3...v0.2.4) (2024-01-17)
 
 
