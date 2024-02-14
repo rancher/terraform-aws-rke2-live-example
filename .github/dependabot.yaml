@@ -19,3 +19,31 @@ updates:
       day: "sunday" # this way it is ready for review on Monday
     commit-message:
       prefix: "fix"
+  - package-ecosystem: "terraform"
+    directory: "/phase_1_project_access"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    commit-message:
+      prefix: "fix"
+  - package-ecosystem: "terraform"
+    directory: "/phase_2_ci_access"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    commit-message:
+      prefix: "fix"
+  - package-ecosystem: "terraform"
+    directory: "/phase_3_prototype"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    commit-message:
+      prefix: "fix"
+  - package-ecosystem: "terraform"
+    directory: "/phase_4_servers"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    commit-message:
+      prefix: "fix"

@@ -1,0 +1,142 @@
+on:
+  workflow_call:
+    inputs:
+      aws-auth-type:
+        description: 'The AWS auth type, either "OIDC" or "IAM".'
+        required: true
+        type: string
+      repository:
+        description: 'The GitHub repository including owner.'
+        required: true
+        type: string
+      workspace:
+        description: 'The GitHub workspace path.'
+        required: true
+        type: string
+      directory:
+        description: 'The name of the terraform directory relative to the repo root where we will run destroy.'
+        required: true
+        type: string
+      run-id:
+        description: 'The id of the GitHub workflow run.'
+        required: true
+        type: string
+      variables:
+        description: 'A json string of variables to pass to terraform. This will be written as terraform.tfvars.json file, please see https://developer.hashicorp.com/terraform/language/values/variables#variable-definitions-tfvars-files.'
+        required: false
+        type: string
+    secrets:
+      aws-region:
+        description: 'The AWS region to deploy/destroy infra.'
+        required: true
+      aws-role:
+        description: 'When using OIDC AWS authentication this is required, otherwise leave blank.'
+        required: false
+      aws-session:
+        description: 'The session to use for AWS login, required when using the OIDC auth type, otherwise leave blank.'
+        required: false
+      aws-access-key-id:
+        description: 'When using IAM AWS authentication this is required, otherwise leave blank.'
+        required: false
+      aws-secret-access-key:
+        description: 'When using IAM AWS authentication this is required, otherwise leave blank.'
+        required: false
+      github-token:
+        description: 'The value of your GITHUB_TOKEN, used to commit encrypted state.'
+        required: true
+      age-secret-key:
+        description: 'The value of your AGE_SECRET_KEY, used to decrypt state and secrets.'
+        required: true
+    outputs:
+      output:
+        description: 'The json output from terraform after the apply is run.'
+        value: ${{jobs.reusable-apply.outputs.output}}
+
+permissions: write-all
+
+jobs:
+  reusable-apply:
+    runs-on: ubuntu-latest
+    outputs:
+      output: ${{ steps.apply.outputs.output }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: nicknovitski/nix-develop@v1.1.0
+        with:
+          arguments: |
+            --ignore-environment \
+            --extra-experimental-features nix-command \
+            --extra-experimental-features flakes \
+            --keep HOME \
+            --keep SSH_AUTH_SOCK \
+            --keep GITHUB_TOKEN \
+            --keep AWS_ROLE \
+            --keep AWS_REGION \
+            --keep AWS_DEFAULT_REGION \
+            --keep AWS_ACCESS_KEY_ID \
+            --keep AWS_SECRET_ACCESS_KEY \
+            --keep AWS_SESSION_TOKEN \
+            --keep TERM \
+            ${{ inputs.workspace }}
+      # if using OICD auth
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: ${{inputs.aws-auth-type == 'OIDC'}}
+        with:
+          role-to-assume: ${{secrets.aws-role}}
+          role-session-name: ${{secrets.aws-session}}
+          aws-region: ${{secrets.aws-region}}
+      # if using access key auth
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: ${{inputs.aws-auth-type == 'IAM'}}
+        with:
+          aws-access-key-id: ${{ secrets.aws-access-key-id }}
+          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+          aws-region: ${{secrets.aws-region}}
+      # apply
+      - name: Apply
+        id: apply
+        shell: bash
+        run: |
+          echo "Setting up env..."
+          if [ "" = '${{secrets.age-secret-key}}' ]; then echo "Missing encrypt key, please run repo setup before release."; exit 1; fi
+          if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before release."; exit 1; fi
+          if [ ! -f secret_file_list.txt ]; then echo "Missing encryption file list, please run repo setup before release."; exit 1; fi
+          git config --global user.name 'automation'
+          git config --global user.email 'automation@users.noreply.github.com'
+          git remote set-url origin "https://x-access-token:${{secrets.github-token}}@github.com/${{inputs.repository}}"
+          git pull --rebase
+          while read -r file; do
+            echo '${{secrets.age-secret-key}}' | age -d -i - -o "$file" "$file.age"
+          done <secret_file_list.txt
+          cd ${{inputs.workspace}}/${{inputs.directory}}
+          if [ -f ssh_key ]; then
+            eval "$(ssh-agent -s)"
+            chmod 0600 ssh_key
+            ssh-add ssh_key
+          fi
+          echo 'Starting  deploy...'
+          if [ "" != "${{inputs.variables}}" ]; then
+            echo '${{inputs.variables}}' > "${{inputs.workspace}}/${{inputs.directory}}/terraform.tfvars.json"
+          fi
+
+          terraform init
+          terraform apply --auto-approve || true
+          OUTPUT="$(terraform output -json)"
+          echo "output=$OUTPUT" >> "$GITHUB_OUTPUT"
+
+          echo "Updating state..."
+          rm -rf terraform.tfstate.age && age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
+
+          cd ${{inputs.workspace}}
+          echo "Removing secret files..."
+          while read -r file; do
+             rm -f "$file"
+          done <secret_file_list.txt
+
+          echo "Saving state..."
+          git add ${{inputs.directory}}/terraform.tfstate.age
+          git commit -s -m "New ${{inputs.directory}} State https://github.com/${{inputs.repository}}/actions/runs/${{inputs.run-id}}"
+          git pull --rebase
+          git push origin main

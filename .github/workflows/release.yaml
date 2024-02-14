@@ -7,171 +7,240 @@ on:
 
 env:
   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-  GITHUB_OWNER: ${{ github.repository_owner }}
+  GITHUB_OWNER: ${{github.repository_owner}}
+  project_name: "livex"
+  project_owner: "tf-livex@noreply.com"
+  project_cidr: "10.0.255.0/24"
+  prototype_subnet_cidr: "10.0.255.224/28" # must be within project_cidr
+  production_subnet_cidr: "10.0.255.223/28" # must be within project_cidr and not be the same as the prototype
 
 permissions: write-all
 
 jobs:
+  env:
+    runs-on: ubuntu-latest
+    outputs:
+      project_name: ${{env.project_name}}
+      project_owner: ${{env.project_owner}}
+      project_cidr: ${{env.project_cidr}}
+      prototype_subnet_cidr: ${{env.prototype_subnet_cidr}}
+      production_subnet_cidr: ${{env.production_subnet_cidr}}
+      ci_ssh_key: ${{steps.setup.outputs.ssh_key}}
+    steps:
+      - name: setup
+        id: setup
+        run: |
+          KEY="$(cat /phase_2_ci_access/ssh_key.pub)"
+          echo "ssh_key=$KEY" >> "$GITHUB_OUTPUT"
+
+  get_runner_ip:
+    runs-on: ubuntu-latest
+    needs:
+      - env
+    outputs:
+      ip: steps.ip.outputs.ipv4
+    steps:
+      - uses: haythem/public-ip@v1.3
+        id: ip
+
   release:
     runs-on: ubuntu-latest
+    needs:
+      - env
+    outputs:
+      release_created: steps.release-please.outputs.release_created
     steps:
       - uses: google-github-actions/release-please-action@v4
         id: release-please
         with:
           release-type: terraform-module
-      - uses: actions/checkout@v4
-      - uses: DeterminateSystems/nix-installer-action@main
-      - uses: DeterminateSystems/magic-nix-cache-action@main
-      - uses: nicknovitski/nix-develop@v1.1.0
-        with:
-          arguments: |
-            --ignore-environment \
-            --extra-experimental-features nix-command \
-            --extra-experimental-features flakes \
-            --keep HOME \
-            --keep SSH_AUTH_SOCK \
-            --keep GITHUB_TOKEN \
-            --keep AWS_ROLE \
-            --keep AWS_REGION \
-            --keep AWS_DEFAULT_REGION \
-            --keep AWS_ACCESS_KEY_ID \
-            --keep AWS_SECRET_ACCESS_KEY \
-            --keep AWS_SESSION_TOKEN \
-            --keep TERM \
-            ${{ github.workspace }}
-# put release tests here
-      # if using OICD auth
-      - uses: aws-actions/configure-aws-credentials@v4
-        if: ${{vars.AWS_AUTH == 'OIDC'}}
-        with:
-          role-to-assume: ${{secrets.AWS_ROLE}}
-          role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
-          aws-region: ${{secrets.AWS_REGION}}
-      # if using access key auth
-      - uses: aws-actions/configure-aws-credentials@v4
-        if: ${{vars.AWS_AUTH == 'IAM'}}
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{secrets.AWS_REGION}}
-      - uses: haythem/public-ip@v1.3
-        id: ip_pre
-      - uses: actions/cache/restore@v3
-        id: cache-terraform-restore
-        with:
-          path: ${{ github.workspace }}/.terraform
-          key: terraform-${{hashFiles('**/versions.tf','**/main.tf')}}
-      - run: |
-          echo "Planning..."
 
-          echo "Setting up env..."
-          if [ "" = '${{secrets.AGE_SECRET_KEY}}' ]; then echo "Missing encrypt key, please run repo setup before release."; exit 1; fi
-          if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before release."; exit 1; fi
+  plan_project_access:
+    needs:
+      - env
+      - release
+    uses: ./.github/workflows/plan.yaml
+    with:
+      github: ${{ toJson(github) }}
+      type: "project_access"
+      variables: |
+        {
+          "project_name": "${{needs.env.outputs.project_name}}",
+          "project_owner": "${{needs.env.outputs.project_owner}}",
+          "project_cidr": "${{needs.env.outputs.project_cidr}}"
+        }
+    secrets: inherit
 
-          while read -r file; do
-            echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
-          done <secret_file_list.txt
-          eval "$(ssh-agent -s)"
-          chmod 0600 ssh_key
-          ssh-add ssh_key
-          export TF_VAR_ip="${{ steps.ip_pre.outputs.ipv4 }}"
+  plan_ci_access:
+    needs:
+      - env
+      - get_runner_ip
+      - release
+    uses: ./.github/workflows/plan.yaml
+    with:
+      github: ${{ toJson(github) }}
+      type: "ci_access"
+      variables: |
+        {
+          "project_name": "${{needs.env.outputs.project_name}}",
+          "project_owner": "${{needs.env.outputs.project_owner}}",
+          "ip": "${{needs.get_runner_ip.outputs.ip}}",
+          "vpc_name": "${{needs.env.outputs.project_name}}",
+          "ssh_key": "${{needs.env.outputs.ci_ssh_key}}"
+        }
+    secrets: inherit
 
-          ls -lah
+  plan_prototype:
+    needs:
+      - env
+      - get_runner_ip
+      - release
+    uses: ./.github/workflows/plan.yaml
+    with:
+      github: ${{ toJson(github) }}
+      type: "prototype"
+      variables: |
+        {
+          "project_name": "${{needs.env.outputs.project_name}}",
+          "project_owner": "${{needs.env.outputs.project_owner}}",
+          "ip": "${{needs.get_runner_ip.outputs.ip}}",
+          "ssh_key_name": "${{needs.env.outputs.project_name}}",
+          "vpc_name": "${{needs.env.outputs.project_name}}",
+          "subnet_cidr": "${{needs.env.outputs.prototype_subnet_cidr}}"
+        }
+    secrets: inherit
 
-          echo "Deploy ci security group access..."
-          terraform init -upgrade
-          # manage the security group rule for the terraform runner as a separate entity to prevent dependency chain issues with server object
-          # this is a hack for the basic example, normally you would manage access as a separate terraform config
-          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
-          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
+  plan_servers:
+    needs:
+      - env
+      - release
+    uses: ./.github/workflows/plan.yaml
+    with:
+      github: ${{ toJson(github) }}
+      type: "servers"
+      variables: |
+        {
+          "project_name": "${{needs.env.outputs.project_name}}",
+          "project_owner": "${{needs.env.outputs.project_owner}}",
+          "vpc_name": "${{needs.env.outputs.project_name}}",
+          "subnet_cidr": "${{needs.env.outputs.production_subnet_cidr}}",
+          "image_id": "fake",
+          "image_admin_group": "wheel",
+          "image_user": "plan",
+          "image_workfolder": "~",
+          "role": "server"
+        }
+    secrets: inherit
 
-          echo "Terraform Plan..."
-          terraform plan
-
-          echo "clear out the CI security group access by replacing with a nonsense IP..."
-          export TF_VAR_ip="192.168.1.1"
-          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
-          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
-
-          echo "Updating state..."
-          rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
-
-          echo "Removing secret files..."
-          while read -r file; do
-             rm -f "$file"
-          done <secret_file_list.txt
-
-          echo "Saving state..."
-          git config --global user.name 'automation'
-          git config --global user.email 'automation@users.noreply.github.com'
-          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
-          git add terraform.tfstate.age
-          git commit -s -m "New State https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
-          git push origin main
-      - uses: actions/cache/save@v3
-        id: cache-terraform-save
-        with:
-          path: ${{ github.workspace }}/.terraform
-          key: ${{ steps.cache-terraform-restore.outputs.cache-primary-key }}
 # these are only run after release is created
-      # if using OICD auth
-      - uses: aws-actions/configure-aws-credentials@v4
-        if: ${{vars.AWS_AUTH == 'OIDC'}}
-        with:
-          role-to-assume: ${{secrets.AWS_ROLE}}
-          role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
-          aws-region: ${{secrets.AWS_REGION}}
-      # if using access key auth
-      - uses: aws-actions/configure-aws-credentials@v4
-        if: ${{vars.AWS_AUTH == 'IAM'}}
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{secrets.AWS_REGION}}
-      - uses: haythem/public-ip@v1.3
-        id: ip
-        if: steps.release-please.outputs.release_created
-      - name: Apply
-        if: steps.release-please.outputs.release_created
-        shell: bash
-        run: |
-          echo "Setting up env..."
-          if [ "" = '${{secrets.AGE_SECRET_KEY}}' ]; then echo "Missing encrypt key, please run repo setup before release."; exit 1; fi
-          if [ ! -f age_recipients.txt ]; then echo "Missing encryption recipients, please run repo setup before release."; exit 1; fi
-          while read -r file; do
-            echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
-          done <secret_file_list.txt
-          eval "$(ssh-agent -s)"
-          chmod 0600 ssh_key
-          ssh-add ssh_key
-          export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
+  apply_project_access:
+    uses: ./.github/workflows/apply.yaml
+    if: needs.release.outputs.release_created
+    needs:
+      - env
+      - release
+    with:
+      github: ${{ toJson(github) }}
+      type: "project_access"
+      variables: |
+        {
+          "project_name": "${{needs.env.outputs.project_name}}",
+          "project_owner": "${{needs.env.outputs.project_owner}}",
+          "project_cidr": "${{needs.env.outputs.project_cidr}}"
+        }
+    secrets: inherit
 
-          echo "Starting  deploy..."
-          terraform init
-          # this is a hack for the basic example, normally you would manage access as a separate terraform config
-          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
-          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
-          terraform apply --auto-approve || true
-          sleep 5
+  apply_ci_access:
+    uses: ./.github/workflows/apply.yaml
+    if: needs.release.outputs.release_created
+    needs:
+      - env
+      - get_runner_ip
+      - release
+      - apply_project_access
+    with:
+      github: ${{ toJson(github) }}
+      type: "ci_access"
+      variables: |
+        {
+          "project_name": "${{needs.env.outputs.project_name}}",
+          "project_owner": "${{needs.env.outputs.project_owner}}",
+          "ip": "${{needs.get_runner_ip.outputs.ip}}",
+          "ssh_key": "${{needs.env.outputs.ci_ssh_key}}",
+          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc}}"
+        }
+    secrets: inherit
 
-          echo "clear out the CI security group access by replacing with a nonsense IP..."
-          export TF_VAR_ip="192.168.1.1"
-          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_egress_rule.to_ip[0] || true
-          terraform apply --auto-approve -target=module.aws_rke2_rhel9_rpm.module.aws_access.module.security_group.aws_vpc_security_group_ingress_rule.from_ip[0] || true
-          rm -f ssh_key
 
-          echo "Updating state..."
-          rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
+  apply_prototype:
+    uses: ./.github/workflows/apply.yaml
+    if: needs.release.outputs.release_created
+    needs:
+      - env
+      - get_runner_ip
+      - release
+      - apply_project_access
+      - apply_ci_access
+    with:
+      github: ${{ toJson(github) }}
+      type: "prototype"
+      variables: |
+        {
+          "project_name": "${{needs.env.outputs.project_name}}",
+          "project_owner": "${{needs.env.outputs.project_owner}}",
+          "ip": "${{needs.get_runner_ip.outputs.ip}}",
+          "ssh_key_name": "${{fromJson(needs.apply_ci_access.outputs.apply_ci_access).ssh_key_name}}",
+          "vpc_name": "${{fromJson(needs.apply_project_access.outputs.apply_project_access).vpc_name}}",
+          "subnet_cidr": "${{needs.env.outputs.prototype_subnet_cidr}}"
+        }
+    secrets: inherit
 
-          echo "Removing secret files..."
-          while read -r file; do
-             rm -f "$file"
-          done <secret_file_list.txt
+  apply_servers:
+    uses: ./.github/workflows/apply.yaml
+    if: needs.release.outputs.release_created
+    needs:
+      - env
+      - release
+      - apply_project_access
+      - apply_ci_access
+      - apply_prototype
+    with:
+      github: ${{ toJson(github) }}
+      type: "servers"
+      variables: |
+        {
+          "project_name": "${{needs.env.outputs.project_name}}",
+          "project_owner": "${{needs.env.outputs.project_owner}}",
+          "vpc_name": "${{fromJson(needs.apply_project_access.outputs.apply_project_access).vpc}}",
+          "subnet_cidr": "${{needs.env.outputs.production_subnet_cidr}}",
+          "image_id": "${{fromJson(needs.apply_prototype.outputs.apply_prototype).image_id}}",
+          "image_admin_group": "${{fromJson(needs.apply_prototype.outputs.apply_prototype).image_admin_group}}",
+          "image_user": "${{fromJson(needs.apply_prototype.outputs.apply_prototype).image_user}}",
+          "image_workfolder": "${{fromJson(needs.apply_prototype.outputs.apply_prototype).image_workfolder}}",
+          "role": "${{fromJson(needs.apply_prototype.outputs.apply_prototype).role}}"
+        }
+    secrets: inherit
 
-          echo "Saving state..."
-          git config --global user.name 'automation'
-          git config --global user.email 'automation@users.noreply.github.com'
-          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
-          git add terraform.tfstate.age
-          git commit -s -m "New State https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
-          git push origin main
+  # destroy CI Access after updating servers
+  destroy_ci_access:
+    uses: ./.github/workflows/apply.yaml
+    if: needs.release.outputs.release_created
+    needs:
+      - env
+      - get_runner_ip
+      - release
+      - apply_ci_access
+      - apply_project_access
+      - apply_prototype
+      - apply_servers
+    with:
+      github: ${{ toJson(github) }}
+      type: "ci_access"
+      variables: |
+        {
+          "project_name": "${{needs.env.outputs.project_name}}",
+          "project_owner": "${{needs.env.outputs.project_owner}}",
+          "ip": "${{needs.get_runner_ip.outputs.ip}}",
+          "vpc_name": "${{fromJson(needs.apply_project_access.outputs.apply_project_access).vpc_name}}"
+        }
+    secrets: inherit

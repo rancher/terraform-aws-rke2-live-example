@@ -1,0 +1,3 @@
+# extra config items should go here
+# auto-generated config will have 'token, advertise-address, tls-san, node-external-ip, node-ip'
+# any of those items added here will overwrite auto-generated config

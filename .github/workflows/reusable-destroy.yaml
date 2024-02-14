@@ -1,0 +1,125 @@
+on:
+  workflow_call:
+    inputs:
+      aws-auth-type:
+        description: 'The AWS auth type, either "OIDC" or "IAM".'
+        required: true
+        type: string
+      repository:
+        description: 'The GitHub repository including owner.'
+        required: true
+        type: string
+      workspace:
+        description: 'The GitHub workspace path.'
+        required: true
+        type: string
+      directory:
+        description: 'The name of the terraform directory relative to the repo root where we will run destroy.'
+        required: true
+        type: string
+      run-id:
+        description: 'The id of the GitHub workflow run.'
+        required: true
+        type: string
+      variables:
+        description: 'A json string of variables to pass to terraform. This will be written as terraform.tfvars.json file, please see https://developer.hashicorp.com/terraform/language/values/variables#variable-definitions-tfvars-files.'
+        required: false
+        type: string
+    secrets:
+      aws-region:
+        description: 'The AWS region to deploy/destroy infra.'
+        required: true
+      aws-role:
+        description: 'When using OIDC AWS authentication this is required, otherwise leave blank.'
+        required: false
+      aws-session:
+        description: 'The session to use for AWS login, required when using the OIDC auth type, otherwise leave blank.'
+        required: false
+      aws-access-key-id:
+        description: 'When using IAM AWS authentication this is required, otherwise leave blank.'
+        required: false
+      aws-secret-access-key:
+        description: 'When using IAM AWS authentication this is required, otherwise leave blank.'
+        required: false
+      github-token:
+        description: 'The value of your GITHUB_TOKEN, used to commit encrypted state.'
+        required: true
+      age-secret-key:
+        description: 'The value of your AGE_SECRET_KEY, used to decrypt state and secrets.'
+        required: true
+
+permissions: write-all
+
+jobs:
+  reusable-destroy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: nicknovitski/nix-develop@v1.1.0
+        with:
+          arguments: |
+            --ignore-environment \
+            --extra-experimental-features nix-command \
+            --extra-experimental-features flakes \
+            --keep HOME \
+            --keep SSH_AUTH_SOCK \
+            --keep GITHUB_TOKEN \
+            --keep AWS_ROLE \
+            --keep AWS_REGION \
+            --keep AWS_DEFAULT_REGION \
+            --keep AWS_ACCESS_KEY_ID \
+            --keep AWS_SECRET_ACCESS_KEY \
+            --keep AWS_SESSION_TOKEN \
+            --keep TERM \
+            ${{ inputs.workspace }}
+      # if using OICD auth
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: ${{inputs.aws-auth-type == 'OIDC'}}
+        with:
+          role-to-assume: ${{secrets.aws-role}}
+          role-session-name: ${{secrets.aws-session}}
+          aws-region: ${{secrets.aws-region}}
+      # if using access key auth
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: ${{inputs.aws-auth-type == 'IAM'}}
+        with:
+          aws-access-key-id: ${{ secrets.aws-access-key-id }}
+          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
+          aws-region: ${{secrets.aws-region}}
+      - uses: actions/cache/restore@v3
+        id: cache-terraform-restore
+        with:
+          path: ${{ inputs.workspace }}/${{inputs.directory}}/.terraform
+          key: terraform-${{inputs.directory}}-${{hashFiles('**/${{inputs.directory}}/versions.tf','**/${{inputs.directory}}/main.tf')}}
+      - name: Destroy Infra
+        shell: bash
+        run: |
+          echo "Destroying ${{inputs.directory}} Infra..."
+          git config --global user.name 'automation'
+          git config --global user.email 'automation@users.noreply.github.com'
+          git remote set-url origin "https://x-access-token:${{secrets.github-token}}@github.com/${{inputs.repository}}"
+          git pull --rebase
+          cd ${{inputs.workspace}}/${{inputs.directory}}
+          if [ -f terraform.tfstate.age ]; then
+            rm -f terraform.tfstate; echo '${{secrets.age-secret-key}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
+            rm -f terraform.tfstate.age
+
+            if [ "" != "${{inputs.variables}}" ]; then
+              echo '${{inputs.variables}}' > "${{inputs.workspace}}/${{inputs.directory}}/terraform.tfvars.json"
+            fi
+
+            terraform init
+            terraform destroy --auto-approve || true
+
+            echo "Saving state..."
+            rm -rf terraform.tfstate.age && age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
+            cd ${{inputs.workspace}}
+            git add ${{inputs.directory}}/terraform.tfstate.age
+            git commit -s -m "New ${{inputs.directory}} State https://github.com/${{inputs.repository}}/actions/runs/${{inputs.run-id}}"
+            git pull --rebase
+            git push origin main
+          else
+            echo "no state found to destroy..."
+          fi

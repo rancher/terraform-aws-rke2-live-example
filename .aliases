@@ -1,13 +1,13 @@
 alias gs='git status'
 alias gd='git diff'
 alias tf='terraform'
-alias tfa='terraform apply --auto-approve'
+alias tfa='chmod 600 ssh_key && ssh-add ssh_key && terraform apply --auto-approve'
 alias tfd='terraform destroy --auto-approve'
 alias tfp='terraform init || terraform providers && terraform validate && terraform plan'
-alias tfr='terraform destroy --auto-approve; terraform apply --auto-approve'
+alias tfr='terraform destroy --auto-approve;chmod 600 ssh_key && ssh-add ssh_key && terraform apply --auto-approve'
 alias tfl='terraform state list'
 alias k='kubectl'
 alias tt='cd tests; go test -v -parallel=10 -timeout=80m'
-# expects AGE_ and TF_CLI_ARGS_ variables to be set, see .variables and .rcs
+# expects AGE_ variables to be set, see .variables and .rcs
 alias ss='while read -r file;do rm -f "$file"; echo "decrypting $file";echo "$AGE_SECRET_KEY" | age -d -i - -o "$file" "$file.age";done <secret_file_list.txt'
 alias se='echo "enter file to encrypt:";while read -r file;do rm -f "$file.age"; echo "encrypting $file";age -e -R age_recipients.txt -o "$file.age" "$file"; break;done <"${1:-/dev/stdin}"'

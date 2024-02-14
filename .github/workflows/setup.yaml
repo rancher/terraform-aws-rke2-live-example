@@ -57,17 +57,39 @@ jobs:
           echo "Setting up Repo..."
           if [ -z "$GITHUB_TOKEN" ]; then echo "token not found, please make sure to add ADMIN_GITHUB_TOKEN to secrets"; exit 1; fi
           if [ -z "${{vars.AWS_AUTH}}" ]; then echo "AWS auth type not found, please specify AWS_AUTH action variable as either 'OIDC' or 'IAM'"; exit 1; fi
+          git config --global user.name 'automation'
+          git config --global user.email 'automation@users.noreply.github.com'
+          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
+          # generate initial AGE key and recipients.txt, and save
+          cd ${{github.workspace}}
           KEY="$(age-keygen 2>/dev/null | grep '^AGE')"
           echo "$KEY" | age-keygen -y > age_recipients.txt
           gh secret set AGE_SECRET_KEY --body "$KEY"
-          ssh-keygen -t rsa -b 4096 -C "automation@users.noreply.github.com" -N "" -f ssh_key && rm -f ssh_key.age; age -e -R age_recipients.txt -o ssh_key.age ssh_key && rm -f ssh_key;
-          cd setup && terraform init && terraform apply --auto-approve && cd ..
+          git add ${{github.workspace}}/age_recipients.txt
 
-          echo "Saving initial state..."
-          export TF_VAR_ip="${{ steps.ip.outputs.ipv4 }}"
-          rm -f terraform.tfstate; terraform init -upgrade; terraform plan;
-          if [ ! -f terraform.tfstate ]; then 
-            cat << 'EOF' > 'terraform.tfstate'
+          if [ ! -f secret_file_list.txt ]; then touch secret_file_list.txt; fi
+          git add ${{github.workspace}}/secret_file_list.txt
+
+          # add ssh key for ci access
+          cd ${{github.workspace}}/phase_2_ci_access
+          ssh-keygen -t rsa -b 4096 -C "automation@users.noreply.github.com" -N "" -f ssh_key && rm -f ssh_key.age; age -e -R ${{github.workspace}}/age_recipients.txt -o ssh_key.age ssh_key && rm -f ssh_key;
+          rm -f ssh_key.pub.age; age -e -R ${{github.workspace}}/age_recipients.txt -o ssh_key.pub.age ssh_key.pub && rm -f ssh_key.pub;
+          git add ${{github.workspace}}/phase_2_ci_access/ssh_key.pub.age
+          git add ${{github.workspace}}/phase_2_ci_access/ssh_key.age
+          echo "phase_2_ci_access/ssh_key.pub.age" >> secret_file_list.txt
+          echo "phase_2_ci_access/ssh_key.age" >> secret_file_list.txt
+
+          # use tf to configure this repo's settings
+          cd ${{github.workspace}}/setup
+          terraform init && terraform apply --auto-approve
+          
+          cd ${{github.workspace}}
+
+          echo "Saving initial states..."
+          for lc in phase_1_project_access phase_2_ci_access phase_3_prototype phase_4_servers; do
+            cd ${{github.workspace}}/$lc
+            if [ ! -f terraform.tfstate ]; then 
+              cat << 'EOF' > 'terraform.tfstate'
           {
             "version": 4,
             "serial": 3,
@@ -76,15 +98,14 @@ jobs:
             "check_results": null
           }
           EOF
-          fi;
-          rm -rf terraform.tfstate.age && age -e -R age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
-          git config --global user.name 'automation'
-          git config --global user.email 'automation@users.noreply.github.com'
-          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
-          git add terraform.tfstate.age
-          git add ssh_key.pub
-          git add ssh_key.age
-          git add .terraform.lock.hcl
-          git add age_recipients.txt
+            fi;
+            if [ ! -f terraform.tfstate.age ]; then
+              age -e -R ${{github.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate
+              git add ${{github.workspace}}/$lc/terraform.tfstate.age
+            fi
+            echo "$lc/terraform.tfstate.age" >> ${{github.workspace}}/secret_file_list.txt
+          done
+
+          git add ${{github.workspace}}/secret_file_list.txt
           git commit -s -m "Setup https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
           git push origin main

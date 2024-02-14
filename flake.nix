@@ -100,6 +100,7 @@
             curl
             gh
             git
+            gitleaks
             gnupg
             go
             jq

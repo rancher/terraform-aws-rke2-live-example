@@ -1,8 +1,4 @@
-name: destroy
-# WARNING! This workflow destroys infrastructure!
-# WARNING! Servers depend on prototype! (they must exist, but don't need to be on)
-#  - this is because servers AMI is a pointer to a Prototype snapshot which has thin copy of a Prototype volume's base image
-
+name: plan
 on:
   workflow_call:
     inputs:
@@ -22,8 +18,17 @@ on:
 permissions: write-all
 
 jobs:
-  destroy_ci_access:
+  get_runner_ip:
+    runs-on: ubuntu-latest
+    outputs:
+      ip: steps.ip.outputs.ipv4
+    steps:
+      - uses: haythem/public-ip@v1.3
+        id: ip
+
+  plan_ci_access:
     uses: ./.github/workflows/reusable-plan.yaml
+    needs: get_runner_ip
     if: inputs.type == 'ci_access'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
@@ -41,7 +46,7 @@ jobs:
       github-token: ${{secrets.GITHUB_TOKEN}}
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
-  destroy_project_access:
+  plan_project_access:
     uses: ./.github/workflows/reusable-plan.yaml
     if: inputs.type == 'project_access'
     with:
@@ -60,7 +65,7 @@ jobs:
       github-token: ${{secrets.GITHUB_TOKEN}}
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
-  destroy_prototype:
+  plan_prototype:
     uses: ./.github/workflows/reusable-plan.yaml
     if: inputs.type == 'prototype'
     with:
@@ -79,7 +84,7 @@ jobs:
       github-token: ${{secrets.GITHUB_TOKEN}}
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
-  destroy_servers:
+  plan_servers:
     uses: ./.github/workflows/reusable-plan.yaml
     if: inputs.type == 'servers'
     with:

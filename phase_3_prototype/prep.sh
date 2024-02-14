@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# this is run BEFORE install
+
 #https://docs.rke2.io/known_issues
 systemctl disable --now firewalld
 systemctl stop firewalld

@@ -34,9 +34,50 @@ jobs:
             --keep AWS_SESSION_TOKEN \
             --keep TERM \
             ${{ github.workspace }}
-      - run: terraform init -upgrade
-      - run: terraform version && terraform init -upgrade && terraform validate
-      - run: terraform fmt -check -recursive
+      - run: |
+          set -e
+          set -x
+          cd ${{github.workspace}}/phase_1_project_access
+          terraform version
+          terraform init -upgrade
+          terraform validate
+          terraform fmt -check -recursive
+          tflint --version
+          tflint --init
+          tflint -f compact
+      - run: |
+          set -e
+          set -x
+          cd ${{github.workspace}}/phase_2_ci_access
+          terraform version
+          terraform init -upgrade
+          terraform validate
+          terraform fmt -check -recursive
+          tflint --version
+          tflint --init
+          tflint -f compact
+      - run: |
+          set -e
+          set -x
+          cd ${{github.workspace}}/phase_3_prototype
+          terraform version
+          terraform init -upgrade
+          terraform validate
+          terraform fmt -check -recursive
+          tflint --version
+          tflint --init
+          tflint -f compact
+      - run: |
+          set -e
+          set -x
+          cd ${{github.workspace}}/phase_4_servers
+          terraform version
+          terraform init -upgrade
+          terraform validate
+          terraform fmt -check -recursive
+          tflint --version
+          tflint --init
+          tflint -f compact
 
   actionlint:
     name: 'Lint Workflows'
@@ -64,17 +105,6 @@ jobs:
             ${{ github.workspace }}
       - run: actionlint
 
-  tflint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: terraform-linters/setup-tflint@v4
-        with:
-          tflint_version: latest
-      - run: tflint --version
-      - run: tflint --init
-      - run: tflint -f compact
-
   shellcheck:
     runs-on: ubuntu-latest
     steps:
@@ -86,3 +116,34 @@ jobs:
       - uses: amannn/action-semantic-pull-request@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  gitleaks:
+    name: 'Scan for Secrets'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: DeterminateSystems/nix-installer-action@main
+    - uses: nicknovitski/nix-develop@v1.1.0
+      with:
+        arguments: |
+          --ignore-environment \
+          --extra-experimental-features nix-command \
+          --extra-experimental-features flakes \
+          --keep HOME \
+          --keep SSH_AUTH_SOCK \
+          --keep GITHUB_TOKEN \
+          --keep AWS_ROLE \
+          --keep AWS_REGION \
+          --keep AWS_DEFAULT_REGION \
+          --keep AWS_ACCESS_KEY_ID \
+          --keep AWS_SECRET_ACCESS_KEY \
+          --keep AWS_SESSION_TOKEN \
+          --keep UPDATECLI_GPGTOKEN \
+          --keep UPDATECLI_GITHUB_TOKEN \
+          --keep UPDATECLI_GITHUB_ACTOR \
+          --keep GPG_SIGNING_KEY \
+          --keep NIX_ENV_LOADED \
+          --keep TERM \
+          ${{ github.workspace }}
+    - run: gitleaks detect --no-banner -v --no-git
+    - run: gitleaks detect --no-banner -v
