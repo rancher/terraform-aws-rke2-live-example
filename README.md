@@ -13,7 +13,6 @@ This example includes GitHub action config which will enable create, update, and
 ## How Do I Use It?
 
 Follow the onboarding guide [here](./docs/guides/onboarding.md).
-For an in-depth tutorial on onboarding take a look at the tutorial [here](./docs/tutorials/onboarding.md).
 
 This is meant to be an example, it is not a managed solution.
 This example is focused on automating as much as possible with security as a secondary priority, please take a close look at what this does and make good decisions for the security of your use case.
@@ -34,11 +33,12 @@ The main purpose of this example is to show a specific full implementation of th
 
 This example uses local state because it optimizes for the onboarding process.
 Using a local state file means that you don't need to configure remote state to get started.
+Using the workflows supplied state will be encrypted at rest and in transit, so it is safe to use for a small team or personal project.
 
 ### Why use Nix?
 
 This example uses Nix because we are passionate about solving "works on my machine" problems.
-We want to make use of GitHub's free workflow runners, which limits our container options, Nix allow us to install the tools we need without needing to build a custom container.
+We want to make use of GitHub's free workflow runners, which limits our container options, Nix allows us to install the tools we need without needing to build a custom container.
 At the same time, Nix allows us to work locally without having to worry about synchronizing a custom container with the GitHub workflow runners or managing a local container runtime.
 
 ### Why not make a provider?
