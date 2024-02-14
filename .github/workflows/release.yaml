@@ -28,6 +28,25 @@ jobs:
       ci_ssh_key: ${{steps.setup.outputs.ssh_key}}
     steps:
       - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: nicknovitski/nix-develop@v1.1.0
+        with:
+          arguments: |
+            --ignore-environment \
+            --extra-experimental-features nix-command \
+            --extra-experimental-features flakes \
+            --keep HOME \
+            --keep SSH_AUTH_SOCK \
+            --keep GITHUB_TOKEN \
+            --keep AWS_ROLE \
+            --keep AWS_REGION \
+            --keep AWS_DEFAULT_REGION \
+            --keep AWS_ACCESS_KEY_ID \
+            --keep AWS_SECRET_ACCESS_KEY \
+            --keep AWS_SESSION_TOKEN \
+            --keep TERM \
+            ${{ github.workspace }}
       - name: setup
         id: setup
         run: |
