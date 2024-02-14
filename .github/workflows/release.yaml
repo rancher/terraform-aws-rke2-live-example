@@ -52,7 +52,7 @@ jobs:
         run: |
           while read -r file; do
             if [ -f "$file.age" ]; then
-              echo '${{secrets.age-secret-key}}' | age -d -i - -o "$file" "$file.age"
+              echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
             fi
           done <secret_file_list.txt
           KEY="$(cat /phase_2_ci_access/ssh_key.pub)"
