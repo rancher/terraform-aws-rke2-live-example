@@ -55,7 +55,7 @@ jobs:
               echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
             fi
           done <secret_file_list.txt
-          KEY="$(cat /phase_2_ci_access/ssh_key.pub)"
+          KEY="$(cat ${{github.workspace}}/phase_2_ci_access/ssh_key.pub)"
           echo "ssh_key=$KEY" >> "$GITHUB_OUTPUT"
 
   get_runner_ip:
