@@ -51,7 +51,9 @@ jobs:
         id: setup
         run: |
           while read -r file; do
-            echo '${{secrets.age-secret-key}}' | age -d -i - -o "$file" "$file.age"
+            if [ -f "$file.age" ]; then
+              echo '${{secrets.age-secret-key}}' | age -d -i - -o "$file" "$file.age"
+            fi
           done <secret_file_list.txt
           KEY="$(cat /phase_2_ci_access/ssh_key.pub)"
           echo "ssh_key=$KEY" >> "$GITHUB_OUTPUT"

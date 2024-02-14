@@ -108,7 +108,9 @@ jobs:
           git remote set-url origin "https://x-access-token:${{secrets.github-token}}@github.com/${{inputs.repository}}"
           git pull --rebase
           while read -r file; do
-            echo '${{secrets.age-secret-key}}' | age -d -i - -o "$file" "$file.age"
+            if [ -f "$file.age" ]; then
+              echo '${{secrets.age-secret-key}}' | age -d -i - -o "$file" "$file.age"
+            fi
           done <secret_file_list.txt
           cd ${{inputs.workspace}}/${{inputs.directory}}
           if [ -f ssh_key ]; then
