@@ -87,7 +87,7 @@ jobs:
     uses: ./.github/workflows/plan.yaml
     with:
       github: ${{ toJson(github) }}
-      type: "project_access"
+      type: "phase_1_project_access"
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -104,7 +104,7 @@ jobs:
     uses: ./.github/workflows/plan.yaml
     with:
       github: ${{ toJson(github) }}
-      type: "ci_access"
+      type: "phase_2_ci_access"
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -123,7 +123,7 @@ jobs:
     uses: ./.github/workflows/plan.yaml
     with:
       github: ${{ toJson(github) }}
-      type: "prototype"
+      type: "phase_3_prototype"
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -142,7 +142,7 @@ jobs:
     uses: ./.github/workflows/plan.yaml
     with:
       github: ${{ toJson(github) }}
-      type: "servers"
+      type: "phase_4_servers"
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -160,13 +160,13 @@ jobs:
 # these are only run after release is created
   apply_project_access:
     uses: ./.github/workflows/apply.yaml
-    if: needs.release.outputs.release_created
+    if: needs.release.outputs.release_created == true
     needs:
       - env
       - release
     with:
       github: ${{ toJson(github) }}
-      type: "project_access"
+      type: "phase_1_project_access"
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -177,7 +177,7 @@ jobs:
 
   apply_ci_access:
     uses: ./.github/workflows/apply.yaml
-    if: needs.release.outputs.release_created
+    if: needs.release.outputs.release_created == true
     needs:
       - env
       - get_runner_ip
@@ -185,7 +185,7 @@ jobs:
       - apply_project_access
     with:
       github: ${{ toJson(github) }}
-      type: "ci_access"
+      type: "phase_2_ci_access"
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -199,7 +199,7 @@ jobs:
 
   apply_prototype:
     uses: ./.github/workflows/apply.yaml
-    if: needs.release.outputs.release_created
+    if: needs.release.outputs.release_created == true
     needs:
       - env
       - get_runner_ip
@@ -208,7 +208,7 @@ jobs:
       - apply_ci_access
     with:
       github: ${{ toJson(github) }}
-      type: "prototype"
+      type: "phase_3_prototype"
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -222,7 +222,7 @@ jobs:
 
   apply_servers:
     uses: ./.github/workflows/apply.yaml
-    if: needs.release.outputs.release_created
+    if: needs.release.outputs.release_created == true
     needs:
       - env
       - release
@@ -231,7 +231,7 @@ jobs:
       - apply_prototype
     with:
       github: ${{ toJson(github) }}
-      type: "servers"
+      type: "phase_4_servers"
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -249,7 +249,7 @@ jobs:
   # destroy CI Access after updating servers
   destroy_ci_access:
     uses: ./.github/workflows/apply.yaml
-    if: needs.release.outputs.release_created
+    if: needs.release.outputs.release_created == true
     needs:
       - env
       - get_runner_ip
@@ -260,7 +260,7 @@ jobs:
       - apply_servers
     with:
       github: ${{ toJson(github) }}
-      type: "ci_access"
+      type: "phase_2_ci_access"
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",

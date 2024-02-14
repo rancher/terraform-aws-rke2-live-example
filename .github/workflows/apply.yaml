@@ -34,7 +34,7 @@ permissions: write-all
 jobs:
   apply_project_access:
     uses: ./.github/workflows/reusable-apply.yaml
-    if: inputs.type == 'project_access'
+    if: inputs.type == 'phase_1_project_access'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
       repository: ${{fromJson(inputs.github).repository}}
@@ -53,7 +53,7 @@ jobs:
 
   apply_ci_access:
     uses: ./.github/workflows/reusable-apply.yaml
-    if: inputs.type == 'ci_access'
+    if: inputs.type == 'phase_2_ci_access'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
       repository: ${{fromJson(inputs.github).repository}}
@@ -72,7 +72,7 @@ jobs:
 
   apply_prototype:
     uses: ./.github/workflows/reusable-apply.yaml
-    if: inputs.type == 'prototype'
+    if: inputs.type == 'phase_3_prototype'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
       repository: ${{fromJson(inputs.github).repository}}
@@ -91,7 +91,7 @@ jobs:
 
   apply_servers:
     uses: ./.github/workflows/reusable-apply.yaml
-    if: inputs.type == 'servers'
+    if: inputs.type == 'phase_4_servers'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
       repository: ${{fromJson(inputs.github).repository}}

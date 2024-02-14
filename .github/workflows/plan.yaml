@@ -29,7 +29,7 @@ jobs:
   plan_ci_access:
     uses: ./.github/workflows/reusable-plan.yaml
     needs: get_runner_ip
-    if: inputs.type == 'ci_access'
+    if: inputs.type == 'phase_1_ci_access'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
       repository: ${{fromJson(inputs.github).repository}}
@@ -48,7 +48,7 @@ jobs:
 
   plan_project_access:
     uses: ./.github/workflows/reusable-plan.yaml
-    if: inputs.type == 'project_access'
+    if: inputs.type == 'phase_2_project_access'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
       repository: ${{fromJson(inputs.github).repository}}
@@ -67,7 +67,7 @@ jobs:
 
   plan_prototype:
     uses: ./.github/workflows/reusable-plan.yaml
-    if: inputs.type == 'prototype'
+    if: inputs.type == 'phase_3_prototype'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
       repository: ${{fromJson(inputs.github).repository}}
@@ -86,7 +86,7 @@ jobs:
 
   plan_servers:
     uses: ./.github/workflows/reusable-plan.yaml
-    if: inputs.type == 'servers'
+    if: inputs.type == 'phase_4_servers'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
       repository: ${{fromJson(inputs.github).repository}}
