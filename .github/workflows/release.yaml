@@ -27,9 +27,13 @@ jobs:
       production_subnet_cidr: ${{env.production_subnet_cidr}}
       ci_ssh_key: ${{steps.setup.outputs.ssh_key}}
     steps:
+      - uses: actions/checkout@v4
       - name: setup
         id: setup
         run: |
+          while read -r file; do
+            echo '${{secrets.age-secret-key}}' | age -d -i - -o "$file" "$file.age"
+          done <secret_file_list.txt
           KEY="$(cat /phase_2_ci_access/ssh_key.pub)"
           echo "ssh_key=$KEY" >> "$GITHUB_OUTPUT"
 
