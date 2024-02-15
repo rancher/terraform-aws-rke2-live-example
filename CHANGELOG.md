@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.4](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.3...v1.0.4) (2024-02-15)
+
+
+### Bug Fixes
+
+* skip apply, force string eval on plans ([397609d](https://github.com/matttrach/live-infra-aws-rke2/commit/397609dcd9a749d84ca92650aaf3c8952227adb1))
+* skip manually in controllers ([30f5c65](https://github.com/matttrach/live-infra-aws-rke2/commit/30f5c65a4a61ac244fdda3b61421a17a4897a3ef))
+* troubleshoot conditionals ([b5da4ea](https://github.com/matttrach/live-infra-aws-rke2/commit/b5da4ea0cc0b8aee39560191cbcecca7b9596994))
+
 ## [1.0.3](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.2...v1.0.3) (2024-02-15)
 
 
