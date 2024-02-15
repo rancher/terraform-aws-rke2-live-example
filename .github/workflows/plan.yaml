@@ -25,7 +25,7 @@ jobs:
   get_runner_ip:
     runs-on: ubuntu-latest
     outputs:
-      ip: steps.ip.outputs.ipv4
+      ip: ${{steps.ip.outputs.ipv4}}
     steps:
       - uses: haythem/public-ip@v1.3
         id: ip
