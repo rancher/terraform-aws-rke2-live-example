@@ -65,8 +65,8 @@ jobs:
     needs:
       - env
     outputs:
-      release_created: steps.release-please.outputs.releases_created
-      pr_created: steps.release-please.outputs.prs_created
+      release_created: ${{steps.release-please.outputs.releases_created && 'true' || 'false'}}
+      pr_created: ${{steps.release-please.outputs.prs_created && 'true' || 'false'}}
       pr: steps.release-please.outputs.pr
     steps:
       - uses: google-github-actions/release-please-action@v4
@@ -87,6 +87,7 @@ jobs:
       type: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_1_project_access'}}
       variables: |
         {
+          "release": "${{needs.release.outputs.release_created}}",
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
           "project_cidr": "${{needs.env.outputs.project_cidr}}"
@@ -165,9 +166,11 @@ jobs:
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
-      type: skip #${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_1_project_access'}}
+      # ${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_1_project_access'}}
+      type: skip
       variables: |
         {
+          "release": "${{needs.release.outputs.release_created}}",
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
           "project_cidr": "${{needs.env.outputs.project_cidr}}"
