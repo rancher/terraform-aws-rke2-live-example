@@ -24,16 +24,16 @@ on:
         value: ${{jobs.apply_project_access.outputs > 0 && fromJSON(jobs.apply_project_access.outputs.output || '{}')}}
       apply_ci_access:
         description: The output from the job.
-        value: ${{fromJSON(jobs.apply_ci_access.outputs.output)}}
+        value: ${{jobs.apply_ci_access.outputs > 0 && fromJSON(jobs.apply_ci_access.outputs.output) || '{}'}}
       apply_prototype:
         description: The output from the job.
-        value: ${{fromJSON(jobs.apply_prototype.outputs.output)}}
+        value: ${{jobs.apply_prototype.outputs > 0 && fromJSON(jobs.apply_prototype.outputs.output) || '{}'}}
       apply_servers:
         description: The output from the job.
-        value: ${{fromJSON(jobs.apply_servers.outputs.output)}}
+        value: ${{jobs.apply_servers.outputs > 0 && fromJSON(jobs.apply_servers.outputs.output) || '{}'}}
       apply_skip:
         description: The output from the job.
-        value: ${{fromJSON(jobs.skip.outputs.output)}}
+        value: ${{jobs.skip.outputs > 0 && fromJSON(jobs.skip.outputs.output) || '{}'}}
 
 permissions: write-all
 
