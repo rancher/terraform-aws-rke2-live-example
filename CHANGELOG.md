@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.10](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.9...v1.0.10) (2024-02-15)
+
+
+### Bug Fixes
+
+* default output to empty ([596da7d](https://github.com/matttrach/live-infra-aws-rke2/commit/596da7dc6a75d135a96c22c2c4a2011444e8e2c8))
+* dont cast output ([3a764c3](https://github.com/matttrach/live-infra-aws-rke2/commit/3a764c30e3a30b22aa65a85015853b0bb7e6ea6b))
+* force output to json ([f61e5c4](https://github.com/matttrach/live-infra-aws-rke2/commit/f61e5c4147a1adfd48c6184a618d77bd3e2d5c97))
+* remove controller workflows ([#142](https://github.com/matttrach/live-infra-aws-rke2/issues/142)) ([2d5f631](https://github.com/matttrach/live-infra-aws-rke2/commit/2d5f6318a79caaea50c4f6ff21aef059401863f3))
+
 ## [1.0.9](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.8...v1.0.9) (2024-02-15)
 
 
