@@ -21,6 +21,11 @@ on:
         description: 'The id of the GitHub workflow run.'
         required: true
         type: string
+      ignore_error:
+        description: When true errors from this job will be ignored.
+        required: false
+        type: boolean
+        default: false
       variables:
         description: 'A json string of variables to pass to terraform. This will be written as terraform.tfvars.json file, please see https://developer.hashicorp.com/terraform/language/values/variables#variable-definitions-tfvars-files.'
         required: false
@@ -57,6 +62,7 @@ permissions: write-all
 jobs:
   reusable-apply:
     runs-on: ubuntu-latest
+    continue-on-error: ${{inputs.ignore_error}}
     outputs:
       output: ${{ steps.apply.outputs.output }}
     steps:
