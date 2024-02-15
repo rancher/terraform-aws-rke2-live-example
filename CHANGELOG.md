@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.0.0](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.2.7...v1.0.0) (2024-02-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* reorganizing around lifecycles ([#128](https://github.com/matttrach/live-infra-aws-rke2/issues/128))
+
+### Bug Fixes
+
+* add nix to setup ([00d0935](https://github.com/matttrach/live-infra-aws-rke2/commit/00d0935c633fa46d453f389afdc91ae16c0c911f))
+* decrypt in setup ([464ccd2](https://github.com/matttrach/live-infra-aws-rke2/commit/464ccd20d724881760724c51e9962afbfae5d039))
+* explicitly pass workspace ([c11ad53](https://github.com/matttrach/live-infra-aws-rke2/commit/c11ad53566e7033992f09a3153d98e924286da71))
+* fix directory names in types ([207b33f](https://github.com/matttrach/live-infra-aws-rke2/commit/207b33fbe4f2406d566a46ae7585b7495cdab53f))
+* generate encrypted files ([482f264](https://github.com/matttrach/live-infra-aws-rke2/commit/482f264788c7719b2d3a1cf507186e37bcf8078f))
+* handle missing encrypted files ([#129](https://github.com/matttrach/live-infra-aws-rke2/issues/129)) ([8fccb28](https://github.com/matttrach/live-infra-aws-rke2/commit/8fccb286b855f00451334f00545bb5b642b956a7))
+* ip out ([bb24878](https://github.com/matttrach/live-infra-aws-rke2/commit/bb24878720050772878ab6453b296131db4369f8))
+* make setup idempotent ([#130](https://github.com/matttrach/live-infra-aws-rke2/issues/130)) ([96dae40](https://github.com/matttrach/live-infra-aws-rke2/commit/96dae4038f3bdbd29e153ba7b815cdff477c8760))
+* pass along ignores for plans on new deploys ([8de34a8](https://github.com/matttrach/live-infra-aws-rke2/commit/8de34a8e2d6cad5da480d0ae2f87feeae2b0b555))
+* pass inputs more simply ([14519cb](https://github.com/matttrach/live-infra-aws-rke2/commit/14519cbbc911d03abbd2f7b2fc48960a19046212))
+* pass workspace through env step ([55d1e09](https://github.com/matttrach/live-infra-aws-rke2/commit/55d1e090b9aa9caef6ec3e982bef07dab9ab8ba6))
+* update readme ([#131](https://github.com/matttrach/live-infra-aws-rke2/issues/131)) ([0f3fe74](https://github.com/matttrach/live-infra-aws-rke2/commit/0f3fe74736a8e7f382302c75b64a066a861e9922))
+* use proper key ([11e8dd6](https://github.com/matttrach/live-infra-aws-rke2/commit/11e8dd66132480dadebc1f651088ab25a29e34dc))
+* use proper location ([0fe6a74](https://github.com/matttrach/live-infra-aws-rke2/commit/0fe6a74d7146347d966d47462775fb74c16a5f3d))
+
+
+### Code Refactoring
+
+* reorganizing around lifecycles ([#128](https://github.com/matttrach/live-infra-aws-rke2/issues/128)) ([e7a1939](https://github.com/matttrach/live-infra-aws-rke2/commit/e7a1939283835e58f1eb009c1d828d2100b2abbc))
+
 ## [0.2.7](https://github.com/matttrach/live-infra-aws-rke2/compare/v0.2.6...v0.2.7) (2024-01-17)
 
 
