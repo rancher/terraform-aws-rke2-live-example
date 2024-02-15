@@ -10,7 +10,7 @@ locals {
   identifier = var.project_name # greater project identifier helpful when looking for objects outside of Terraform, should be less than 10 characters
   vpc_name   = var.vpc_name
   owner      = var.project_owner
-  name       = "ci-access-${local.identifier}"
+  name       = local.identifier
   ssh_key    = var.ssh_key
 }
 

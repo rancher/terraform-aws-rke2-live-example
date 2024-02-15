@@ -10,11 +10,6 @@ on:
         description: The caller's github workspace.
         required: true
         type: string
-      ignore_error:
-        description: When true errors from this job will be ignored.
-        required: false
-        type: boolean
-        default: false
       type:
         description: Which plan job to run.
         required: true
@@ -37,7 +32,6 @@ on:
         description: The output from the job.
         value: ${{jobs.apply_servers.outputs.output}}
 
-
 permissions: write-all
 
 jobs:
@@ -50,7 +44,6 @@ jobs:
       workspace: ${{inputs.workspace}}
       directory: ${{inputs.type}}
       run-id: ${{fromJson(inputs.github).run_id}}
-      ignore_error: ${{inputs.ignore_error}}
       variables: ${{inputs.variables}}
     secrets:
       aws-region: ${{secrets.AWS_REGION}}
@@ -70,7 +63,6 @@ jobs:
       workspace: ${{inputs.workspace}}
       directory: ${{inputs.type}}
       run-id: ${{fromJson(inputs.github).run_id}}
-      ignore_error: ${{inputs.ignore_error}}
       variables: ${{inputs.variables}}
     secrets:
       aws-region: ${{secrets.AWS_REGION}}
@@ -90,7 +82,6 @@ jobs:
       workspace: ${{inputs.workspace}}
       directory: ${{inputs.type}}
       run-id: ${{fromJson(inputs.github).run_id}}
-      ignore_error: ${{inputs.ignore_error}}
       variables: ${{inputs.variables}}
     secrets:
       aws-region: ${{secrets.AWS_REGION}}
@@ -110,7 +101,6 @@ jobs:
       workspace: ${{inputs.workspace}}
       directory: ${{inputs.type}}
       run-id: ${{fromJson(inputs.github).run_id}}
-      ignore_error: ${{inputs.ignore_error}}
       variables: ${{inputs.variables}}
     secrets:
       aws-region: ${{secrets.AWS_REGION}}
