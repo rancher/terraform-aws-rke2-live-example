@@ -10,6 +10,7 @@ terraform.tfstate
 kubeconfig-*.yaml
 terraform.tfstate.backup
 terraform.tfstate*.backup
+.terraform.lock.hcl
 !*.age
 ssh_key
 ssh_key.pub

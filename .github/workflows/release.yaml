@@ -185,7 +185,7 @@ jobs:
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
           "ssh_key": "${{needs.env.outputs.ci_ssh_key}}",
-          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc}}"
+          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc.value}}"
         }
     secrets: inherit
 
@@ -204,8 +204,8 @@ jobs:
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
-          "ssh_key_name": "${{fromJSON(needs.apply_ci_access.outputs.apply_ci_access).ssh_key_name}}",
-          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc_name}}",
+          "ssh_key_name": "${{fromJSON(needs.apply_ci_access.outputs.apply_ci_access).ssh_key_name.value}}",
+          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc.value}}",
           "subnet_cidr": "${{needs.env.outputs.prototype_subnet_cidr}}"
         }
     secrets: inherit
@@ -226,13 +226,13 @@ jobs:
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
-          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc}}",
+          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc.value}}",
           "subnet_cidr": "${{needs.env.outputs.production_subnet_cidr}}",
-          "image_id": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_id}}",
-          "image_admin_group": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_admin_group}}",
-          "image_user": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_user}}",
-          "image_workfolder": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_workfolder}}",
-          "role": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).role}}"
+          "image_id": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_id.value}}",
+          "image_admin_group": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_admin_group.value}}",
+          "image_user": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_user.value}}",
+          "image_workfolder": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_workfolder.value}}",
+          "role": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).role.value}}"
         }
     secrets: inherit
 
@@ -254,6 +254,6 @@ jobs:
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
-          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc_name}}"
+          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc.value}}"
         }
     secrets: inherit
