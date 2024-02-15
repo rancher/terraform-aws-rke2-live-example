@@ -8,14 +8,18 @@ provider "aws" {
 }
 
 locals {
-  identifier         = var.project_name
-  name               = "livex-${local.identifier}"
-  owner              = var.project_owner
-  rke2_version       = "latest"
+  identifier   = var.project_name
+  name         = local.identifier
+  owner        = var.project_owner
+  rke2_version = var.rke2_version # defaults to 'latest' channel
+  rpm_channel  = "latest"
+  os           = "rhel-9" # https://github.com/rancher/terraform-aws-server/blob/main/modules/image/types.tf
+  # it is best to keep prototypes small so that the resulting image is small
+  size               = "small"          # smallest viable server: https://github.com/rancher/terraform-aws-server/blob/main/modules/server/types.tf
   vpc_name           = var.vpc_name     # select the project VPC
   subnet_cidr        = var.subnet_cidr  # must be within the VPC CIDR range
   ssh_key_name       = var.ssh_key_name # the name of the ci key generated in the previous stage
-  username           = "proto"
+  username           = local.identifier
   server_prep_script = file("${path.root}/prep.sh")
   extra_config       = file("${path.root}/config.yaml")
   ip                 = var.ip
@@ -48,12 +52,12 @@ module "proto_rke2_rhel9_rpm" {
   ssh_username = local.username
 
   rke2_version    = local.rke2_version
-  rpm_channel     = "stable"
-  image_type      = "rhel-9" # https://github.com/rancher/terraform-aws-server/blob/main/modules/image/types.tf
-  install_method  = "rpm"    # use the RPM install method when installing rke2
+  rpm_channel     = local.rpm_channel
+  image_type      = local.os
+  install_method  = "rpm" # use the RPM install method when installing rke2
   local_file_path = "${path.root}/${local.name}"
   role            = local.role # "server" or "agent", "server" for stand alone, see "dedicated" example for setting up clusters where different nodes have dedicated jobs
-  server_type     = "small"    # smallest viable server: https://github.com/rancher/terraform-aws-server/blob/main/modules/server/types.tf
+  server_type     = local.size
   #  availability_zone    = "us-west-1b"   # you can specify an availability zone name here https://us-west-1.console.aws.amazon.com/ec2/home?region=us-west-1#Settings:tab=zones, must match region!
   server_prep_script   = local.server_prep_script # prep RHEL9 for running rke2
   retrieve_kubeconfig  = false                    # get the kubeconfig so we can start using kubernetes locally

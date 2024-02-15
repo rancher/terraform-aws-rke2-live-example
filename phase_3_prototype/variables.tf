@@ -27,3 +27,10 @@ variable "subnet_cidr" {
   type        = string
   description = "the subnet cidr to deploy the prototype servers on"
 }
+
+# rke2 info
+variable "rke2_version" {
+  type        = string
+  description = "the release version or channel to send to the install script"
+  default     = "latest"
+}

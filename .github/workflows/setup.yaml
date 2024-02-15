@@ -83,6 +83,8 @@ jobs:
             rm -f ssh_key.pub.age; age -e -R ${{github.workspace}}/age_recipients.txt -o ssh_key.pub.age ssh_key.pub && rm -f ssh_key.pub;
             git add ${{github.workspace}}/phase_2_ci_access/ssh_key.pub.age
             git add ${{github.workspace}}/phase_2_ci_access/ssh_key.age
+            cp ${{github.workspace}}/phase_2_ci_access/ssh_key.pub.age  ${{github.workspace}}/phase_3_prototype/ssh_key.pub.age
+            cp ${{github.workspace}}/phase_2_ci_access/ssh_key.age  ${{github.workspace}}/phase_3_prototype/ssh_key.age
           fi
 
           # use tf to configure this repo's settings
