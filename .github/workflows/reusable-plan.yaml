@@ -58,7 +58,7 @@ jobs:
     steps:
       - uses: haythem/public-ip@v1.3
         id: ip
-      - run: echo '${{toJson(steps.ip.outputs)}}'
+      - run: echo '${{toJSON(steps.ip.outputs)}}'
 
   reusable-plan:
     runs-on: ubuntu-latest

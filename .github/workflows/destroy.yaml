@@ -31,15 +31,15 @@ jobs:
     if: inputs.type == 'phase_1_project_access'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
-      repository: ${{fromJson(inputs.github).repository}}
+      repository: ${{fromJSON(inputs.github).repository}}
       workspace: ${{inputs.workspace}}
       directory: ${{inputs.type}}
-      run-id: ${{fromJson(inputs.github).run_id}}
+      run-id: ${{fromJSON(inputs.github).run_id}}
       variables: ${{inputs.variables}}
     secrets:
       aws-region: ${{secrets.AWS_REGION}}
       aws-role: ${{secrets.AWS_ROLE}}
-      aws-session: ${{fromJson(inputs.github).job}}-${{fromJson(inputs.github).run_id}}-${{fromJson(inputs.github).run_number}}-${{fromJson(inputs.github).run_attempt}}
+      aws-session: ${{fromJSON(inputs.github).job}}-${{fromJSON(inputs.github).run_id}}-${{fromJSON(inputs.github).run_number}}-${{fromJSON(inputs.github).run_attempt}}
       aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
       aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
       github-token: ${{secrets.GITHUB_TOKEN}}
@@ -50,15 +50,15 @@ jobs:
     if: inputs.type == 'phase_2_ci_access'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
-      repository: ${{fromJson(inputs.github).repository}}
+      repository: ${{fromJSON(inputs.github).repository}}
       workspace: ${{inputs.workspace}}
       directory: ${{inputs.type}}
-      run-id: ${{fromJson(inputs.github).run_id}}
+      run-id: ${{fromJSON(inputs.github).run_id}}
       variables: ${{inputs.variables}}
     secrets:
       aws-region: ${{secrets.AWS_REGION}}
       aws-role: ${{secrets.AWS_ROLE}}
-      aws-session: ${{fromJson(inputs.github).job}}-${{fromJson(inputs.github).run_id}}-${{fromJson(inputs.github).run_number}}-${{fromJson(inputs.github).run_attempt}}
+      aws-session: ${{fromJSON(inputs.github).job}}-${{fromJSON(inputs.github).run_id}}-${{fromJSON(inputs.github).run_number}}-${{fromJSON(inputs.github).run_attempt}}
       aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
       aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
       github-token: ${{secrets.GITHUB_TOKEN}}
@@ -69,15 +69,15 @@ jobs:
     if: inputs.type == 'phase_3_prototype'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
-      repository: ${{fromJson(inputs.github).repository}}
+      repository: ${{fromJSON(inputs.github).repository}}
       workspace: ${{inputs.workspace}}
       directory: ${{inputs.type}}
-      run-id: ${{fromJson(inputs.github).run_id}}
+      run-id: ${{fromJSON(inputs.github).run_id}}
       variables: ${{inputs.variables}}
     secrets:
       aws-region: ${{secrets.AWS_REGION}}
       aws-role: ${{secrets.AWS_ROLE}}
-      aws-session: ${{fromJson(inputs.github).job}}-${{fromJson(inputs.github).run_id}}-${{fromJson(inputs.github).run_number}}-${{fromJson(inputs.github).run_attempt}}
+      aws-session: ${{fromJSON(inputs.github).job}}-${{fromJSON(inputs.github).run_id}}-${{fromJSON(inputs.github).run_number}}-${{fromJSON(inputs.github).run_attempt}}
       aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
       aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
       github-token: ${{secrets.GITHUB_TOKEN}}
@@ -88,15 +88,15 @@ jobs:
     if: inputs.type == 'phase_4_servers'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
-      repository: ${{fromJson(inputs.github).repository}}
+      repository: ${{fromJSON(inputs.github).repository}}
       workspace: ${{inputs.workspace}}
       directory: ${{inputs.type}}
-      run-id: ${{fromJson(inputs.github).run_id}}
+      run-id: ${{fromJSON(inputs.github).run_id}}
       variables: ${{inputs.variables}}
     secrets:
       aws-region: ${{secrets.AWS_REGION}}
       aws-role: ${{secrets.AWS_ROLE}}
-      aws-session: ${{fromJson(inputs.github).job}}-${{fromJson(inputs.github).run_id}}-${{fromJson(inputs.github).run_number}}-${{fromJson(inputs.github).run_attempt}}
+      aws-session: ${{fromJSON(inputs.github).job}}-${{fromJSON(inputs.github).run_id}}-${{fromJSON(inputs.github).run_number}}-${{fromJSON(inputs.github).run_attempt}}
       aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
       aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
       github-token: ${{secrets.GITHUB_TOKEN}}

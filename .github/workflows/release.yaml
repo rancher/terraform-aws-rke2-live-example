@@ -73,7 +73,7 @@ jobs:
         id: release-please
         with:
           release-type: terraform-module
-      - run: echo '${{toJson(steps.release-please.outputs)}}'
+      - run: echo '${{toJSON(steps.release-please.outputs)}}'
 
   plan_project_access:
     needs:
@@ -81,7 +81,7 @@ jobs:
       - release
     uses: ./.github/workflows/plan.yaml
     with:
-      github: ${{ toJson(github) }}
+      github: ${{ toJSON(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       type: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_1_project_access'}}
       variables: |
@@ -98,7 +98,7 @@ jobs:
       - release
     uses: ./.github/workflows/plan.yaml
     with:
-      github: ${{ toJson(github) }}
+      github: ${{ toJSON(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       type: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_2_ci_access'}}
       variables: |
@@ -116,7 +116,7 @@ jobs:
       - release
     uses: ./.github/workflows/plan.yaml
     with:
-      github: ${{ toJson(github) }}
+      github: ${{ toJSON(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       type: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_3_prototype'}}
       variables: |
@@ -135,7 +135,7 @@ jobs:
       - release
     uses: ./.github/workflows/plan.yaml
     with:
-      github: ${{ toJson(github) }}
+      github: ${{ toJSON(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       type: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_4_servers'}}
       variables: |
@@ -159,7 +159,7 @@ jobs:
       - env
       - release
     with:
-      github: ${{ toJson(github) }}
+      github: ${{ toJSON(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       type: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_4_servers' || 'skip'}}
       variables: |
@@ -177,7 +177,7 @@ jobs:
       - release
       - apply_project_access
     with:
-      github: ${{ toJson(github) }}
+      github: ${{ toJSON(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       type: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_2_ci_access' || 'skip'}}
       variables: |
@@ -197,15 +197,15 @@ jobs:
       - apply_project_access
       - apply_ci_access
     with:
-      github: ${{ toJson(github) }}
+      github: ${{ toJSON(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       type: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_3_prototype' || 'skip'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
-          "ssh_key_name": "${{fromJson(needs.apply_ci_access.outputs.apply_ci_access).ssh_key_name}}",
-          "vpc_name": "${{fromJson(needs.apply_project_access.outputs.apply_project_access).vpc_name}}",
+          "ssh_key_name": "${{fromJSON(needs.apply_ci_access.outputs.apply_ci_access).ssh_key_name}}",
+          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc_name}}",
           "subnet_cidr": "${{needs.env.outputs.prototype_subnet_cidr}}"
         }
     secrets: inherit
@@ -219,20 +219,20 @@ jobs:
       - apply_ci_access
       - apply_prototype
     with:
-      github: ${{ toJson(github) }}
+      github: ${{ toJSON(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       type: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_4_servers' || 'skip'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
-          "vpc_name": "${{fromJson(needs.apply_project_access.outputs.apply_project_access).vpc}}",
+          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc}}",
           "subnet_cidr": "${{needs.env.outputs.production_subnet_cidr}}",
-          "image_id": "${{fromJson(needs.apply_prototype.outputs.apply_prototype).image_id}}",
-          "image_admin_group": "${{fromJson(needs.apply_prototype.outputs.apply_prototype).image_admin_group}}",
-          "image_user": "${{fromJson(needs.apply_prototype.outputs.apply_prototype).image_user}}",
-          "image_workfolder": "${{fromJson(needs.apply_prototype.outputs.apply_prototype).image_workfolder}}",
-          "role": "${{fromJson(needs.apply_prototype.outputs.apply_prototype).role}}"
+          "image_id": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_id}}",
+          "image_admin_group": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_admin_group}}",
+          "image_user": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_user}}",
+          "image_workfolder": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_workfolder}}",
+          "role": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).role}}"
         }
     secrets: inherit
 
@@ -247,13 +247,13 @@ jobs:
       - apply_prototype
       - apply_servers
     with:
-      github: ${{ toJson(github) }}
+      github: ${{ toJSON(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       type: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_2_ci_access' || 'skip'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
-          "vpc_name": "${{fromJson(needs.apply_project_access.outputs.apply_project_access).vpc_name}}"
+          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc_name}}"
         }
     secrets: inherit
