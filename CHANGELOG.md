@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.1...v1.0.2) (2024-02-15)
+
+
+### Bug Fixes
+
+* move get runner ip to base level ([0535763](https://github.com/matttrach/live-infra-aws-rke2/commit/053576338e7c8b7866ca12054c3494d88b725ff8))
+
 ## [1.0.1](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.0...v1.0.1) (2024-02-15)
 
 
