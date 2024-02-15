@@ -50,7 +50,7 @@ on:
     outputs:
       output:
         description: 'The json output from terraform after the apply is run.'
-        value: ${{jobs.reusable-apply.outputs.output}}
+        value: ${{fromJSON(jobs.reusable-apply.outputs.output)}}
 
 permissions: write-all
 
