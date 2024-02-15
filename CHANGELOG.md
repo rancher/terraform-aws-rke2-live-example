@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.12](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.11...v1.0.12) (2024-02-15)
+
+
+### Bug Fixes
+
+* add prototype key to phase 3 and clean up variables ([#145](https://github.com/matttrach/live-infra-aws-rke2/issues/145)) ([9258f1e](https://github.com/matttrach/live-infra-aws-rke2/commit/9258f1e5063a005cd3cd3fcbc9a45a975964a0f3))
+* bump actions/cache from 3 to 4 ([#118](https://github.com/matttrach/live-infra-aws-rke2/issues/118)) ([bfc99ee](https://github.com/matttrach/live-infra-aws-rke2/commit/bfc99eec8d43f59d2143841471cdc77ddc618e06))
+* rename some workflows and add warnings ([6b90ef6](https://github.com/matttrach/live-infra-aws-rke2/commit/6b90ef6cce09b3bd9bdbb666d5b9e9d4b117c641))
+
 ## [1.0.11](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.10...v1.0.11) (2024-02-15)
 
 
