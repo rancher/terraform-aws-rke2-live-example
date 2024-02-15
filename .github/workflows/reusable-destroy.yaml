@@ -106,9 +106,9 @@ jobs:
             rm -f terraform.tfstate; echo '${{secrets.age-secret-key}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
             rm -f terraform.tfstate.age
 
-            if [ "" != "${{inputs.variables}}" ]; then
-              echo '${{inputs.variables}}' > "${{inputs.workspace}}/${{inputs.directory}}/terraform.tfvars.json"
-            fi
+            V='${{inputs.variables}}'
+            if [ -z "$V" ]; then V='{}';fi
+            echo "$V" > "terraform.tfvars.json"
 
             terraform init
             terraform destroy --auto-approve || true

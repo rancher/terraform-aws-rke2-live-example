@@ -119,9 +119,9 @@ jobs:
             ssh-add ssh_key
           fi
           echo 'Starting  deploy...'
-          if [ "" != "${{inputs.variables}}" ]; then
-            echo '${{inputs.variables}}' > "${{inputs.workspace}}/${{inputs.directory}}/terraform.tfvars.json"
-          fi
+          V='${{inputs.variables}}'
+          if [ "" != "$V" ]; then V='{}'; fi
+          echo "$V" > "terraform.tfvars.json"
 
           terraform init
           terraform apply --auto-approve || true
