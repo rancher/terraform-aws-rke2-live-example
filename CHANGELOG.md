@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.7](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.6...v1.0.7) (2024-02-15)
+
+
+### Bug Fixes
+
+* use value from outputs, try quoting json ([5de2561](https://github.com/matttrach/live-infra-aws-rke2/commit/5de256140d0064e49aea9fb58d1008eaf082137c))
+
 ## [1.0.6](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.5...v1.0.6) (2024-02-15)
 
 
