@@ -140,7 +140,7 @@ jobs:
 
           terraform init
           terraform apply --auto-approve || true
-          echo "output=|$(tf output -json)|" | tr -d '[\n ]' | sed 's/"/\\"/g' | tr '|' '"' >> "$GITHUB_OUTPUT"
+          echo "output=|$(tf output -json)|" | tr -d '\n ' | sed 's/"/\\"/g' | tr '|' '"' >> "$GITHUB_OUTPUT"
 
           echo "Updating state..."
           rm -rf terraform.tfstate.age && age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
