@@ -55,22 +55,14 @@ on:
 permissions: write-all
 
 jobs:
-  get_runner_ip:
-    runs-on: ubuntu-latest
-    outputs:
-      ip: ${{steps.ip.outputs.ipv4}}
-    steps:
-      - uses: haythem/public-ip@v1.3
-        id: ip
-      - run: echo '${{toJSON(steps.ip.outputs)}}'
-
   reusable-apply:
     runs-on: ubuntu-latest
-    needs:
-      - get_runner_ip
     outputs:
       output: ${{ steps.apply.outputs.output }}
     steps:
+      # this must be run in the same job to get the proper address
+      - uses: haythem/public-ip@v1.3
+        id: ip
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
       - uses: DeterminateSystems/magic-nix-cache-action@main
@@ -130,7 +122,7 @@ jobs:
             ssh-add ssh_key
           fi
           echo 'Starting  deploy...'
-          export TF_VAR_ip='${{needs.get_runner_ip.outputs.ip}}'
+          export TF_VAR_ip='${{steps.ip.outputs.ipv4}}'
           V='${{inputs.variables}}'
           if [ -z "$V" ]; then V='{}'; fi
           echo "$V" > "terraform.tfvars.json"
