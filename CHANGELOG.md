@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.8](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.7...v1.0.8) (2024-02-15)
+
+
+### Bug Fixes
+
+* actionlint ([ef4ffb9](https://github.com/matttrach/live-infra-aws-rke2/commit/ef4ffb94a94226e7c34021b26d1e06991cb98121))
+* sanitize output for gh ([fb404ad](https://github.com/matttrach/live-infra-aws-rke2/commit/fb404ad0612a52c42bce6573611b8ae213ac33a7))
+
 ## [1.0.7](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.6...v1.0.7) (2024-02-15)
 
 
