@@ -79,7 +79,7 @@ jobs:
       - env
       - release
     uses: ./.github/workflows/plan.yaml
-    if: ${{ ! needs.release.outputs.release_created }}
+    if: ${{needs.release.outputs.pr}}
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
@@ -98,7 +98,7 @@ jobs:
       - env
       - release
     uses: ./.github/workflows/plan.yaml
-    if: ${{ ! needs.release.outputs.release_created }}
+    if: ${{needs.release.outputs.pr}}
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
@@ -118,7 +118,7 @@ jobs:
       - env
       - release
     uses: ./.github/workflows/plan.yaml
-    if: ${{ ! needs.release.outputs.release_created }}
+    if: ${{needs.release.outputs.pr}}
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
@@ -139,7 +139,7 @@ jobs:
       - env
       - release
     uses: ./.github/workflows/plan.yaml
-    if: ${{ ! needs.release.outputs.release_created }}
+    if: ${{needs.release.outputs.pr}}
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
@@ -162,7 +162,7 @@ jobs:
 # these are only run after release is created
   apply_project_access:
     uses: ./.github/workflows/apply.yaml
-    if: ${{needs.release.outputs.release_created}}
+    if: ${{needs.release.outputs.release_created == true}}
     needs:
       - env
       - release
@@ -180,7 +180,7 @@ jobs:
 
   apply_ci_access:
     uses: ./.github/workflows/apply.yaml
-    if: ${{needs.release.outputs.release_created}}
+    if: ${{needs.release.outputs.release_created == true}}
     needs:
       - env
       - release
@@ -201,7 +201,7 @@ jobs:
 
   apply_prototype:
     uses: ./.github/workflows/apply.yaml
-    if: ${{needs.release.outputs.release_created}}
+    if: ${{needs.release.outputs.release_created == true}}
     needs:
       - env
       - release
@@ -223,7 +223,7 @@ jobs:
 
   apply_servers:
     uses: ./.github/workflows/apply.yaml
-    if: ${{needs.release.outputs.release_created}}
+    if: ${{needs.release.outputs.release_created == true}}
     needs:
       - env
       - release
@@ -250,8 +250,8 @@ jobs:
 
   # destroy CI Access after updating servers
   destroy_ci_access:
-    uses: ./.github/workflows/apply.yaml
-    if: ${{needs.release.outputs.release_created}}
+    uses: ./.github/workflows/destroy.yaml
+    if: ${{needs.release.outputs.release_created == true}}
     needs:
       - env
       - release

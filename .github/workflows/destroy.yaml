@@ -32,7 +32,7 @@ permissions: write-all
 
 jobs:
   destroy_project_access:
-    uses: ./.github/workflows/reusable-plan.yaml
+    uses: ./.github/workflows/reusable-destroy.yaml
     if: inputs.type == 'phase_1_project_access'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
@@ -52,7 +52,7 @@ jobs:
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
   destroy_ci_access:
-    uses: ./.github/workflows/reusable-plan.yaml
+    uses: ./.github/workflows/reusable-destroy.yaml
     if: inputs.type == 'phase_2_ci_access'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
@@ -72,7 +72,7 @@ jobs:
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
   destroy_prototype:
-    uses: ./.github/workflows/reusable-plan.yaml
+    uses: ./.github/workflows/reusable-destroy.yaml
     if: inputs.type == 'phase_3_prototype'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
@@ -92,7 +92,7 @@ jobs:
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
   destroy_servers:
-    uses: ./.github/workflows/reusable-plan.yaml
+    uses: ./.github/workflows/reusable-destroy.yaml
     if: inputs.type == 'phase_4_servers'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
