@@ -80,6 +80,7 @@ resource "aws_ami_from_instance" "golden" {
   depends_on = [
     random_uuid.join_token,
     module.proto_rke2_rhel9_rpm,
+    aws_ec2_instance_state.shut_down_prototype,
   ]
   name               = local.name
   source_instance_id = module.proto_rke2_rhel9_rpm.server.id
