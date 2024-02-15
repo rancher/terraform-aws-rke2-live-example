@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.9](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.8...v1.0.9) (2024-02-15)
+
+
+### Bug Fixes
+
+* get runner id in same job ([a443d44](https://github.com/matttrach/live-infra-aws-rke2/commit/a443d4453aba7ee11d7b2b8743be6120a57c6f92))
+* terraform not tf ([9ebe032](https://github.com/matttrach/live-infra-aws-rke2/commit/9ebe032019195695692c50a7f8eb043b6b91e68c))
+
 ## [1.0.8](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.7...v1.0.8) (2024-02-15)
 
 
