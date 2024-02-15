@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.3](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.2...v1.0.3) (2024-02-15)
+
+
+### Bug Fixes
+
+* troubleshoot tfvars and conditionals ([1afcef8](https://github.com/matttrach/live-infra-aws-rke2/commit/1afcef8d3bf50e79469e8ce5b7b6857370f0498d))
+* try implicit boolean values ([b82ecb0](https://github.com/matttrach/live-infra-aws-rke2/commit/b82ecb0be4587fe280fcdc64136db363b396d7a8))
+
 ## [1.0.2](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.1...v1.0.2) (2024-02-15)
 
 
