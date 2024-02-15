@@ -84,7 +84,7 @@ jobs:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       ignore_error: true
-      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_1_project_access'}}
+      type: ${{endsWith(needs.release.outputs.release_created,'false') && 'skip' || 'phase_1_project_access'}}
       variables: |
         {
           "pr_created": "${{needs.release.outputs.pr_created}}",
