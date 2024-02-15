@@ -50,7 +50,7 @@ on:
     outputs:
       output:
         description: 'The json output from terraform after the apply is run.'
-        value: ${{jobs.reusable-apply.outputs > 0 && jobs.reusable-apply.outputs.output || '{}'}}
+        value: ${{jobs.reusable-apply.outputs.output}}
 
 permissions: write-all
 
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{inputs.directory != 'skip'}}
     outputs:
-      output: ${{ steps.apply.outputs.output }}
+      output: ${{ fromJSON(steps.apply.outputs.output) }}
     steps:
       # this must be run in the same job to get the proper address
       - uses: haythem/public-ip@v1.3
@@ -127,8 +127,8 @@ jobs:
           V='${{inputs.variables}}'
           if [ -z "$V" ]; then V='{}'; fi
           echo "$V" > "terraform.tfvars.json"
-          pwd
-          ls -lah
+
+          echo 'with vars: '
           cat terraform.tfvars.json
 
           terraform init
@@ -149,3 +149,5 @@ jobs:
           git commit -s -m "New ${{inputs.directory}} State https://github.com/${{inputs.repository}}/actions/runs/${{inputs.run-id}}"
           git pull --rebase
           git push origin main
+          echo 'outputs: '
+          cat "$GITHUB_OUTPUT"
