@@ -60,16 +60,6 @@ jobs:
           echo "ssh_key=$KEY" >> "$GITHUB_OUTPUT"
           echo "workspace=${{github.workspace}}" >> "$GITHUB_OUTPUT"
 
-  get_runner_ip:
-    runs-on: ubuntu-latest
-    needs:
-      - env
-    outputs:
-      ip: ${{steps.ip.outputs.ipv4}}
-    steps:
-      - uses: haythem/public-ip@v1.3
-        id: ip
-
   release:
     runs-on: ubuntu-latest
     needs:
@@ -89,7 +79,7 @@ jobs:
       - env
       - release
     uses: ./.github/workflows/plan.yaml
-    if: needs.release.outputs.release_created == 'false'
+    if: ${{needs.release.outputs.release_created == 'false'}}
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
@@ -106,10 +96,9 @@ jobs:
   plan_ci_access:
     needs:
       - env
-      - get_runner_ip
       - release
     uses: ./.github/workflows/plan.yaml
-    if: needs.release.outputs.release_created == 'false'
+    if: ${{needs.release.outputs.release_created == 'false'}}
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
@@ -119,7 +108,6 @@ jobs:
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
-          "ip": "${{needs.get_runner_ip.outputs.ip}}",
           "vpc_name": "${{needs.env.outputs.project_name}}",
           "ssh_key": "${{needs.env.outputs.ci_ssh_key}}"
         }
@@ -128,10 +116,9 @@ jobs:
   plan_prototype:
     needs:
       - env
-      - get_runner_ip
       - release
     uses: ./.github/workflows/plan.yaml
-    if: needs.release.outputs.release_created == 'false'
+    if: ${{needs.release.outputs.release_created == 'false'}}
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
@@ -141,7 +128,6 @@ jobs:
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
-          "ip": "${{needs.get_runner_ip.outputs.ip}}",
           "ssh_key_name": "${{needs.env.outputs.project_name}}",
           "vpc_name": "${{needs.env.outputs.project_name}}",
           "subnet_cidr": "${{needs.env.outputs.prototype_subnet_cidr}}"
@@ -153,7 +139,7 @@ jobs:
       - env
       - release
     uses: ./.github/workflows/plan.yaml
-    if: needs.release.outputs.release_created == 'false'
+    if: ${{needs.release.outputs.release_created == 'false'}}
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
@@ -176,7 +162,7 @@ jobs:
 # these are only run after release is created
   apply_project_access:
     uses: ./.github/workflows/apply.yaml
-    if: needs.release.outputs.release_created == 'true'
+    if: ${{needs.release.outputs.release_created == 'true'}}
     needs:
       - env
       - release
@@ -194,10 +180,9 @@ jobs:
 
   apply_ci_access:
     uses: ./.github/workflows/apply.yaml
-    if: needs.release.outputs.release_created == 'true'
+    if: ${{needs.release.outputs.release_created == 'true'}}
     needs:
       - env
-      - get_runner_ip
       - release
       - apply_project_access
     with:
@@ -208,7 +193,6 @@ jobs:
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
-          "ip": "${{needs.get_runner_ip.outputs.ip}}",
           "ssh_key": "${{needs.env.outputs.ci_ssh_key}}",
           "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc}}"
         }
@@ -217,10 +201,9 @@ jobs:
 
   apply_prototype:
     uses: ./.github/workflows/apply.yaml
-    if: needs.release.outputs.release_created == 'true'
+    if: ${{needs.release.outputs.release_created == 'true'}}
     needs:
       - env
-      - get_runner_ip
       - release
       - apply_project_access
       - apply_ci_access
@@ -232,7 +215,6 @@ jobs:
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
-          "ip": "${{needs.get_runner_ip.outputs.ip}}",
           "ssh_key_name": "${{fromJson(needs.apply_ci_access.outputs.apply_ci_access).ssh_key_name}}",
           "vpc_name": "${{fromJson(needs.apply_project_access.outputs.apply_project_access).vpc_name}}",
           "subnet_cidr": "${{needs.env.outputs.prototype_subnet_cidr}}"
@@ -241,7 +223,7 @@ jobs:
 
   apply_servers:
     uses: ./.github/workflows/apply.yaml
-    if: needs.release.outputs.release_created == 'true'
+    if: ${{needs.release.outputs.release_created == 'true'}}
     needs:
       - env
       - release
@@ -269,10 +251,9 @@ jobs:
   # destroy CI Access after updating servers
   destroy_ci_access:
     uses: ./.github/workflows/apply.yaml
-    if: needs.release.outputs.release_created == 'true'
+    if: ${{needs.release.outputs.release_created == 'true'}}
     needs:
       - env
-      - get_runner_ip
       - release
       - apply_ci_access
       - apply_project_access
@@ -286,7 +267,6 @@ jobs:
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
-          "ip": "${{needs.get_runner_ip.outputs.ip}}",
           "vpc_name": "${{fromJson(needs.apply_project_access.outputs.apply_project_access).vpc_name}}"
         }
     secrets: inherit
