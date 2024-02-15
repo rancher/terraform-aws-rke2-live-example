@@ -1,6 +1,5 @@
-name: setup
+name: setup_repo
 # this workflow sets up your repo, run this before first release
-# WARNING! this step is not idempotent and is destructive
 on:
   # only on dispatch
   workflow_dispatch:
@@ -85,6 +84,8 @@ jobs:
             git add ${{github.workspace}}/phase_2_ci_access/ssh_key.age
             cp ${{github.workspace}}/phase_2_ci_access/ssh_key.pub.age  ${{github.workspace}}/phase_3_prototype/ssh_key.pub.age
             cp ${{github.workspace}}/phase_2_ci_access/ssh_key.age  ${{github.workspace}}/phase_3_prototype/ssh_key.age
+            git add ${{github.workspace}}/phase_3_prototype/ssh_key.pub.age
+            git add ${{github.workspace}}/phase_3_prototype/ssh_key.age
           fi
 
           # use tf to configure this repo's settings

@@ -1,5 +1,6 @@
 name: release
-
+# this will automatically run when something is merged to main
+# please see google-github-actions/release-please-action for more information: https://github.com/google-github-actions/release-please-action
 on:
   push:
     branches:
