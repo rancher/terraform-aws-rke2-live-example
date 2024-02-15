@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.13](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.12...v1.0.13) (2024-02-15)
+
+
+### Bug Fixes
+
+* ami should depend on shutting down the prototype ([#147](https://github.com/matttrach/live-infra-aws-rke2/issues/147)) ([bf38823](https://github.com/matttrach/live-infra-aws-rke2/commit/bf38823d592089285fb105c2e4cb9a018c74261e))
+
 ## [1.0.12](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.11...v1.0.12) (2024-02-15)
 
 
