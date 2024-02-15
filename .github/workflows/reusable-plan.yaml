@@ -92,7 +92,7 @@ jobs:
           aws-access-key-id: ${{ secrets.aws-access-key-id }}
           aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
           aws-region: ${{secrets.aws-region}}
-      - uses: actions/cache/restore@v3
+      - uses: actions/cache/restore@v4
         id: cache-terraform-restore
         with:
           path: ${{ inputs.workspace }}/${{inputs.directory}}/.terraform

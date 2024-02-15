@@ -49,13 +49,13 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{secrets.AWS_REGION}}
-      - uses: actions/cache/restore@v3
+      - uses: actions/cache/restore@v4
         id: cache-terraform-restore
         with:
           path: ${{ github.workspace }}/.terraform
           key: terraform-${{hashFiles('**/versions.tf','**/main.tf')}}
       - run: terraform init -upgrade
-      - uses: actions/cache/save@v3
+      - uses: actions/cache/save@v4
         id: cache-terraform-save
         with:
           path: ${{ github.workspace }}/.terraform
