@@ -161,7 +161,7 @@ jobs:
     with:
       github: ${{ toJSON(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
-      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_4_servers' || 'skip'}}
+      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_1_project_access' || 'skip'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
