@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.5](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.4...v1.0.5) (2024-02-15)
+
+
+### Bug Fixes
+
+* force explicit compare ([b0a3f6d](https://github.com/matttrach/live-infra-aws-rke2/commit/b0a3f6df5ffc726cf36460cc9e7afc69d6776eba))
+* force output to strings and print ([d409376](https://github.com/matttrach/live-infra-aws-rke2/commit/d409376d616c8d24ab3deaa829f223072d5cce6d))
+* plans default to running, apply defaults to skipping ([8f23fd0](https://github.com/matttrach/live-infra-aws-rke2/commit/8f23fd009fa521577ba831c0a6fbe34465a172e5))
+* remove ignores and always continue on plan errors ([075b360](https://github.com/matttrach/live-infra-aws-rke2/commit/075b360d90f746010ccbcf02bd43ce37f790d91a))
+* try flipping one ([6f4b6d3](https://github.com/matttrach/live-infra-aws-rke2/commit/6f4b6d341e6ae37353fcfc07a56bf6b7871968ef))
+* try forcing output type ([2291ca3](https://github.com/matttrach/live-infra-aws-rke2/commit/2291ca3fc0dbab3e742f22afde36fbf63ac5cee3))
+* try forcing output types ([412267d](https://github.com/matttrach/live-infra-aws-rke2/commit/412267d1aa42f43d01721a3b633bd38d30fe9a06))
+* try to sanitize outputs to json ([d318f29](https://github.com/matttrach/live-infra-aws-rke2/commit/d318f29c573fc50afa32e9eb39816a19d5472fdb))
+* typo ([f53aea2](https://github.com/matttrach/live-infra-aws-rke2/commit/f53aea2b61eac6a901eab97e838d530021d9e163))
+
 ## [1.0.4](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.3...v1.0.4) (2024-02-15)
 
 
