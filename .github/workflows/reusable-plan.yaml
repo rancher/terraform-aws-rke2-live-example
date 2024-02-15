@@ -53,6 +53,7 @@ permissions: write-all
 jobs:
   reusable-plan:
     runs-on: ubuntu-latest
+    if: ${{inputs.directory != 'skip'}}
     steps:
       # this must be run in the same job to get the proper address
       - uses: haythem/public-ip@v1.3

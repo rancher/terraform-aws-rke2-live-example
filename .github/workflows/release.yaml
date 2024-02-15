@@ -79,28 +79,40 @@ jobs:
     needs:
       - env
       - release
-    uses: ./.github/workflows/plan.yaml
+    uses: ./.github/workflows/reusable-plan.yaml
     with:
-      github: ${{ toJSON(github) }}
-      workspace: "${{needs.env.outputs.workspace}}"
-      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_1_project_access'}}
+      aws-auth-type: ${{vars.AWS_AUTH}}
+      repository: ${{github.repository}}
+      workspace: ${{needs.env.outputs.workspace}}
+      run-id: ${{github.run_id}}
+      directory: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_1_project_access'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
           "project_cidr": "${{needs.env.outputs.project_cidr}}"
         }
-    secrets: inherit
+    secrets:
+      aws-region: ${{secrets.AWS_REGION}}
+      aws-role: ${{secrets.AWS_ROLE}}
+      aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
+      aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+      aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      github-token: ${{secrets.GITHUB_TOKEN}}
+      age-secret-key: ${{secrets.AGE_SECRET_KEY}}
+
 
   plan_ci_access:
     needs:
       - env
       - release
-    uses: ./.github/workflows/plan.yaml
+    uses: ./.github/workflows/reusable-plan.yaml
     with:
-      github: ${{ toJSON(github) }}
-      workspace: "${{needs.env.outputs.workspace}}"
-      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_2_ci_access'}}
+      aws-auth-type: ${{vars.AWS_AUTH}}
+      repository: ${{github.repository}}
+      workspace: ${{needs.env.outputs.workspace}}
+      run-id: ${{github.run_id}}
+      directory: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_2_ci_access'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -108,17 +120,26 @@ jobs:
           "vpc_name": "${{needs.env.outputs.project_name}}",
           "ssh_key": "${{needs.env.outputs.ci_ssh_key}}"
         }
-    secrets: inherit
+    secrets:
+      aws-region: ${{secrets.AWS_REGION}}
+      aws-role: ${{secrets.AWS_ROLE}}
+      aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
+      aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+      aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      github-token: ${{secrets.GITHUB_TOKEN}}
+      age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
   plan_prototype:
     needs:
       - env
       - release
-    uses: ./.github/workflows/plan.yaml
+    uses: ./.github/workflows/reusable-plan.yaml
     with:
-      github: ${{ toJSON(github) }}
-      workspace: "${{needs.env.outputs.workspace}}"
-      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_3_prototype'}}
+      aws-auth-type: ${{vars.AWS_AUTH}}
+      repository: ${{github.repository}}
+      workspace: ${{needs.env.outputs.workspace}}
+      run-id: ${{github.run_id}}
+      directory: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_3_prototype'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -127,17 +148,26 @@ jobs:
           "vpc_name": "${{needs.env.outputs.project_name}}",
           "subnet_cidr": "${{needs.env.outputs.prototype_subnet_cidr}}"
         }
-    secrets: inherit
+    secrets:
+      aws-region: ${{secrets.AWS_REGION}}
+      aws-role: ${{secrets.AWS_ROLE}}
+      aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
+      aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+      aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      github-token: ${{secrets.GITHUB_TOKEN}}
+      age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
   plan_servers:
     needs:
       - env
       - release
-    uses: ./.github/workflows/plan.yaml
+    uses: ./.github/workflows/reusable-plan.yaml
     with:
-      github: ${{ toJSON(github) }}
-      workspace: "${{needs.env.outputs.workspace}}"
-      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_4_servers'}}
+      aws-auth-type: ${{vars.AWS_AUTH}}
+      repository: ${{github.repository}}
+      workspace: ${{needs.env.outputs.workspace}}
+      run-id: ${{github.run_id}}
+      directory: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_4_servers'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -150,110 +180,163 @@ jobs:
           "image_workfolder": "~",
           "role": "server"
         }
-    secrets: inherit
+    secrets:
+      aws-region: ${{secrets.AWS_REGION}}
+      aws-role: ${{secrets.AWS_ROLE}}
+      aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
+      aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+      aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      github-token: ${{secrets.GITHUB_TOKEN}}
+      age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
 # these are only run after release is created
   apply_project_access:
-    uses: ./.github/workflows/apply.yaml
     needs:
       - env
       - release
+    uses: ./.github/workflows/reusable-apply.yaml
     with:
-      github: ${{ toJSON(github) }}
-      workspace: "${{needs.env.outputs.workspace}}"
-      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_1_project_access' || 'skip'}}
+      aws-auth-type: ${{vars.AWS_AUTH}}
+      repository: ${{github.repository}}
+      workspace: ${{needs.env.outputs.workspace}}
+      run-id: ${{github.run_id}}
+      directory: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_1_project_access' || 'skip'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
           "project_cidr": "${{needs.env.outputs.project_cidr}}"
         }
-    secrets: inherit
+    secrets:
+      aws-region: ${{secrets.AWS_REGION}}
+      aws-role: ${{secrets.AWS_ROLE}}
+      aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
+      aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+      aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      github-token: ${{secrets.GITHUB_TOKEN}}
+      age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
   apply_ci_access:
-    uses: ./.github/workflows/apply.yaml
     needs:
       - env
       - release
       - apply_project_access
+    uses: ./.github/workflows/reusable-apply.yaml
     with:
-      github: ${{ toJSON(github) }}
-      workspace: "${{needs.env.outputs.workspace}}"
-      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_2_ci_access' || 'skip'}}
+      aws-auth-type: ${{vars.AWS_AUTH}}
+      repository: ${{github.repository}}
+      workspace: ${{needs.env.outputs.workspace}}
+      run-id: ${{github.run_id}}
+      directory: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_2_ci_access' || 'skip'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
           "ssh_key": "${{needs.env.outputs.ci_ssh_key}}",
-          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc.value}}"
+          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.output).vpc.value}}"
         }
-    secrets: inherit
+    secrets:
+      aws-region: ${{secrets.AWS_REGION}}
+      aws-role: ${{secrets.AWS_ROLE}}
+      aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
+      aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+      aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      github-token: ${{secrets.GITHUB_TOKEN}}
+      age-secret-key: ${{secrets.AGE_SECRET_KEY}}
+
 
   apply_prototype:
-    uses: ./.github/workflows/apply.yaml
     needs:
       - env
       - release
       - apply_project_access
       - apply_ci_access
+    uses: ./.github/workflows/reusable-apply.yaml
     with:
-      github: ${{ toJSON(github) }}
-      workspace: "${{needs.env.outputs.workspace}}"
-      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_3_prototype' || 'skip'}}
+      aws-auth-type: ${{vars.AWS_AUTH}}
+      repository: ${{github.repository}}
+      workspace: ${{needs.env.outputs.workspace}}
+      run-id: ${{github.run_id}}
+      directory: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_3_prototype' || 'skip'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
-          "ssh_key_name": "${{fromJSON(needs.apply_ci_access.outputs.apply_ci_access).ssh_key_name.value}}",
-          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc.value}}",
+          "ssh_key_name": "${{fromJSON(needs.apply_ci_access.outputs.output).ssh_key_name.value}}",
+          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.output).vpc.value}}",
           "subnet_cidr": "${{needs.env.outputs.prototype_subnet_cidr}}"
         }
-    secrets: inherit
+    secrets:
+      aws-region: ${{secrets.AWS_REGION}}
+      aws-role: ${{secrets.AWS_ROLE}}
+      aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
+      aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+      aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      github-token: ${{secrets.GITHUB_TOKEN}}
+      age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
   apply_servers:
-    uses: ./.github/workflows/apply.yaml
     needs:
       - env
       - release
       - apply_project_access
       - apply_ci_access
       - apply_prototype
+    uses: ./.github/workflows/reusable-apply.yaml
     with:
-      github: ${{ toJSON(github) }}
-      workspace: "${{needs.env.outputs.workspace}}"
-      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_4_servers' || 'skip'}}
+      aws-auth-type: ${{vars.AWS_AUTH}}
+      repository: ${{github.repository}}
+      workspace: ${{needs.env.outputs.workspace}}
+      run-id: ${{github.run_id}}
+      directory: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_4_servers' || 'skip'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
-          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc.value}}",
+          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.output).vpc.value}}",
           "subnet_cidr": "${{needs.env.outputs.production_subnet_cidr}}",
-          "image_id": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_id.value}}",
-          "image_admin_group": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_admin_group.value}}",
-          "image_user": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_user.value}}",
-          "image_workfolder": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).image_workfolder.value}}",
-          "role": "${{fromJSON(needs.apply_prototype.outputs.apply_prototype).role.value}}"
+          "image_id": "${{fromJSON(needs.apply_prototype.outputs.output).image_id.value}}",
+          "image_admin_group": "${{fromJSON(needs.apply_prototype.outputs.output).image_admin_group.value}}",
+          "image_user": "${{fromJSON(needs.apply_prototype.outputs.output).image_user.value}}",
+          "image_workfolder": "${{fromJSON(needs.apply_prototype.outputs.output).image_workfolder.value}}",
+          "role": "${{fromJSON(needs.apply_prototype.outputs.output).role.value}}"
         }
-    secrets: inherit
+    secrets:
+      aws-region: ${{secrets.AWS_REGION}}
+      aws-role: ${{secrets.AWS_ROLE}}
+      aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
+      aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+      aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      github-token: ${{secrets.GITHUB_TOKEN}}
+      age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
   # destroy CI Access after updating servers
   destroy_ci_access:
-    uses: ./.github/workflows/destroy.yaml
     needs:
       - env
       - release
-      - apply_ci_access
       - apply_project_access
+      - apply_ci_access
       - apply_prototype
       - apply_servers
+    uses: ./.github/workflows/reusable-destroy.yaml
     with:
-      github: ${{ toJSON(github) }}
-      workspace: "${{needs.env.outputs.workspace}}"
-      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_2_ci_access' || 'skip'}}
+      aws-auth-type: ${{vars.AWS_AUTH}}
+      repository: ${{github.repository}}
+      workspace: ${{needs.env.outputs.workspace}}
+      run-id: ${{github.run_id}}
+      directory: ${{endsWith(needs.release.outputs.release_created,'true') && 'phase_2_ci_access' || 'skip'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
-          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.apply_project_access).vpc.value}}"
+          "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.output).vpc.value}}"
         }
-    secrets: inherit
+    secrets:
+      aws-region: ${{secrets.AWS_REGION}}
+      aws-role: ${{secrets.AWS_ROLE}}
+      aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
+      aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+      aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+      github-token: ${{secrets.GITHUB_TOKEN}}
+      age-secret-key: ${{secrets.AGE_SECRET_KEY}}

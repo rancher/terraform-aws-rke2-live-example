@@ -57,6 +57,7 @@ permissions: write-all
 jobs:
   reusable-apply:
     runs-on: ubuntu-latest
+    if: ${{inputs.directory != 'skip'}}
     outputs:
       output: ${{ steps.apply.outputs.output }}
     steps:
