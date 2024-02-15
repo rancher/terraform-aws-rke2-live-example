@@ -26,6 +26,7 @@ jobs:
       prototype_subnet_cidr: ${{env.prototype_subnet_cidr}}
       production_subnet_cidr: ${{env.production_subnet_cidr}}
       ci_ssh_key: ${{steps.setup.outputs.ssh_key}}
+      workspace: ${{steps.setup.outputs.workspace}}
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@main
@@ -57,6 +58,7 @@ jobs:
           done <secret_file_list.txt
           KEY="$(cat ${{github.workspace}}/phase_2_ci_access/ssh_key.pub)"
           echo "ssh_key=$KEY" >> "$GITHUB_OUTPUT"
+          echo "workspace=${{github.workspace}}" >> "$GITHUB_OUTPUT"
 
   get_runner_ip:
     runs-on: ubuntu-latest
@@ -87,7 +89,7 @@ jobs:
     uses: ./.github/workflows/plan.yaml
     with:
       github: ${{ toJson(github) }}
-      workspace: "${{github.workspace}}"
+      workspace: "${{needs.env.outputs.workspace}}"
       type: "phase_1_project_access"
       variables: |
         {
@@ -105,7 +107,7 @@ jobs:
     uses: ./.github/workflows/plan.yaml
     with:
       github: ${{ toJson(github) }}
-      workspace: "${{github.workspace}}"
+      workspace: "${{needs.env.outputs.workspace}}"
       type: "phase_2_ci_access"
       variables: |
         {
@@ -125,7 +127,7 @@ jobs:
     uses: ./.github/workflows/plan.yaml
     with:
       github: ${{ toJson(github) }}
-      workspace: "${{github.workspace}}"
+      workspace: "${{needs.env.outputs.workspace}}"
       type: "phase_3_prototype"
       variables: |
         {
@@ -145,7 +147,7 @@ jobs:
     uses: ./.github/workflows/plan.yaml
     with:
       github: ${{ toJson(github) }}
-      workspace: "${{github.workspace}}"
+      workspace: "${{needs.env.outputs.workspace}}"
       type: "phase_4_servers"
       variables: |
         {
@@ -170,7 +172,7 @@ jobs:
       - release
     with:
       github: ${{ toJson(github) }}
-      workspace: "${{github.workspace}}"
+      workspace: "${{needs.env.outputs.workspace}}"
       type: "phase_1_project_access"
       variables: |
         {
@@ -190,7 +192,7 @@ jobs:
       - apply_project_access
     with:
       github: ${{ toJson(github) }}
-      workspace: "${{github.workspace}}"
+      workspace: "${{needs.env.outputs.workspace}}"
       type: "phase_2_ci_access"
       variables: |
         {
@@ -214,7 +216,7 @@ jobs:
       - apply_ci_access
     with:
       github: ${{ toJson(github) }}
-      workspace: "${{github.workspace}}"
+      workspace: "${{needs.env.outputs.workspace}}"
       type: "phase_3_prototype"
       variables: |
         {
@@ -238,7 +240,7 @@ jobs:
       - apply_prototype
     with:
       github: ${{ toJson(github) }}
-      workspace: "${{github.workspace}}"
+      workspace: "${{needs.env.outputs.workspace}}"
       type: "phase_4_servers"
       variables: |
         {
@@ -268,7 +270,7 @@ jobs:
       - apply_servers
     with:
       github: ${{ toJson(github) }}
-      workspace: "${{github.workspace}}"
+      workspace: "${{needs.env.outputs.workspace}}"
       type: "phase_2_ci_access"
       variables: |
         {

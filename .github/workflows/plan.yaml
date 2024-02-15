@@ -30,10 +30,9 @@ jobs:
       - uses: haythem/public-ip@v1.3
         id: ip
 
-  plan_ci_access:
+  plan_project_access:
     uses: ./.github/workflows/reusable-plan.yaml
-    needs: get_runner_ip
-    if: inputs.type == 'phase_1_ci_access'
+    if: inputs.type == 'phase_1_project_access'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
       repository: ${{fromJson(inputs.github).repository}}
@@ -50,9 +49,10 @@ jobs:
       github-token: ${{secrets.GITHUB_TOKEN}}
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
-  plan_project_access:
+  plan_ci_access:
     uses: ./.github/workflows/reusable-plan.yaml
-    if: inputs.type == 'phase_2_project_access'
+    needs: get_runner_ip
+    if: inputs.type == 'phase_2_ci_access'
     with:
       aws-auth-type: ${{vars.AWS_AUTH}}
       repository: ${{fromJson(inputs.github).repository}}
