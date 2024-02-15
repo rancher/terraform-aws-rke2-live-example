@@ -84,7 +84,7 @@ jobs:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       ignore_error: true
-      type: ${{needs.release.outputs.release_created == 'true' && 'skip' || 'phase_1_project_access'}}
+      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_1_project_access'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -102,7 +102,7 @@ jobs:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       ignore_error: true
-      type: ${{needs.release.outputs.release_created == 'true' && 'skip' || 'phase_2_ci_access'}}
+      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_2_ci_access'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -121,7 +121,7 @@ jobs:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       ignore_error: true
-      type: ${{needs.release.outputs.release_created == 'true' && 'skip' || 'phase_3_prototype'}}
+      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_3_prototype'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -141,7 +141,7 @@ jobs:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       ignore_error: true
-      type: ${{needs.release.outputs.release_created == 'true' && 'skip' || 'phase_4_servers'}}
+      type: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_4_servers'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -165,7 +165,7 @@ jobs:
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
-      type: ${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_1_project_access'}}
+      type: skip #${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_1_project_access'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -183,7 +183,7 @@ jobs:
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
-      type: ${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_2_ci_access'}}
+      type: skip #${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_2_ci_access'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -203,7 +203,7 @@ jobs:
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
-      type: ${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_3_prototype'}}
+      type: skip #${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_3_prototype'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -225,7 +225,7 @@ jobs:
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
-      type: ${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_4_servers'}}
+      type: skip #${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_4_servers'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -253,7 +253,7 @@ jobs:
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
-      type: ${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_2_ci_access'}}
+      type: skip #${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_2_ci_access'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
