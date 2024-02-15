@@ -87,6 +87,7 @@ jobs:
     uses: ./.github/workflows/plan.yaml
     with:
       github: ${{ toJson(github) }}
+      workspace: "${{github.workspace}}"
       type: "phase_1_project_access"
       variables: |
         {
@@ -104,6 +105,7 @@ jobs:
     uses: ./.github/workflows/plan.yaml
     with:
       github: ${{ toJson(github) }}
+      workspace: "${{github.workspace}}"
       type: "phase_2_ci_access"
       variables: |
         {
@@ -123,6 +125,7 @@ jobs:
     uses: ./.github/workflows/plan.yaml
     with:
       github: ${{ toJson(github) }}
+      workspace: "${{github.workspace}}"
       type: "phase_3_prototype"
       variables: |
         {
@@ -142,6 +145,7 @@ jobs:
     uses: ./.github/workflows/plan.yaml
     with:
       github: ${{ toJson(github) }}
+      workspace: "${{github.workspace}}"
       type: "phase_4_servers"
       variables: |
         {
@@ -166,6 +170,7 @@ jobs:
       - release
     with:
       github: ${{ toJson(github) }}
+      workspace: "${{github.workspace}}"
       type: "phase_1_project_access"
       variables: |
         {
@@ -185,6 +190,7 @@ jobs:
       - apply_project_access
     with:
       github: ${{ toJson(github) }}
+      workspace: "${{github.workspace}}"
       type: "phase_2_ci_access"
       variables: |
         {
@@ -208,6 +214,7 @@ jobs:
       - apply_ci_access
     with:
       github: ${{ toJson(github) }}
+      workspace: "${{github.workspace}}"
       type: "phase_3_prototype"
       variables: |
         {
@@ -231,6 +238,7 @@ jobs:
       - apply_prototype
     with:
       github: ${{ toJson(github) }}
+      workspace: "${{github.workspace}}"
       type: "phase_4_servers"
       variables: |
         {
@@ -260,6 +268,7 @@ jobs:
       - apply_servers
     with:
       github: ${{ toJson(github) }}
+      workspace: "${{github.workspace}}"
       type: "phase_2_ci_access"
       variables: |
         {
