@@ -21,7 +21,7 @@ on:
     outputs:
       apply_project_access:
         description: The output from the job.
-        value: ${{fromJSON(jobs.apply_project_access.outputs.output)}}
+        value: ${{jobs.apply_project_access.outputs > 0 && fromJSON(jobs.apply_project_access.outputs.output || '{}')}}
       apply_ci_access:
         description: The output from the job.
         value: ${{fromJSON(jobs.apply_ci_access.outputs.output)}}
