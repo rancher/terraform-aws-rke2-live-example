@@ -80,12 +80,11 @@ jobs:
       - env
       - release
     uses: ./.github/workflows/plan.yaml
-    if: ${{needs.release.outputs.pr_created == 'true'}}
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       ignore_error: true
-      type: "phase_1_project_access"
+      type: ${{needs.release.outputs.release_created == 'true' && 'skip' || 'phase_1_project_access'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -99,12 +98,11 @@ jobs:
       - env
       - release
     uses: ./.github/workflows/plan.yaml
-    if: ${{needs.release.outputs.pr_created == 'true'}}
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       ignore_error: true
-      type: "phase_2_ci_access"
+      type: ${{needs.release.outputs.release_created == 'true' && 'skip' || 'phase_2_ci_access'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -119,12 +117,11 @@ jobs:
       - env
       - release
     uses: ./.github/workflows/plan.yaml
-    if: ${{needs.release.outputs.pr_created == 'true'}}
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       ignore_error: true
-      type: "phase_3_prototype"
+      type: ${{needs.release.outputs.release_created == 'true' && 'skip' || 'phase_3_prototype'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -140,12 +137,11 @@ jobs:
       - env
       - release
     uses: ./.github/workflows/plan.yaml
-    if: ${{needs.release.outputs.pr_created == 'true'}}
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
       ignore_error: true
-      type: "phase_4_servers"
+      type: ${{needs.release.outputs.release_created == 'true' && 'skip' || 'phase_4_servers'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -163,14 +159,13 @@ jobs:
 # these are only run after release is created
   apply_project_access:
     uses: ./.github/workflows/apply.yaml
-    if: ${{needs.release.outputs.release_created == 'true'}}
     needs:
       - env
       - release
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
-      type: "phase_1_project_access"
+      type: ${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_1_project_access'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -181,7 +176,6 @@ jobs:
 
   apply_ci_access:
     uses: ./.github/workflows/apply.yaml
-    if: ${{needs.release.outputs.release_created == 'true'}}
     needs:
       - env
       - release
@@ -189,7 +183,7 @@ jobs:
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
-      type: "phase_2_ci_access"
+      type: ${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_2_ci_access'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -199,10 +193,8 @@ jobs:
         }
     secrets: inherit
 
-
   apply_prototype:
     uses: ./.github/workflows/apply.yaml
-    if: ${{needs.release.outputs.release_created == 'true'}}
     needs:
       - env
       - release
@@ -211,7 +203,7 @@ jobs:
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
-      type: "phase_3_prototype"
+      type: ${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_3_prototype'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -224,7 +216,6 @@ jobs:
 
   apply_servers:
     uses: ./.github/workflows/apply.yaml
-    if: ${{needs.release.outputs.release_created == 'true'}}
     needs:
       - env
       - release
@@ -234,7 +225,7 @@ jobs:
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
-      type: "phase_4_servers"
+      type: ${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_4_servers'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",
@@ -252,7 +243,6 @@ jobs:
   # destroy CI Access after updating servers
   destroy_ci_access:
     uses: ./.github/workflows/destroy.yaml
-    if: ${{needs.release.outputs.release_created == 'true'}}
     needs:
       - env
       - release
@@ -263,7 +253,7 @@ jobs:
     with:
       github: ${{ toJson(github) }}
       workspace: "${{needs.env.outputs.workspace}}"
-      type: "phase_2_ci_access"
+      type: ${{needs.release.outputs.release_created == 'false' && 'skip' || 'phase_2_ci_access'}}
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",

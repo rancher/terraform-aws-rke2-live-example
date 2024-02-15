@@ -120,3 +120,9 @@ jobs:
       aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
       github-token: ${{secrets.GITHUB_TOKEN}}
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
+
+  apply_skip:
+    runs-on: ubuntu-latest
+    if: inputs.type == 'skip'
+    steps:
+      - run: echo 'skipping apply step...'
