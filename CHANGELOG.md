@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.6](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.5...v1.0.6) (2024-02-15)
+
+
+### Bug Fixes
+
+* set proper type ([fee564f](https://github.com/matttrach/live-infra-aws-rke2/commit/fee564f6ff46e09a61dbc246fcefe572e0ea7a0b))
+* try to cast output to json ([5f8d05a](https://github.com/matttrach/live-infra-aws-rke2/commit/5f8d05a5486958d28407a5e6602c36d75faed624))
+
 ## [1.0.5](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.4...v1.0.5) (2024-02-15)
 
 
