@@ -74,7 +74,6 @@ jobs:
         id: release-please
         with:
           release-type: terraform-module
-      - run: echo '${{toJSON(steps.release-please.outputs)}}'
 
   plan_project_access:
     needs:
