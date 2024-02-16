@@ -7,17 +7,17 @@ provider "github" {} # This expects the GITHUB_TOKEN to be set in the environmen
 # the token must have Read and Write access to Repository: actions, administration, code, commit statuses, issues, pull requests, secrets, and workflows
 
 locals {
-  name        = "live-infra-aws-rke2"
+  name        = "terraform-aws-rke2-live-example"
   description = "an example of a live infrastructure repo"
 }
 
 import {
   to = github_repository.this
-  id = "live-infra-aws-rke2" # variables can't be used here
+  id = "terraform-aws-rke2-live-example" # variables can't be used here
 }
 import {
   to = github_branch.main
-  id = "live-infra-aws-rke2:main" # variables can't be used here
+  id = "terraform-aws-rke2-live-example:main" # variables can't be used here
 }
 
 resource "github_repository" "this" {
@@ -45,30 +45,30 @@ resource "github_branch" "main" {
   branch     = "main"
 }
 
-# branch protections are only for enterprise
-# resource "github_branch_protection" "main" {
-#   depends_on = [
-#     github_repository.this,
-#     github_branch.main,
-#   ]
-#   repository_id = github_repository.this.name
+# branch protections are only for enterprise and public repos
+resource "github_branch_protection" "main" {
+  depends_on = [
+    github_repository.this,
+    github_branch.main,
+  ]
+  repository_id = github_repository.this.name
 
-#   pattern                 = github_branch.main.branch
-#   enforce_admins          = true
-#   require_signed_commits  = true
-#   required_linear_history = true
-#   allows_deletions        = false # protect branch from deletion
+  pattern                 = github_branch.main.branch
+  enforce_admins          = true
+  require_signed_commits  = true
+  required_linear_history = true
+  allows_deletions        = false # protect branch from deletion
 
-#   required_pull_request_reviews {
-#     require_code_owner_reviews      = true
-#     required_approving_review_count = 1
-#     dismiss_stale_reviews           = true
-#   }
+  required_pull_request_reviews {
+    require_code_owner_reviews      = true
+    required_approving_review_count = 1
+    dismiss_stale_reviews           = true
+  }
 
-#   required_status_checks {
-#     strict = true # require the latest push on the branch to be reviewed
-#   }
-# }
+  required_status_checks {
+    strict = true # require the latest push on the branch to be reviewed
+  }
+}
 
 resource "github_branch_default" "main" {
   depends_on = [
