@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.10](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.9...v0.1.10) (2024-02-16)
+
+
+### Bug Fixes
+
+* add a workflow to destroy everything to save money ([#28](https://github.com/rancher/terraform-aws-rke2-live-example/issues/28)) ([fc22d0a](https://github.com/rancher/terraform-aws-rke2-live-example/commit/fc22d0ab28ad84bdd16910b2ffd86e10b7f6dd10))
+
 ## [0.1.9](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.8...v0.1.9) (2024-02-16)
 
 
