@@ -74,6 +74,7 @@ jobs:
         id: release-please
         with:
           release-type: terraform-module
+          token: ${{secrets.ADMIN_GITHUB_TOKEN}}
 
   plan_project_access:
     needs:
