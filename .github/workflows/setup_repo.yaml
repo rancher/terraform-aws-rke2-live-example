@@ -60,18 +60,13 @@ jobs:
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
 
-          # generate initial AGE key and recipients.txt, and save
+          # generate AGE key and save public key tro recipients
           cd ${{github.workspace}}
           if [ "" = "${{secrets.AGE_SECRET_KEY}}" ]; then
             KEY="$(age-keygen 2>/dev/null | grep '^AGE')"
-            echo "$KEY" | age-keygen -y > age_recipients.txt
+            echo "$KEY" | age-keygen -y >> age_recipients.txt
             gh secret set AGE_SECRET_KEY --body "$KEY"
             git add ${{github.workspace}}/age_recipients.txt
-          fi
-
-          if [ ! -f secret_file_list.txt ]; then
-            touch secret_file_list.txt;
-            git add ${{github.workspace}}/secret_file_list.txt
           fi
 
           # add ssh key for ci access
@@ -97,21 +92,13 @@ jobs:
           echo "Saving initial states..."
           for lc in phase_1_project_access phase_2_ci_access phase_3_prototype phase_4_servers; do
             cd ${{github.workspace}}/$lc
-            if [ ! -f terraform.tfstate ]; then 
-              cat << 'EOF' > 'terraform.tfstate'
-          {
-            "version": 4,
-            "serial": 3,
-            "outputs": {},
-            "resources": [],
-            "check_results": null
-          }
-          EOF
-            fi;
             if [ ! -f terraform.tfstate.age ]; then
+              if [ ! -f terraform.tfstate ]; then
+                echo '{"version": 4,"serial": 3,"outputs": {},"resources": [],"check_results": null}' > terraform.tfstate
+              fi;
               age -e -R ${{github.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate
               git add ${{github.workspace}}/$lc/terraform.tfstate.age
-            fi
+            fi;
           done
 
           git commit -s -m "Setup https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"

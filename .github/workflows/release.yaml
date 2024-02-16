@@ -13,7 +13,7 @@ env:
   project_owner: "tf-livex@noreply.com"
   project_cidr: "10.0.255.0/24"
   prototype_subnet_cidr: "10.0.255.224/28" # must be within project_cidr
-  production_subnet_cidr: "10.0.255.223/28" # must be within project_cidr and not be the same as the prototype
+  production_subnet_cidr: "10.0.255.208/28" # must be within project_cidr and not be the same as the prototype
 
 permissions: write-all
 
