@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.9](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.8...v0.1.9) (2024-02-16)
+
+
+### Bug Fixes
+
+* shut down servers by default to prevent charges ([#26](https://github.com/rancher/terraform-aws-rke2-live-example/issues/26)) ([37d464e](https://github.com/rancher/terraform-aws-rke2-live-example/commit/37d464ea603b8efecbebe2f632d31316d38e175b))
+
 ## [0.1.8](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.7...v0.1.8) (2024-02-16)
 
 
