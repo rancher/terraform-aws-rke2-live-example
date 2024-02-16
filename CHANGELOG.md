@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.15](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.14...v1.0.15) (2024-02-16)
+
+
+### Bug Fixes
+
+* output the proper info for image user and id ([#151](https://github.com/matttrach/live-infra-aws-rke2/issues/151)) ([16a9c3e](https://github.com/matttrach/live-infra-aws-rke2/commit/16a9c3ee60cfee38520d0a1c8c2d6722a5dedc41))
+
 ## [1.0.14](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.13...v1.0.14) (2024-02-16)
 
 
