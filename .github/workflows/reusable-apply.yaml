@@ -127,7 +127,8 @@ jobs:
           V='${{inputs.variables}}'
           if [ -z "$V" ]; then V='{}'; fi
           echo "$V" > "terraform.tfvars.json"
-          rm -rf terraform.tfvars.json.age && age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfvars.json.age terraform.tfvars.json
+          rm -rf terraform.tfvars.json.age
+          age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfvars.json.age terraform.tfvars.json
           git add terraform.tfvars.json.age
 
           echo 'with vars: '
@@ -139,16 +140,18 @@ jobs:
 
           echo "Updating state..."
           rm -rf terraform.tfstate.backup.age
-          mv terraform.tfstate.age terraform.tfstate.backup.age || true
+          if [ -f terraform.tfstate.age ]; then mv terraform.tfstate.age terraform.tfstate.backup.age; fi
           rm -rf terraform.tfstate.age
           age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate
           git add terraform.tfstate.age
           git add terraform.tfstate.backup.age
 
-          cd ${{inputs.workspace}}
           echo "Removing secret files..."
+          cd ${{inputs.workspace}}
           while read -r file; do
-             rm -f "$file"
+            if [ -f "$file" ]; then
+              rm -f "$file";
+            fi
           done <secret_file_list.txt
 
           echo "Saving state..."
