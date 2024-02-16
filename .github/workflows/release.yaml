@@ -169,6 +169,8 @@ jobs:
       workspace: ${{needs.env.outputs.workspace}}
       run-id: ${{github.run_id}}
       directory: ${{endsWith(needs.release.outputs.release_created,'true') && 'skip' || 'phase_4_servers'}}
+      # these variables be saved in the proper directory after the first release (terraform.tfvars.json)
+      # at which point the variables in the plan will no longer be used
       variables: |
         {
           "project_name": "${{needs.env.outputs.project_name}}",

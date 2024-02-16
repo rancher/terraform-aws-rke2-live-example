@@ -81,9 +81,11 @@ jobs:
           # destroy infra
           for lc in phase_4_servers phase_3_prototype phase_2_ci_access phase_1_project_access; do
             cd ${{github.workspace}}/$lc
-            terraform init
-            terraform destroy --auto-approve || true
-            terraform destroy --auto-approve
+            if [ -f terraform.tfstate ]; then
+              terraform init
+              terraform destroy --auto-approve || true
+              terraform destroy --auto-approve
+            fi
             cd ${{github.workspace}}
           done
 

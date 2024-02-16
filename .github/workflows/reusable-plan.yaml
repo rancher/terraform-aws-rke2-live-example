@@ -122,13 +122,11 @@ jobs:
 
           echo "Starting  plan..."
           export TF_VAR_ip='${{steps.ip.outputs.ipv4}}'
-          V='${{inputs.variables}}'
-          if [ -z "$V" ]; then V='{}'; fi
-          echo "$V" > "terraform.tfvars.json"
-          pwd
-          ls -lah
-          cat terraform.tfvars.json
-
+          if [ ! -f terraform.tfvars.json ]; then
+            V='${{inputs.variables}}'
+            if [ -z "$V" ]; then V='{}'; fi
+            echo "$V" > "terraform.tfvars.json"
+          fi
           terraform init
           terraform plan || true
 

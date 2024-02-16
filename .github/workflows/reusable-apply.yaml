@@ -127,9 +127,8 @@ jobs:
           V='${{inputs.variables}}'
           if [ -z "$V" ]; then V='{}'; fi
           echo "$V" > "terraform.tfvars.json"
-
-          echo 'with vars: '
-          cat terraform.tfvars.json
+          rm -rf terraform.tfvars.json.age && age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfvars.json.age terraform.tfvars.json && rm -f terraform.tfvars.json
+          git add ${{inputs.directory}}/terraform.tfvars.json.age
 
           terraform init
           terraform apply --auto-approve || true
@@ -149,5 +148,3 @@ jobs:
           git commit -s -m "New ${{inputs.directory}} State https://github.com/${{inputs.repository}}/actions/runs/${{inputs.run-id}}"
           git pull --rebase
           git push origin main
-          echo 'outputs: '
-          cat "$GITHUB_OUTPUT"
