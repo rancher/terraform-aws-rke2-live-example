@@ -80,14 +80,11 @@ jobs:
 
           # destroy infra
           for lc in phase_4_servers phase_3_prototype phase_2_ci_access phase_1_project_access; do
-            if [ -f ssh_key ]; then
-              eval "$(ssh-agent -s)"
-              chmod 0600 ssh_key
-              ssh-add ssh_key
-            fi
+            cd ${{github.workspace}}/$lc
             terraform init
             terraform destroy --auto-approve || true
             terraform destroy --auto-approve
+            cd ${{github.workspace}}
           done
 
           # delete secret files and recipients
