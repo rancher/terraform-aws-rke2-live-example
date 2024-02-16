@@ -144,7 +144,7 @@ jobs:
           rm -rf terraform.tfstate.age
           age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate
           git add terraform.tfstate.age
-          git add terraform.tfstate.backup.age
+          if [ -f terraform.tfstate.backup.age ]; then git add terraform.tfstate.backup.age; fi
 
           echo "Removing secret files..."
           cd ${{inputs.workspace}}
