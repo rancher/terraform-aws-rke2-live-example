@@ -128,14 +128,20 @@ jobs:
           if [ -z "$V" ]; then V='{}'; fi
           echo "$V" > "terraform.tfvars.json"
           rm -rf terraform.tfvars.json.age && age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfvars.json.age terraform.tfvars.json && rm -f terraform.tfvars.json
-          git add ${{inputs.directory}}/terraform.tfvars.json.age
+          git add terraform.tfvars.json.age
 
           terraform init
           terraform apply --auto-approve || true
           echo "output=|$(terraform output -json)|" | tr -d '\n ' | sed 's/"/\\"/g' | tr '|' '"' >> "$GITHUB_OUTPUT"
 
           echo "Updating state..."
-          rm -rf terraform.tfstate.age && age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
+          mv terraform.tfstate.age terraform.tfstate.backup.age
+          rm -rf terraform.tfstate.backup.age && \
+            mv terraform.tfstate.age terraform.tfstate.backup.age && \
+            age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate && \
+            rm -f terraform.tfstate
+          git add terraform.tfstate.age
+          git add terraform.tfstate.backup.age
 
           cd ${{inputs.workspace}}
           echo "Removing secret files..."
@@ -144,7 +150,6 @@ jobs:
           done <secret_file_list.txt
 
           echo "Saving state..."
-          git add ${{inputs.directory}}/terraform.tfstate.age
           git commit -s -m "New ${{inputs.directory}} State https://github.com/${{inputs.repository}}/actions/runs/${{inputs.run-id}}"
           git pull --rebase
           git push origin main
