@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.1...v0.1.2) (2024-02-16)
+
+
+### Bug Fixes
+
+* save state to backup state ([#11](https://github.com/rancher/terraform-aws-rke2-live-example/issues/11)) ([349ae29](https://github.com/rancher/terraform-aws-rke2-live-example/commit/349ae298ac48b8e38c316a0d57ce2caf87fbdc5f))
+
 ## [0.1.1](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.0...v0.1.1) (2024-02-16)
 
 
