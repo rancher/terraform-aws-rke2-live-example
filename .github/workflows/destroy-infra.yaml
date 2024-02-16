@@ -9,6 +9,11 @@ permissions: write-all
 env:
   GITHUB_TOKEN: ${{secrets.ADMIN_GITHUB_TOKEN}}
   GITHUB_OWNER: ${{github.repository_owner}}
+  AWS_AUTH: ${{vars.AWS_AUTH}}
+  AWS_REGION: ${{secrets.AWS_REGION}}
+  AWS_ROLE: ${{secrets.AWS_ROLE}}
+  AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+  AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
   project_name: "livex"
   project_owner: "tf-livex@noreply.com"
   project_cidr: "10.0.255.0/24"
@@ -16,49 +21,6 @@ env:
   production_subnet_cidr: "10.0.255.208/28" # must be within project_cidr and not be the same as the prototype
 
 jobs:
-  env:
-    runs-on: ubuntu-latest
-    outputs:
-      project_name: ${{env.project_name}}
-      project_owner: ${{env.project_owner}}
-      project_cidr: ${{env.project_cidr}}
-      prototype_subnet_cidr: ${{env.prototype_subnet_cidr}}
-      production_subnet_cidr: ${{env.production_subnet_cidr}}
-      ci_ssh_key: ${{steps.setup.outputs.ssh_key}}
-      workspace: ${{steps.setup.outputs.workspace}}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: DeterminateSystems/nix-installer-action@main
-      - uses: DeterminateSystems/magic-nix-cache-action@main
-      - uses: nicknovitski/nix-develop@v1.1.0
-        with:
-          arguments: |
-            --ignore-environment \
-            --extra-experimental-features nix-command \
-            --extra-experimental-features flakes \
-            --keep HOME \
-            --keep SSH_AUTH_SOCK \
-            --keep GITHUB_TOKEN \
-            --keep AWS_ROLE \
-            --keep AWS_REGION \
-            --keep AWS_DEFAULT_REGION \
-            --keep AWS_ACCESS_KEY_ID \
-            --keep AWS_SECRET_ACCESS_KEY \
-            --keep AWS_SESSION_TOKEN \
-            --keep TERM \
-            ${{ github.workspace }}
-      - name: setup
-        id: setup
-        run: |
-          while read -r file; do
-            if [ -f "$file.age" ]; then
-              echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
-            fi
-          done <secret_file_list.txt
-          KEY="$(cat ${{github.workspace}}/phase_2_ci_access/ssh_key.pub)"
-          echo "ssh_key=$KEY" >> "$GITHUB_OUTPUT"
-          echo "workspace=${{github.workspace}}" >> "$GITHUB_OUTPUT"
-
   destroy:
     runs-on: ubuntu-latest
     steps:
@@ -84,21 +46,21 @@ jobs:
             --keep AWS_SECRET_ACCESS_KEY \
             --keep AWS_SESSION_TOKEN \
             --keep TERM \
-            ${{ inputs.workspace }}
+            ${{ github.workspace }}
       # if using OICD auth
       - uses: aws-actions/configure-aws-credentials@v4
-        if: ${{vars.AWS_AUTH == 'OIDC'}}
+        if: ${{env.AWS_AUTH == 'OIDC'}}
         with:
-          role-to-assume: ${{secrets.aws-role}}
-          role-session-name: ${{secrets.aws-session}}
-          aws-region: ${{secrets.aws-region}}
+          role-to-assume: ${{env.AWS_ROLE}}
+          role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
+          aws-region: ${{env.AWS_REGION}}
       # if using access key auth
       - uses: aws-actions/configure-aws-credentials@v4
-        if: ${{vars.AWS_AUTH == 'IAM'}}
+        if: ${{env.AWS_AUTH == 'IAM'}}
         with:
-          aws-access-key-id: ${{ secrets.aws-access-key-id }}
-          aws-secret-access-key: ${{ secrets.aws-secret-access-key }}
-          aws-region: ${{secrets.aws-region}}
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY}}
+          aws-region: ${{env.AWS_REGION}}
       - name: Destroy Infra
         shell: bash
         run: |
@@ -114,6 +76,8 @@ jobs:
               echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
             fi
           done <secret_file_list.txt
+
+          export TF_VAR_ip='${{steps.ip.outputs.ipv4}}'
 
           echo 'Destroying infra...'
           for lc in phase_4_servers phase_3_prototype phase_2_ci_access phase_1_project_access; do
@@ -140,6 +104,6 @@ jobs:
           done <secret_file_list.txt
 
           echo "Saving state..."
-          git commit -s -m "New State https://github.com/${{github.repository}}/actions/runs/${{github.run-id}}"
+          git commit -s -m "New State https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
           git pull --rebase
           git push -f origin main
