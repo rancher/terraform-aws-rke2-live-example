@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.14](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.13...v1.0.14) (2024-02-16)
+
+
+### Bug Fixes
+
+* use an appropriate subnet for server, fix setup ([#149](https://github.com/matttrach/live-infra-aws-rke2/issues/149)) ([2fcc0b2](https://github.com/matttrach/live-infra-aws-rke2/commit/2fcc0b2220ebf1e157a740b06525c787980c7047))
+
 ## [1.0.13](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.12...v1.0.13) (2024-02-15)
 
 
