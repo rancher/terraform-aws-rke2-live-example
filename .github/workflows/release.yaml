@@ -99,7 +99,7 @@ jobs:
       aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
       aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
       aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-      github-token: ${{secrets.GITHUB_TOKEN}}
+      github-token: ${{secrets.ADMIN_GITHUB_TOKEN}}
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
 
@@ -127,7 +127,7 @@ jobs:
       aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
       aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
       aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-      github-token: ${{secrets.GITHUB_TOKEN}}
+      github-token: ${{secrets.ADMIN_GITHUB_TOKEN}}
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
   plan_prototype:
@@ -155,7 +155,7 @@ jobs:
       aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
       aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
       aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-      github-token: ${{secrets.GITHUB_TOKEN}}
+      github-token: ${{secrets.ADMIN_GITHUB_TOKEN}}
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
   plan_servers:
@@ -189,7 +189,7 @@ jobs:
       aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
       aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
       aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-      github-token: ${{secrets.GITHUB_TOKEN}}
+      github-token: ${{secrets.ADMIN_GITHUB_TOKEN}}
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
 # these are only run after release is created
@@ -216,7 +216,7 @@ jobs:
       aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
       aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
       aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-      github-token: ${{secrets.GITHUB_TOKEN}}
+      github-token: ${{secrets.ADMIN_GITHUB_TOKEN}}
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
   apply_ci_access:
@@ -244,7 +244,7 @@ jobs:
       aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
       aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
       aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-      github-token: ${{secrets.GITHUB_TOKEN}}
+      github-token: ${{secrets.ADMIN_GITHUB_TOKEN}}
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
 
@@ -275,7 +275,7 @@ jobs:
       aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
       aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
       aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-      github-token: ${{secrets.GITHUB_TOKEN}}
+      github-token: ${{secrets.ADMIN_GITHUB_TOKEN}}
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
   apply_servers:
@@ -310,7 +310,7 @@ jobs:
       aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
       aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
       aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-      github-token: ${{secrets.GITHUB_TOKEN}}
+      github-token: ${{secrets.ADMIN_GITHUB_TOKEN}}
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
 
   # destroy CI Access after updating servers
@@ -341,5 +341,5 @@ jobs:
       aws-session: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
       aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
       aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
-      github-token: ${{secrets.GITHUB_TOKEN}}
+      github-token: ${{secrets.ADMIN_GITHUB_TOKEN}}
       age-secret-key: ${{secrets.AGE_SECRET_KEY}}
