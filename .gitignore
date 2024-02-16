@@ -14,3 +14,8 @@ terraform.tfstate*.backup
 !*.age
 ssh_key
 ssh_key.pub
+terraform.tfvars*
+terraform.tfvars
+!terraform.tfvars.age
+!terraform.tfstate.age
+!terraform.tfstate.backup.age

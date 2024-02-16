@@ -138,10 +138,10 @@ jobs:
           echo "output=|$(terraform output -json)|" | tr -d '\n ' | sed 's/"/\\"/g' | tr '|' '"' >> "$GITHUB_OUTPUT"
 
           echo "Updating state..."
-          mv terraform.tfstate.age terraform.tfstate.backup.age
-          rm -rf terraform.tfstate.backup.age && \
-            mv terraform.tfstate.age terraform.tfstate.backup.age && \
-            age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate
+          rm -rf terraform.tfstate.backup.age
+          mv terraform.tfstate.age terraform.tfstate.backup.age || true
+          rm -rf terraform.tfstate.age
+          age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate
           git add terraform.tfstate.age
           git add terraform.tfstate.backup.age
 
