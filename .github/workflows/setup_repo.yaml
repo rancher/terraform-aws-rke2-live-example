@@ -58,9 +58,9 @@ jobs:
           if [ -z "${{vars.AWS_AUTH}}" ]; then echo "AWS auth type not found, please specify AWS_AUTH action variable as either 'OIDC' or 'IAM'"; exit 1; fi
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
-          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
+          git remote set-url origin "https://x-access-token:$GITHUB_TOKEN@github.com/${{github.repository}}"
 
-          # generate AGE key and save public key tro recipients
+          echo "generate AGE key and save public key tro recipients..."
           cd ${{github.workspace}}
           if [ "" = "${{secrets.AGE_SECRET_KEY}}" ]; then
             KEY="$(age-keygen 2>/dev/null | grep '^AGE')"
@@ -69,7 +69,7 @@ jobs:
             git add ${{github.workspace}}/age_recipients.txt
           fi
 
-          # add ssh key for ci access
+          echo "add ssh key for ci access..."
           cd ${{github.workspace}}/phase_2_ci_access
           if [ ! -f ssh_key.age ]; then
             # generate an rsa ssh key pair and encrypt public and private keys
@@ -83,7 +83,7 @@ jobs:
             git add ${{github.workspace}}/phase_3_prototype/ssh_key.age
           fi
 
-          # use tf to configure this repo's settings
+          echo "use tf to configure repo settings..."
           cd ${{github.workspace}}/setup
           terraform init && terraform apply --auto-approve
           
