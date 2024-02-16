@@ -144,7 +144,7 @@ jobs:
           rm -rf terraform.tfstate.age
           age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate
           git add terraform.tfstate.age
-          git add terraform.tfstate.backup.age
+          if [ -f terraform.tfstate.backup.age ]; then git add terraform.tfstate.backup.age; fi
 
           echo "Removing secret files..."
           cd ${{inputs.workspace}}
@@ -155,6 +155,6 @@ jobs:
           done <secret_file_list.txt
 
           echo "Saving state..."
-          git commit -s -m "New ${{inputs.directory}} State https://github.com/${{inputs.repository}}/actions/runs/${{inputs.run-id}}"
+          git commit -s -m "New ${{inputs.directory}} State https://github.com/${{inputs.repository}}/actions/runs/${{inputs.run-id}} [skip ci]"
           git pull --rebase
-          git push origin main
+          git push -f origin main
