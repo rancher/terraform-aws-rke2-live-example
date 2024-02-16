@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.5](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.4...v0.1.5) (2024-02-16)
+
+
+### Bug Fixes
+
+* add docs and try release with new perms ([#17](https://github.com/rancher/terraform-aws-rke2-live-example/issues/17)) ([d978df0](https://github.com/rancher/terraform-aws-rke2-live-example/commit/d978df0e9ee5dcf31a2b153187bd5ecd4e4fac94))
+
 ## [0.1.4](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.3...v0.1.4) (2024-02-16)
 
 
