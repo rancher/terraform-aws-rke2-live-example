@@ -127,8 +127,11 @@ jobs:
           V='${{inputs.variables}}'
           if [ -z "$V" ]; then V='{}'; fi
           echo "$V" > "terraform.tfvars.json"
-          rm -rf terraform.tfvars.json.age && age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfvars.json.age terraform.tfvars.json && rm -f terraform.tfvars.json
+          rm -rf terraform.tfvars.json.age && age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfvars.json.age terraform.tfvars.json
           git add terraform.tfvars.json.age
+
+          echo 'with vars: '
+          cat terraform.tfvars.json
 
           terraform init
           terraform apply --auto-approve || true
@@ -138,8 +141,7 @@ jobs:
           mv terraform.tfstate.age terraform.tfstate.backup.age
           rm -rf terraform.tfstate.backup.age && \
             mv terraform.tfstate.age terraform.tfstate.backup.age && \
-            age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate && \
-            rm -f terraform.tfstate
+            age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate
           git add terraform.tfstate.age
           git add terraform.tfstate.backup.age
 
