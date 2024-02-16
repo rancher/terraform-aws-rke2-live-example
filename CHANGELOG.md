@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.5...v0.1.6) (2024-02-16)
+
+
+### Bug Fixes
+
+* add tfvars to gitignore and put state moves to backup in new line ([#20](https://github.com/rancher/terraform-aws-rke2-live-example/issues/20)) ([7451630](https://github.com/rancher/terraform-aws-rke2-live-example/commit/745163047b2f4d761630192e6fba47a2d025495e))
+
 ## [0.1.5](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.4...v0.1.5) (2024-02-16)
 
 
