@@ -83,6 +83,23 @@ module "server_from_ami" {
     }
   )
 }
+resource "terraform_data" "wait" {
+  depends_on = [
+    module.server_from_ami,
+  ]
+  provisioner "local-exec" {
+    command = "sleep 500" # wait 5 min for the init script to complete, we want the server in a ready state when starting
+  }
+}
+
+resource "aws_ec2_instance_state" "shut_down_server" {
+  depends_on = [
+    module.server_from_ami,
+    terraform_data.wait,
+  ]
+  instance_id = module.server_from_ami.server.id
+  state       = "stopped"
+}
 
 # resource "terraform_data" "post_mint_script" {
 #   depends_on = [

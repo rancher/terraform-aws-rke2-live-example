@@ -333,6 +333,7 @@ jobs:
         {
           "project_name": "${{needs.env.outputs.project_name}}",
           "project_owner": "${{needs.env.outputs.project_owner}}",
+          "ssh_key": "${{needs.env.outputs.ci_ssh_key}}",
           "vpc_name": "${{fromJSON(needs.apply_project_access.outputs.output).vpc.value}}"
         }
     secrets:

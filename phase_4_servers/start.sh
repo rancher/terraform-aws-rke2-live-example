@@ -32,10 +32,14 @@ echo "${service} status is \"$(systemctl is-active "${service}")\""
 if [ $EXIT -eq 1 ]; then
   echo "Timed out attempting to start service:"
   echo "kubelet:"
-  tail /var/lib/rancher/rke2/agent/logs/kubelet.log
+  tail -n 100 /var/lib/rancher/rke2/agent/logs/kubelet.log
   echo "containerd:"
-  tail /var/lib/rancher/rke2/agent/containerd/containerd.log
+  tail -n 100 /var/lib/rancher/rke2/agent/containerd/containerd.log
 fi
+
+# allow us to log into the ec2 console and access the server
+# ec2 console access is the only way to access the server since it is fully air-gapped
+yes 'ec2consoleaccessonly!' | passwd root
 
 # get node info
 if [ ! -f /etc/rancher/rke2/rke2.yaml ]; then echo "kubeconfig not found"; fi
