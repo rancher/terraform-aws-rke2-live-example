@@ -13,7 +13,7 @@ locals {
   owner             = var.project_owner
   vpc_name          = var.vpc_name                    # select the project VPC
   subnet_cidr       = var.subnet_cidr                 # must be within the VPC CIDR range
-  host_ip           = cidrhost(local.subnet_cidr, -1) # set host to the last available ip in the subnet
+  host_ip           = cidrhost(local.subnet_cidr, -2) # set host to the last available/unreserved ip in the subnet
   image_id          = var.image_id
   image_user        = var.image_user
   image_admin_group = var.image_admin_group # wheel
