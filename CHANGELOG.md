@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.7](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.6...v0.1.7) (2024-02-16)
+
+
+### Bug Fixes
+
+* move things around to be more reliable ([#22](https://github.com/rancher/terraform-aws-rke2-live-example/issues/22)) ([266a49c](https://github.com/rancher/terraform-aws-rke2-live-example/commit/266a49c5942423a1d4f7d543918b598926f356ba))
+
 ## [0.1.6](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.5...v0.1.6) (2024-02-16)
 
 
