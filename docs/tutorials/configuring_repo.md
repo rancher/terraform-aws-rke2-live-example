@@ -6,8 +6,7 @@ You should already have a GitHub account.
 
 Steps:
 
-1. Create a new ***private*** repo using the defaults, name it "live-infra-" and some unique identifier, I used "live-infra-aws-rke2".
-   1. make sure to choose "private" or secrets could be potentially leaked later on
+1. Create a new repo using the defaults
 2. Get oriented with the controls
    1. At the top of the page there are "tabs" for the repository
       1. "Code", "Issues", "Pull Requests", "Actions", "Projects", "Security", "Insights", and "Settings"
