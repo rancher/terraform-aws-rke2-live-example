@@ -23,7 +23,7 @@ import {
 resource "github_repository" "this" {
   name                        = local.name
   description                 = local.description
-  visibility                  = "private"
+  visibility                  = "public"
   has_issues                  = false
   has_discussions             = false
   has_projects                = false
