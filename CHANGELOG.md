@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.16](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.15...v1.0.16) (2024-02-16)
+
+
+### Bug Fixes
+
+* use next ip because last is reserved ([#153](https://github.com/matttrach/live-infra-aws-rke2/issues/153)) ([7477e9e](https://github.com/matttrach/live-infra-aws-rke2/commit/7477e9eab863bb9c30474c7843405378bafe30e6))
+
 ## [1.0.15](https://github.com/matttrach/live-infra-aws-rke2/compare/v1.0.14...v1.0.15) (2024-02-16)
 
 
