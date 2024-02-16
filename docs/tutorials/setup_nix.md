@@ -24,11 +24,11 @@
    1. run `direnv allow` in this directory
       1. you should see a message like this `entering dev environment...`
       2. you should see Nix load a bunch of dependencies
-      3. your prompt should change to include the name of this directory
+      3. your prompt should change to show that you are in the Nix shell
     2. source the .envrc from this directory once you have entered the Nix shell
       1. `source .envrc`
       2. you should see a message like this `setting up dev environment...`
 
 The CI performs similar steps, but it does not use direnv, it uses the `nix` command directly.
 It will enter the Nix shell, but will not source the .envrc file, this allows you to have different ways to load in secrets.
-Your CI and your local environment should now be very silimar, if not identical.
+Your CI and your local environment should now be very similar, if not identical.
