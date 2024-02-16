@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.2...v0.1.3) (2024-02-16)
+
+
+### Bug Fixes
+
+* output vars and dont remove them ([#13](https://github.com/rancher/terraform-aws-rke2-live-example/issues/13)) ([3d1f727](https://github.com/rancher/terraform-aws-rke2-live-example/commit/3d1f727d3edd4a4e9b472e8df68651bc7c1348b0))
+
 ## [0.1.2](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.1...v0.1.2) (2024-02-16)
 
 
