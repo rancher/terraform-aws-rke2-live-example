@@ -1,0 +1,109 @@
+# This workflow just runs destroy on all the infra to save money on resources.
+name: destroy
+on:
+  # only manual
+  workflow_dispatch:
+
+permissions: write-all
+
+env:
+  GITHUB_TOKEN: ${{secrets.ADMIN_GITHUB_TOKEN}}
+  GITHUB_OWNER: ${{github.repository_owner}}
+  AWS_AUTH: ${{vars.AWS_AUTH}}
+  AWS_REGION: ${{secrets.AWS_REGION}}
+  AWS_ROLE: ${{secrets.AWS_ROLE}}
+  AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+  AWS_SECRET_ACCESS_KEY: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+  project_name: "livex"
+  project_owner: "tf-livex@noreply.com"
+  project_cidr: "10.0.255.0/24"
+  prototype_subnet_cidr: "10.0.255.224/28" # must be within project_cidr
+  production_subnet_cidr: "10.0.255.208/28" # must be within project_cidr and not be the same as the prototype
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    steps:
+      # this must be run in the same job to get the proper address
+      - uses: haythem/public-ip@v1.3
+        id: ip
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - uses: nicknovitski/nix-develop@v1.1.0
+        with:
+          arguments: |
+            --ignore-environment \
+            --extra-experimental-features nix-command \
+            --extra-experimental-features flakes \
+            --keep HOME \
+            --keep SSH_AUTH_SOCK \
+            --keep GITHUB_TOKEN \
+            --keep AWS_ROLE \
+            --keep AWS_REGION \
+            --keep AWS_DEFAULT_REGION \
+            --keep AWS_ACCESS_KEY_ID \
+            --keep AWS_SECRET_ACCESS_KEY \
+            --keep AWS_SESSION_TOKEN \
+            --keep TERM \
+            ${{ github.workspace }}
+      # if using OICD auth
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: ${{env.AWS_AUTH == 'OIDC'}}
+        with:
+          role-to-assume: ${{env.AWS_ROLE}}
+          role-session-name: ${{github.job}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}
+          aws-region: ${{env.AWS_REGION}}
+      # if using access key auth
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: ${{env.AWS_AUTH == 'IAM'}}
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY}}
+          aws-region: ${{env.AWS_REGION}}
+      - name: Destroy Infra
+        shell: bash
+        run: |
+          echo "Destroying..."
+          git config --global user.name 'automation'
+          git config --global user.email 'automation@users.noreply.github.com'
+          git remote set-url origin "https://x-access-token:${{env.GITHUB_TOKEN}}@github.com/${{github.repository}}"
+          git pull --rebase
+
+          echo 'Decrypting secrets...'
+          while read -r file; do
+            if [ -f "$file.age" ]; then
+              echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
+            fi
+          done <secret_file_list.txt
+
+          export TF_VAR_ip='${{steps.ip.outputs.ipv4}}'
+
+          echo 'Destroying infra...'
+          for lc in phase_4_servers phase_3_prototype phase_2_ci_access phase_1_project_access; do
+            cd ${{github.workspace}}/$lc
+            if [ -f terraform.tfstate ]; then
+              terraform init
+              terraform destroy --auto-approve || true
+              terraform destroy --auto-approve
+            fi
+            echo "Updating state..."
+            rm -rf terraform.tfstate.backup.age
+            if [ -f terraform.tfstate.age ]; then mv terraform.tfstate.age terraform.tfstate.backup.age; fi
+            rm -rf terraform.tfstate.age
+            age -e -R ${{github.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate
+            git add terraform.tfstate.age
+            if [ -f terraform.tfstate.backup.age ]; then git add terraform.tfstate.backup.age; fi
+            cd ${{github.workspace}}
+          done
+
+          echo 'Deleting secret files...'
+          while read -r file; do
+              rm -f "$file";
+              rm -f "$file.age";
+          done <secret_file_list.txt
+
+          echo "Saving state..."
+          git commit -s -m "New State https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
+          git pull --rebase
+          git push -f origin main

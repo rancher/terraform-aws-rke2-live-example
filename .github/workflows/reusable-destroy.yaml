@@ -105,29 +105,47 @@ jobs:
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{secrets.github-token}}@github.com/${{inputs.repository}}"
           git pull --rebase
-          cd ${{inputs.workspace}}/${{inputs.directory}}
-          if [ -f terraform.tfstate.age ]; then
-            rm -f terraform.tfstate; echo '${{secrets.age-secret-key}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
-            rm -f terraform.tfstate.age
+          while read -r file; do
+            if [ -f "$file.age" ]; then
+              echo '${{secrets.age-secret-key}}' | age -d -i - -o "$file" "$file.age"
+            fi
+          done <secret_file_list.txt
 
+          cd ${{inputs.workspace}}/${{inputs.directory}}
+          if [ -f terraform.tfstate ]; then
             export TF_VAR_ip='${{steps.ip.outputs.ipv4}}'
-            V='${{inputs.variables}}'
-            if [ -z "$V" ]; then V='{}';fi
-            echo "$V" > "terraform.tfvars.json"
-            pwd
-            ls -lah
+            if [ ! -f terraform.tfvars.json ]; then
+              V='${{inputs.variables}}'
+              if [ -z "$V" ]; then V='{}';fi
+              echo "$V" > "terraform.tfvars.json"
+            fi
+
+            echo 'With vars:'
             cat terraform.tfvars.json
 
             terraform init
             terraform destroy --auto-approve || true
 
-            echo "Saving state..."
-            rm -rf terraform.tfstate.age && age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate && rm -f terraform.tfstate
+            echo "Updating state..."
+            rm -rf terraform.tfstate.backup.age
+            if [ -f terraform.tfstate.age ]; then mv terraform.tfstate.age terraform.tfstate.backup.age; fi
+            rm -rf terraform.tfstate.age
+            age -e -R ${{inputs.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate
+            git add terraform.tfstate.age
+            if [ -f terraform.tfstate.backup.age ]; then git add terraform.tfstate.backup.age; fi
+
+            echo "Removing secret files..."
             cd ${{inputs.workspace}}
-            git add ${{inputs.directory}}/terraform.tfstate.age
-            git commit -s -m "New ${{inputs.directory}} State https://github.com/${{inputs.repository}}/actions/runs/${{inputs.run-id}}"
+            while read -r file; do
+              if [ -f "$file" ]; then
+                rm -f "$file";
+              fi
+            done <secret_file_list.txt
+
+            echo "Saving state..."
+            git commit -s -m "New ${{inputs.directory}} State https://github.com/${{inputs.repository}}/actions/runs/${{inputs.run-id}} [skip ci]"
             git pull --rebase
-            git push origin main
+            git push -f origin main
           else
             echo "no state found to destroy..."
           fi
