@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.3...v0.1.4) (2024-02-16)
+
+
+### Bug Fixes
+
+* use admin token instead of workflow token ([#15](https://github.com/rancher/terraform-aws-rke2-live-example/issues/15)) ([a3ccc23](https://github.com/rancher/terraform-aws-rke2-live-example/commit/a3ccc23a15a1e544dc90c0f360042b9afd92423d))
+
 ## [0.1.3](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.2...v0.1.3) (2024-02-16)
 
 
