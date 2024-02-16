@@ -13,7 +13,6 @@
    4. create a new secret
    5. name the secret `AGE_SECRET_KEY`
    6. paste the output of the key file into the value field
-   7. follow the same process for `AGE_PUBLIC_KEY` (using the public key file)
 4. Make sure not to commit or push your key files to the repo
 5. I add my AGE secrets to my development environment by setting up an RC file.
    1. the contents of my rc file are as follows:

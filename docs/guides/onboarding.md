@@ -1,6 +1,6 @@
-## Quick Start Guide
+## Onboarding
 
-1. Set up GitHub: Create account, set up SSH keys, generate a private repo, and a personal access token with necessary permissions
+1. Set up GitHub: Create account, set up SSH keys, generate a new repo
    - [GitHub SSH Keys](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh)
 2. Configure AWS access: Use IAM user or OIDC
    - [AWS IAM User](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html)
@@ -12,19 +12,15 @@
   - make sure to add the AWS_AUTH variable to your repo (settings -> secrets and variables -> actions -> "Variables" section)
     - OIDC requires the following AWS_AUTH value "OIDC"
     - IAM requires the following AWS_AUTH value "IAM"
-3. Clone this repo, copy all files from the example directory to your new repo, commit and push changes
+3. Clone this repo, copy all files to your new repo
 4. Create a repo specific personal access token
    - [GitHub Personal Access Token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)
      - Repository Access should just be the new private repo you created.
-     - Select the following (repository) permissions: Read and Write access to: actions, administration, code, commit statuses, issues, pull requests, secrets, and workflows
+     - Select the following (repository) permissions: Read and Write access to: actions, administration, content, commit statuses, issues, pull requests, secrets, and workflows
      - No other permissions are required
-5. Run the "setup" workflow in GitHub Actions on the new private repo
-   - make sure to pull down the new files the setup action created
-6. Update the main.tf file with your desired configuration
-   - you will probably want to change the my_ variables
-   - alternatively, you can use an override.tf file to configure the module
-     - take a look at override_example.tf for an example
-     - you can also add the override.tf file to the secret_file_list.txt to encrypt it in the repo
+5. Run the "setup" workflow in the "Actions" tab on the new repo
+   - make sure to pull down the new files (in git) that the setup action created
+6. Update the .github/workflows/release.yaml file with your desired configuration
 7. Create a new branch, commit your changes, push to your repo, and open a PR
 8. Review and merge the PR, monitor the repo actions to ensure everything works
 9. Review and merge the release PR, then watch your cluster being built in the repo actions
