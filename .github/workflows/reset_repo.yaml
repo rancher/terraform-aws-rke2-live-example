@@ -66,42 +66,45 @@ jobs:
       - name: ResetRepo
         shell: bash
         run: |
-          if [ -z "$GITHUB_TOKEN" ]; then echo "token not found, please make sure to add ADMIN_GITHUB_TOKEN to secrets"; exit 1; fi
-          if [ -f terraform.tfstate.age ]; then
-            rm -f terraform.tfstate; echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o terraform.tfstate terraform.tfstate.age
-            rm -f terraform.tfstate.age
+          git config --global user.name 'automation'
+          git config --global user.email 'automation@users.noreply.github.com'
+          git remote set-url origin "https://x-access-token:${{secrets.GITHUB_TOKEN}}@github.com/${{github.repository}}"
+          git pull --rebase
+
+          # decrypt secret files
+          while read -r file; do
+            if [ -f "$file.age" ]; then
+              echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
+            fi
+          done <secret_file_list.txt
+
+          # destroy infra
+          for lc in phase_4_servers phase_3_prototype phase_2_ci_access phase_1_project_access; do
+            if [ -f ssh_key ]; then
+              eval "$(ssh-agent -s)"
+              chmod 0600 ssh_key
+              ssh-add ssh_key
+            fi
             terraform init
             terraform destroy --auto-approve || true
             terraform destroy --auto-approve
-          else
-            echo "no state found to clean..."
-          fi
+          done
+
+          # delete secret files and recipients
           while read -r file; do
               rm -f "$file";
               rm -f "$file.age";
           done <secret_file_list.txt
-          cat << 'EOF' > 'terraform.tfstate'
-          {
-            "version": 4,
-            "serial": 3,
-            "outputs": {},
-            "resources": [],
-            "check_results": null
-          }
-          EOF
-          cat << 'EOF' > 'secret_file_list.txt'
-          terraform.tfstate
-          ssh_key
-          EOF
           echo "" > age_recipients.txt
-          echo "" > ssh_key.pub
-          rm -rf CHANGELOG.md
-          git config --global user.name 'automation'
-          git config --global user.email 'automation@users.noreply.github.com'
-          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{github.repository}}"
+
           if [ -n "$(git diff)" ]; then
             git add -A
             git commit -s -m "Reset repo https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}" || true
             git push -f origin main || true
           fi
-          echo "At this point the repo should be clean"
+          # remove secrets which effect infra, these will need to be manually added again before setup
+          gh secret delete AGE_SECRET_KEY || true
+          gh secret delete AWS_ACCESS_KEY_ID || true
+          gh secret delete AWS_SECRET_ACCESS_KEY || true
+
+          echo "At this point the repo should be clean, run setup to prepare it again..."
