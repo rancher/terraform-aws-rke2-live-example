@@ -64,7 +64,7 @@ jobs:
       - name: Destroy Infra
         shell: bash
         run: |
-          echo "Destroying..."
+          echo "Start Destroying..."
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:${{env.GITHUB_TOKEN}}@github.com/${{github.repository}}"
@@ -92,14 +92,16 @@ jobs:
               terraform init
               terraform destroy --auto-approve || true
               terraform destroy --auto-approve
+              echo "Updating state..."
+              rm -rf terraform.tfstate.backup.age
+              if [ -f terraform.tfstate.age ]; then 
+                cp terraform.tfstate.age terraform.tfstate.backup.age;
+                git add terraform.tfstate.backup.age;
+              fi
+              rm -rf terraform.tfstate.age
+              age -e -R ${{github.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate
+              git add terraform.tfstate.age
             fi
-            echo "Updating state..."
-            rm -rf terraform.tfstate.backup.age
-            if [ -f terraform.tfstate.age ]; then mv terraform.tfstate.age terraform.tfstate.backup.age; fi
-            rm -rf terraform.tfstate.age
-            age -e -R ${{github.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate
-            git add terraform.tfstate.age
-            if [ -f terraform.tfstate.backup.age ]; then git add terraform.tfstate.backup.age; fi
             cd ${{github.workspace}}
           done
 
@@ -111,5 +113,10 @@ jobs:
 
           echo "Saving state..."
           git commit -s -m "New State https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
+          git add -A
+          git stash
           git pull --rebase
           git push -f origin main
+          echo "Unsaved files..."
+          git stash pop
+          git status
