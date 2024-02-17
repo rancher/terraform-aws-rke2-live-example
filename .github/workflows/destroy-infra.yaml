@@ -79,6 +79,12 @@ jobs:
 
           export TF_VAR_ip='${{steps.ip.outputs.ipv4}}'
 
+          echo 'Creating CI Access'
+          cd ${{github.workspace}}/phase_2_ci_access
+          terraform init
+          terraform apply --auto-approve || true
+          cd ${{github.workspace}}
+
           echo 'Destroying infra...'
           for lc in phase_4_servers phase_3_prototype phase_2_ci_access phase_1_project_access; do
             cd ${{github.workspace}}/$lc
