@@ -9,5 +9,6 @@ alias tfl='terraform state list'
 alias k='kubectl'
 alias tt='cd tests; go test -v -parallel=10 -timeout=80m'
 # expects AGE_ variables to be set, see .variables and .rcs
-alias ss='while read -r file;do rm -f "$file"; echo "decrypting $file";echo "$AGE_SECRET_KEY" | age -d -i - -o "$file" "$file.age";done <secret_file_list.txt'
-alias se='echo "enter file to encrypt:";while read -r file;do rm -f "$file.age"; echo "encrypting $file";age -e -R age_recipients.txt -o "$file.age" "$file"; break;done <"${1:-/dev/stdin}"'
+alias es='encrypt_secrets' # see .functions
+alias ds='decrypt_secrets' # see .functions
+alias ef='encrypt_file' # see .functions
