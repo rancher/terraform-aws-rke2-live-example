@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.11](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.10...v0.1.11) (2024-02-17)
+
+
+### Bug Fixes
+
+* add ci access before destroying everything ([#30](https://github.com/rancher/terraform-aws-rke2-live-example/issues/30)) ([17ae763](https://github.com/rancher/terraform-aws-rke2-live-example/commit/17ae763cf434366a108476bfed700040c799ad8d))
+
 ## [0.1.10](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.9...v0.1.10) (2024-02-16)
 
 
