@@ -60,23 +60,41 @@ jobs:
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:$GITHUB_TOKEN@github.com/${{github.repository}}"
 
-          echo "generate AGE key and save public key tro recipients..."
+          echo 'Try decrypting secrets...'
+          while read -r file; do
+            if [ -f "$file.age" ]; then
+              if [ "" != "${{secrets.AGE_SECRET_KEY}}" ]; then
+                echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
+              fi
+            fi
+          done <secret_file_list.txt
+
+          echo "generate AGE key and save public key to recipients..."
           cd ${{github.workspace}}
           if [ "" = "${{secrets.AGE_SECRET_KEY}}" ]; then
             KEY="$(age-keygen 2>/dev/null | grep '^AGE')"
-            echo "$KEY" | age-keygen -y >> age_recipients.txt
+            echo "$KEY" | age-keygen -y > age_recipients.txt
             gh secret set AGE_SECRET_KEY --body "$KEY"
+            git add ${{github.workspace}}/age_recipients.txt
+          fi
+          PUBLIC_KEY="$(echo "${{secrets.AGE_SECRET_KEY}}" | age-keygen -y)"
+          KEY_RECIPIENTS="$(grep "$PUBLIC_KEY" age_recipients.txt)"
+          if [ -z "$KEY_RECIPIENTS" ]; then
+            echo "${{secrets.AGE_SECRET_KEY}}" | age-keygen -y > age_recipients.txt
             git add ${{github.workspace}}/age_recipients.txt
           fi
 
           echo "add ssh key for ci access..."
           cd ${{github.workspace}}/phase_2_ci_access
-          if [ ! -f ssh_key.age ]; then
+          if [ ! -f ssh_key ]; then
             # generate an rsa ssh key pair and encrypt public and private keys
             ssh-keygen -t rsa -b 4096 -C "automation@users.noreply.github.com" -N "" -f ssh_key && rm -f ssh_key.age; age -e -R ${{github.workspace}}/age_recipients.txt -o ssh_key.age ssh_key && rm -f ssh_key;
             rm -f ssh_key.pub.age; age -e -R ${{github.workspace}}/age_recipients.txt -o ssh_key.pub.age ssh_key.pub && rm -f ssh_key.pub;
             git add ${{github.workspace}}/phase_2_ci_access/ssh_key.pub.age
             git add ${{github.workspace}}/phase_2_ci_access/ssh_key.age
+          fi
+          cd ${{github.workspace}}/phase_3_prototype
+          if [ ! -f ssh_key ]; then
             cp ${{github.workspace}}/phase_2_ci_access/ssh_key.pub.age  ${{github.workspace}}/phase_3_prototype/ssh_key.pub.age
             cp ${{github.workspace}}/phase_2_ci_access/ssh_key.age  ${{github.workspace}}/phase_3_prototype/ssh_key.age
             git add ${{github.workspace}}/phase_3_prototype/ssh_key.pub.age
@@ -92,14 +110,15 @@ jobs:
           echo "Saving initial states..."
           for lc in phase_1_project_access phase_2_ci_access phase_3_prototype phase_4_servers; do
             cd ${{github.workspace}}/$lc
-            if [ ! -f terraform.tfstate.age ]; then
-              if [ ! -f terraform.tfstate ]; then
-                echo '{"version": 4,"serial": 3,"outputs": {},"resources": [],"check_results": null}' > terraform.tfstate
-              fi;
-              age -e -R ${{github.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate
-              git add ${{github.workspace}}/$lc/terraform.tfstate.age
+            if [ ! -f terraform.tfstate ]; then
+              echo '{"version": 4,"serial": 3,"outputs": {},"resources": [],"check_results": null}' > terraform.tfstate
             fi;
+            rm -f terraform.tfstate.age
+            age -e -R ${{github.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate
+            git add ${{github.workspace}}/$lc/terraform.tfstate.age
           done
 
-          git commit -s -m "Setup https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
-          git push origin main
+          if [ ! -z "$(git diff)" ]; then
+            git commit -s -m "Setup https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
+            git push origin main
+          fi
