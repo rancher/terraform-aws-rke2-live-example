@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.12](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.11...v0.1.12) (2024-02-21)
+
+
+### Bug Fixes
+
+* destroy infra, manually fix state, add helpers ([#32](https://github.com/rancher/terraform-aws-rke2-live-example/issues/32)) ([ef6a103](https://github.com/rancher/terraform-aws-rke2-live-example/commit/ef6a103f3f5b2bc1a569a0e80441c33ce410a212))
+* setup ([#34](https://github.com/rancher/terraform-aws-rke2-live-example/issues/34)) ([cb40834](https://github.com/rancher/terraform-aws-rke2-live-example/commit/cb40834bcbfb295fe441250699b03871642ca695))
+* style from actionlint ([#35](https://github.com/rancher/terraform-aws-rke2-live-example/issues/35)) ([ba39fbb](https://github.com/rancher/terraform-aws-rke2-live-example/commit/ba39fbbd21b4ee83ab1b0af130142193c7a0a1a9))
+
 ## [0.1.11](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.10...v0.1.11) (2024-02-17)
 
 
