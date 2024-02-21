@@ -63,7 +63,7 @@ jobs:
           echo 'Try decrypting secrets...'
           while read -r file; do
             if [ -f "$file.age" ]; then
-              if [ "" != "${{secrets.AGE_SECRET_KEY}}" ]; then
+              if [ -n "${{secrets.AGE_SECRET_KEY}}" ]; then
                 echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
               fi
             fi
@@ -71,7 +71,7 @@ jobs:
 
           echo "generate AGE key and save public key to recipients..."
           cd ${{github.workspace}}
-          if [ "" = "${{secrets.AGE_SECRET_KEY}}" ]; then
+          if [ -z "${{secrets.AGE_SECRET_KEY}}" ]; then
             KEY="$(age-keygen 2>/dev/null | grep '^AGE')"
             echo "$KEY" | age-keygen -y > age_recipients.txt
             gh secret set AGE_SECRET_KEY --body "$KEY"
@@ -118,7 +118,7 @@ jobs:
             git add ${{github.workspace}}/$lc/terraform.tfstate.age
           done
 
-          if [ ! -z "$(git diff)" ]; then
+          if [ -n "$(git diff)" ]; then
             git commit -s -m "Setup https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
             git push origin main
           fi
