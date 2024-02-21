@@ -56,6 +56,26 @@ jobs:
           echo "Setting up Repo..."
           if [ -z "$GITHUB_TOKEN" ]; then echo "token not found, please make sure to add ADMIN_GITHUB_TOKEN to secrets"; exit 1; fi
           if [ -z "${{vars.AWS_AUTH}}" ]; then echo "AWS auth type not found, please specify AWS_AUTH action variable as either 'OIDC' or 'IAM'"; exit 1; fi
+          if [ "${{vars.AWS_AUTH}}" = "IAM" ]; then
+            if [ -z "${{secrets.AWS_ACCESS_KEY_ID}}" ]; then
+              echo "AWS_ACCESS_KEY_ID secret not found, please make sure to add it to the repo action secrets";
+              exit 1;
+            fi
+            if [ -z "${{secrets.AWS_SECRET_ACCESS_KEY}}" ]; then
+              echo "AWS_SECRET_ACCESS_KEY secret not found, please make sure to add it to the repo action secrets";
+              exit 1;
+            fi
+          fi
+          if [ "${{vars.AWS_AUTH}}" = "OIDC" ]; then
+            if [ -z "${{secrets.AWS_ROLE}}" ]; then
+              echo "AWS_ROLE secret not found, please make sure to add it to the repo action secrets";
+              exit 1;
+            fi
+          fi
+          if [ -z "secrets.AWS_REGION" ]; then
+            echo "AWS_REGION secret not found, please make sure to add it to the repo action secrets";
+            exit 1;
+          fi
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
           git remote set-url origin "https://x-access-token:$GITHUB_TOKEN@github.com/${{github.repository}}"
@@ -63,15 +83,15 @@ jobs:
           echo 'Try decrypting secrets...'
           while read -r file; do
             if [ -f "$file.age" ]; then
-              if [ "" != "${{secrets.AGE_SECRET_KEY}}" ]; then
-                echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age"
+              if [ -n "${{secrets.AGE_SECRET_KEY}}" ]; then
+                echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age" || true
               fi
             fi
           done <secret_file_list.txt
 
           echo "generate AGE key and save public key to recipients..."
           cd ${{github.workspace}}
-          if [ "" = "${{secrets.AGE_SECRET_KEY}}" ]; then
+          if [ -z "${{secrets.AGE_SECRET_KEY}}" ]; then
             KEY="$(age-keygen 2>/dev/null | grep '^AGE')"
             echo "$KEY" | age-keygen -y > age_recipients.txt
             gh secret set AGE_SECRET_KEY --body "$KEY"
@@ -107,7 +127,7 @@ jobs:
           
           cd ${{github.workspace}}
 
-          echo "Saving initial states..."
+          echo "Setting initial states..."
           for lc in phase_1_project_access phase_2_ci_access phase_3_prototype phase_4_servers; do
             cd ${{github.workspace}}/$lc
             if [ ! -f terraform.tfstate ]; then
@@ -118,7 +138,16 @@ jobs:
             git add ${{github.workspace}}/$lc/terraform.tfstate.age
           done
 
-          if [ ! -z "$(git diff)" ]; then
+          echo "Removing secret files..."
+          cd ${{github.workspace}}
+          while read -r file; do
+            if [ -f "$file" ]; then
+              rm -f "$file";
+            fi
+          done <secret_file_list.txt
+
+          echo "Saving state..."
+          if [ -n "$(git diff)" ]; then
             git commit -s -m "Setup https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
             git push origin main
           fi

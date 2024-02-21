@@ -15,12 +15,18 @@
 3. Clone this repo, copy all files to your new repo
 4. Create a repo specific personal access token
    - [GitHub Personal Access Token](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token)
-     - Repository Access should just be the new private repo you created.
-     - Select the following (repository) permissions: Read and Write access to: actions, administration, content, commit statuses, issues, pull requests, secrets, and workflows
+     - Repository Access should just be the new private repo you created
+     - Select the following (repository) permissions:
+       - Read and Write access to: actions, administration, commit statuses, content, issues, pull requests, secrets, and workflows
      - No other permissions are required
-5. Run the "setup" workflow in the "Actions" tab on the new repo
+5. Add GitHub token to repo secrets
+   - settings -> secrets and variables -> actions -> "Secrets" section
+   - key: ADMIN_GITHUB_TOKEN
+   - value: the token you created in the previous step
+6. Run the "setup" workflow in the "Actions" tab on the new repo
    - make sure to pull down the new files (in git) that the setup action created
-6. Update the .github/workflows/release.yaml file with your desired configuration
-7. Create a new branch, commit your changes, push to your repo, and open a PR
-8. Review and merge the PR, monitor the repo actions to ensure everything works
-9. Review and merge the release PR, then watch your cluster being built in the repo actions
+   - if the setup action fails, please create an issue in this repo
+7. Update the .github/workflows/release.yaml file with your desired configuration
+8. Create a new branch, commit your changes, push to your repo, and open a PR
+9. Review and merge the PR, monitor the repo actions to ensure everything works
+10. Review and merge the release PR, then watch your cluster being built in the repo actions
