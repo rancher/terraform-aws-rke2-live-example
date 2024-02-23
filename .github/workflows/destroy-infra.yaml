@@ -114,9 +114,9 @@ jobs:
           echo "Saving state..."
           git commit -s -m "New State https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
           git add -A
-          git stash
+          git stash || true
           git pull --rebase
           git push -f origin main
           echo "Unsaved files..."
-          git stash pop
+          git stash pop || true
           git status

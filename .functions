@@ -10,6 +10,12 @@ function parse_git_branch() {
     fi
 }
 
+function get_repo_owner() {
+  REPO="$(basename "$(git rev-parse --show-toplevel)")"
+  OWNER="$(basename $(git rev-parse --show-toplevel | sed  s/$REPO//g))"
+  echo $OWNER
+}
+
 # get current status of git repo
 function parse_git_dirty {
     status=`git status 2>&1 | tee`
