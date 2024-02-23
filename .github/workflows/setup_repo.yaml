@@ -53,8 +53,18 @@ jobs:
       - uses: haythem/public-ip@v1.3
         id: ip
       - run: |
+          # functions
+          function save_state() {
+            echo "Saving state..."
+            git status || true
+            git commit -s -m "Setup https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}" || true
+            git push -f origin main || true
+            echo "pushed new commit..."
+          }
+
+          set +e
           echo "Setting up Repo..."
-          if [ -z "$GITHUB_TOKEN" ]; then echo "token not found, please make sure to add ADMIN_GITHUB_TOKEN to secrets"; exit 1; fi
+          if [ -z "${{ secrets.ADMIN_GITHUB_TOKEN }}" ]; then echo "token not found, please make sure to add ADMIN_GITHUB_TOKEN to secrets"; exit 1; fi
           if [ -z "${{vars.AWS_AUTH}}" ]; then echo "AWS auth type not found, please specify AWS_AUTH action variable as either 'OIDC' or 'IAM'"; exit 1; fi
           if [ "${{vars.AWS_AUTH}}" = "IAM" ]; then
             if [ -z "${{secrets.AWS_ACCESS_KEY_ID}}" ]; then
@@ -78,29 +88,35 @@ jobs:
           fi
           git config --global user.name 'automation'
           git config --global user.email 'automation@users.noreply.github.com'
-          git remote set-url origin "https://x-access-token:$GITHUB_TOKEN@github.com/${{github.repository}}"
+          git remote set-url origin "https://x-access-token:${{secrets.ADMIN_GITHUB_TOKEN}}@github.com/${{github.repository}}"
 
           echo 'Try decrypting secrets...'
           while read -r file; do
             if [ -f "$file.age" ]; then
               if [ -n "${{secrets.AGE_SECRET_KEY}}" ]; then
-                echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age" || true
+                if echo '${{secrets.AGE_SECRET_KEY}}' | age -d -i - -o "$file" "$file.age" 2&>/dev/null; then
+                  echo "decrypted $file.age"
+                else
+                  echo "failed to decrypt $file.age"
+                fi
               fi
             fi
           done <secret_file_list.txt
 
-          echo "generate AGE key and save public key to recipients..."
           cd ${{github.workspace}}
-          if [ -z "${{secrets.AGE_SECRET_KEY}}" ]; then
+          KEY='${{secrets.AGE_SECRET_KEY}}'
+          if [ -z '${{secrets.AGE_SECRET_KEY}}' ]; then
+            echo "generate AGE key..."
             KEY="$(age-keygen 2>/dev/null | grep '^AGE')"
-            echo "$KEY" | age-keygen -y > age_recipients.txt
             gh secret set AGE_SECRET_KEY --body "$KEY"
-            git add ${{github.workspace}}/age_recipients.txt
+            echo "AGE_SECRET_KEY repo secret created..."
           fi
-          PUBLIC_KEY="$(echo "${{secrets.AGE_SECRET_KEY}}" | age-keygen -y)"
-          KEY_RECIPIENTS="$(grep "$PUBLIC_KEY" age_recipients.txt)"
+          PUBLIC_KEY="$(echo "$KEY" | age-keygen -y)"
+          KEY_RECIPIENTS="$(grep "$PUBLIC_KEY" ${{github.workspace}}/age_recipients.txt)"
           if [ -z "$KEY_RECIPIENTS" ]; then
-            echo "${{secrets.AGE_SECRET_KEY}}" | age-keygen -y > age_recipients.txt
+            echo "key $PUBLIC_KEY not found in recipients, adding..."
+            echo "$KEY" | age-keygen -y >> age_recipients.txt
+            echo "adding age_recipients.txt to git..."
             git add ${{github.workspace}}/age_recipients.txt
           fi
 
@@ -110,14 +126,18 @@ jobs:
             # generate an rsa ssh key pair and encrypt public and private keys
             ssh-keygen -t rsa -b 4096 -C "automation@users.noreply.github.com" -N "" -f ssh_key && rm -f ssh_key.age; age -e -R ${{github.workspace}}/age_recipients.txt -o ssh_key.age ssh_key && rm -f ssh_key;
             rm -f ssh_key.pub.age; age -e -R ${{github.workspace}}/age_recipients.txt -o ssh_key.pub.age ssh_key.pub && rm -f ssh_key.pub;
+            echo "adding ssh_key.pub.age to git..."
             git add ${{github.workspace}}/phase_2_ci_access/ssh_key.pub.age
+            echo "adding ssh_key.age to git..."
             git add ${{github.workspace}}/phase_2_ci_access/ssh_key.age
           fi
           cd ${{github.workspace}}/phase_3_prototype
           if [ ! -f ssh_key ]; then
             cp ${{github.workspace}}/phase_2_ci_access/ssh_key.pub.age  ${{github.workspace}}/phase_3_prototype/ssh_key.pub.age
             cp ${{github.workspace}}/phase_2_ci_access/ssh_key.age  ${{github.workspace}}/phase_3_prototype/ssh_key.age
+            echo "adding phase 3 ssh_key.pub.age to git..."
             git add ${{github.workspace}}/phase_3_prototype/ssh_key.pub.age
+            echo "adding phase 3 ssh_key.age to git..."
             git add ${{github.workspace}}/phase_3_prototype/ssh_key.age
           fi
 
@@ -135,6 +155,7 @@ jobs:
             fi;
             rm -f terraform.tfstate.age
             age -e -R ${{github.workspace}}/age_recipients.txt -o terraform.tfstate.age terraform.tfstate
+            echo "adding $lc terraform.tfstate.age to git..."
             git add ${{github.workspace}}/$lc/terraform.tfstate.age
           done
 
@@ -146,8 +167,4 @@ jobs:
             fi
           done <secret_file_list.txt
 
-          echo "Saving state..."
-          if [ -n "$(git diff)" ]; then
-            git commit -s -m "Setup https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}"
-            git push origin main
-          fi
+          trap save_state EXIT
