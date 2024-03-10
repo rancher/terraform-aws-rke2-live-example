@@ -34,7 +34,7 @@ module "proto_rke2_rhel9_rpm" {
     random_uuid.join_token,
   ]
   source     = "rancher/rke2/aws"
-  version    = "v0.1.19"
+  version    = "0.1.20"
   join_token = random_uuid.join_token.result
   name       = local.name
   owner      = local.owner
