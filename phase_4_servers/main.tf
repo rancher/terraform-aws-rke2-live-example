@@ -61,7 +61,7 @@ module "server_from_ami" {
     module.config,
   ]
   source              = "rancher/server/aws"
-  version             = "0.3.0"
+  version             = "0.3.1"
   owner               = local.owner             # add your contact info to the tags on the aws object
   image_id            = local.image_id          # select image from previous step
   image_initial_user  = local.image_user        # This should be the user generated when creating the prototype server
