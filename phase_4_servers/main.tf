@@ -26,7 +26,7 @@ resource "random_uuid" "join_token" {}
 # generate a production server from golden image
 module "prod_access" {
   source              = "rancher/access/aws"
-  version             = "v1.1.1"
+  version             = "1.2.0"
   owner               = local.owner    # tag objects with your contact info
   vpc_name            = local.vpc_name # select project vpc
   subnet_name         = local.name     # generate a subnet for the prod servers
@@ -61,7 +61,7 @@ module "server_from_ami" {
     module.config,
   ]
   source              = "rancher/server/aws"
-  version             = "0.3.0"
+  version             = "0.3.1"
   owner               = local.owner             # add your contact info to the tags on the aws object
   image_id            = local.image_id          # select image from previous step
   image_initial_user  = local.image_user        # This should be the user generated when creating the prototype server

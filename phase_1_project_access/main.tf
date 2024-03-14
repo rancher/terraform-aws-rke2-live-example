@@ -16,7 +16,7 @@ locals {
 # an IGW will be created with the VPC, but it won't be used unless servers are given EIP addresses
 module "project" {
   source              = "rancher/access/aws"
-  version             = "v1.1.1"
+  version             = "1.2.0"
   owner               = local.owner
   vpc_name            = local.name
   vpc_cidr            = local.cidr
