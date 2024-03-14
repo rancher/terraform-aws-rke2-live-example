@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.13](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.12...v0.1.13) (2024-03-14)
+
+
+### Bug Fixes
+
+* bump rancher/server/aws from 0.3.0 to 0.3.1 in /phase_4_servers ([#41](https://github.com/rancher/terraform-aws-rke2-live-example/issues/41)) ([32220e9](https://github.com/rancher/terraform-aws-rke2-live-example/commit/32220e91514f6c8be8c75b279fec208f09d18269))
+* improve the setup action ([#36](https://github.com/rancher/terraform-aws-rke2-live-example/issues/36)) ([88ac5e7](https://github.com/rancher/terraform-aws-rke2-live-example/commit/88ac5e7ddba80a6d97e6dd454a2f40485de9aa38))
+* update rancher/access/aws requirement from v1.1.1 to 1.2.0 in /phase_1_project_access ([#39](https://github.com/rancher/terraform-aws-rke2-live-example/issues/39)) ([c2398ec](https://github.com/rancher/terraform-aws-rke2-live-example/commit/c2398ec1176ce6c665a717d2da601c9a169a7c18))
+* update rancher/access/aws requirement from v1.1.1 to 1.2.0 in /phase_2_ci_access ([#38](https://github.com/rancher/terraform-aws-rke2-live-example/issues/38)) ([eb8fbae](https://github.com/rancher/terraform-aws-rke2-live-example/commit/eb8fbaec4d245a284eee800fa4a2431164b2f4ab))
+* update rancher/access/aws requirement from v1.1.1 to 1.2.0 in /phase_4_servers ([#40](https://github.com/rancher/terraform-aws-rke2-live-example/issues/40)) ([7cb7bc8](https://github.com/rancher/terraform-aws-rke2-live-example/commit/7cb7bc8ffac3269b2536bf7a303d86de8d5eab47))
+* update rancher/rke2/aws requirement from v0.1.19 to 0.1.20 in /phase_3_prototype ([#42](https://github.com/rancher/terraform-aws-rke2-live-example/issues/42)) ([b3a428d](https://github.com/rancher/terraform-aws-rke2-live-example/commit/b3a428dd8e6e0752766a769e2014a3e7386c6c64))
+
 ## [0.1.12](https://github.com/rancher/terraform-aws-rke2-live-example/compare/v0.1.11...v0.1.12) (2024-02-21)
 
 
